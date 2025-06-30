@@ -1,0 +1,10 @@
+﻿services:
+  streamkey.api:
+    image: streamkey.api
+    build:
+      context: .
+      dockerfile: StreamKey.Api/Dockerfile
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./logs:/app/logs
