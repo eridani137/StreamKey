@@ -13,9 +13,9 @@ public class StreamEndpoint : ICarterModule
         group.MapPost("get", async (StreamReceiveDto dto, IStreamService service) =>
             {
                 var source = await service.GetSource(dto.Username);
-                
+
                 if (source is null) return Results.NotFound();
-                
+
                 return Results.Ok(source);
             })
             .Produces<string>()
