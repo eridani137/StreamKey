@@ -1,5 +1,6 @@
 using Carter;
 using Serilog;
+using StreamKey.Api;
 using StreamKey.Application;
 using StreamKey.Core.Configs;
 using StreamKey.Core.Configuration;
@@ -24,7 +25,12 @@ try
     builder.Services.AddCarter();
 
     builder.Services.AddApplication();
-
+    
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
+    
+    CorsConfiguration.ConfigureCors(builder);
+    
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())
@@ -32,7 +38,9 @@ try
         app.MapOpenApi();
     }
 
-    app.UseHttpsRedirection();
+    app.UseCors("AllowAll");
+    app.UseExceptionHandler();
+    // app.UseHttpsRedirection(); // TODO https
     app.MapCarter();
 
     app.Run();

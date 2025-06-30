@@ -4,8 +4,9 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using StreamKey.Core.Configs;
 
-namespace StreamKey.Core.Configs;
+namespace StreamKey.Core.Configuration;
 
 public static class OpenTelemetryConfiguration
 {
@@ -32,7 +33,7 @@ public static class OpenTelemetryConfiguration
                     .AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri($"{otlpConfig.Endpoint}/ingest/otlp/v1/traces");
-                        options.Protocol = OtlpExportProtocol.HttpProtobuf; // TODO https connection
+                        options.Protocol = OtlpExportProtocol.HttpProtobuf; // TODO https
                         options.Headers = $"X-Seq-ApiKey={otlpConfig.Token}";
                     });
             })
@@ -45,7 +46,7 @@ public static class OpenTelemetryConfiguration
                     .AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri($"{otlpConfig.Endpoint}/ingest/otlp/v1/metrics");
-                        options.Protocol = OtlpExportProtocol.HttpProtobuf; // TODO https connection
+                        options.Protocol = OtlpExportProtocol.HttpProtobuf; // TODO https
                         options.Headers = $"X-Seq-ApiKey={otlpConfig.Token}";
                     });
             });
