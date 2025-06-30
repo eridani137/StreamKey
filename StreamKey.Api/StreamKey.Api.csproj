@@ -4,6 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>5acec551-bf98-4772-8076-ed6aced9ad7f</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\StreamKey.Application\StreamKey.Application.csproj" />
       <ProjectReference Include="..\StreamKey.Core\StreamKey.Core.csproj" />
     </ItemGroup>
 

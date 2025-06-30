@@ -1,5 +1,6 @@
 using Carter;
 using Serilog;
+using StreamKey.Application;
 using StreamKey.Core.Configs;
 using StreamKey.Core.Configuration;
 
@@ -20,8 +21,9 @@ try
     builder.Host.UseSerilog(Log.Logger);
 
     builder.Services.AddOpenApi();
-
     builder.Services.AddCarter();
+
+    builder.Services.AddApplication();
 
     var app = builder.Build();
 
@@ -32,7 +34,7 @@ try
 
     app.UseHttpsRedirection();
     app.MapCarter();
-    
+
     app.Run();
 }
 catch (Exception e)
