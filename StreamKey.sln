@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Api", "StreamKey.Api\StreamKey.Api.csproj", "{ED21CF0E-4022-4E71-932E-D35893E1FBEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Core", "StreamKey.Core\StreamKey.Core.csproj", "{7BF0B50E-7DAD-4C85-8B23-68BE7E7EEEF5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ED21CF0E-4022-4E71-932E-D35893E1FBEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED21CF0E-4022-4E71-932E-D35893E1FBEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED21CF0E-4022-4E71-932E-D35893E1FBEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED21CF0E-4022-4E71-932E-D35893E1FBEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BF0B50E-7DAD-4C85-8B23-68BE7E7EEEF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BF0B50E-7DAD-4C85-8B23-68BE7E7EEEF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BF0B50E-7DAD-4C85-8B23-68BE7E7EEEF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BF0B50E-7DAD-4C85-8B23-68BE7E7EEEF5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
