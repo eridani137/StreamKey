@@ -20,8 +20,7 @@ try
     OpenTelemetryConfiguration.Configure(builder, otlpConfig);
 
     builder.Host.UseSerilog(Log.Logger);
-
-    builder.Services.AddOpenApi();
+    
     builder.Services.AddCarter();
 
     builder.Services.AddApplication();
@@ -29,19 +28,20 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
     
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddOpenApi();
+    
     CorsConfiguration.ConfigureCors(builder);
     
     var app = builder.Build();
 
-    if (app.Environment.IsDevelopment())
-    {
-        app.MapOpenApi();
-    }
 
     app.UseCors("AllowAll");
+    
     app.UseExceptionHandler();
     // app.UseHttpsRedirection(); // TODO https
     app.MapCarter();
+    app.MapOpenApi("/openapi/v1.json");
 
     app.Run();
 }

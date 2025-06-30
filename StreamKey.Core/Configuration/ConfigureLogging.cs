@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 using StreamKey.Core.Configs;
 
 namespace StreamKey.Core.Configuration;
@@ -22,6 +23,8 @@ public static class ConfigureLogging
         var levelSwitch = new LoggingLevelSwitch();
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(levelSwitch)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()

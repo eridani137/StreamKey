@@ -1,10 +1,11 @@
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using StreamKey.Application.Interfaces;
 
 namespace StreamKey.Application.Services;
 
-public class StreamService : IStreamService
+public class StreamService(ILogger<StreamService> logger) : IStreamService
 {
     public async Task<string?> GetSource(string username)
     {
@@ -49,10 +50,15 @@ public class StreamService : IStreamService
         var body = await response.Content.ReadAsStringAsync();
         
         var obj = JObject.Parse(body);
-        var token = obj["data"]?["streamPlaybackAccessToken"]?["value"]?.ToString();
-        var sig = obj["data"]?["streamPlaybackAccessToken"]?["signature"]?.ToString();
+        var token = obj.SelectToken("..data.streamPlaybackAccessToken.value")?.ToString();
+        var sig = obj.SelectToken("..data.streamPlaybackAccessToken.signature")?.ToString();
 
-        if (token is null || sig is null) return null;
+        if (token is null || sig is null)
+        {
+            logger.LogError("Ошибка при получении значений из JSON: {JSON}", obj.ToString());
+            
+            return null;
+        }
         
         var url = $"https://usher.ttvnw.net/api/channel/hls/{username}.m3u8?client_id={clientId}&token={token}&sig={sig}&allow_source=true";
         return await client.GetStringAsync(url);
