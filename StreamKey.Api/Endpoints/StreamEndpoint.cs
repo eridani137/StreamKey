@@ -12,18 +12,22 @@ public class StreamEndpoint : ICarterModule
     {
         var group = app.MapGroup("/api/stream");
 
-        group.MapPost("get", async (StreamRequestDto dto, ITwitchService service) =>
+        group.MapPost("get", async (StreamRequestDto dto, ITwitchService service, ILogger<StreamEndpoint> logger) =>
             {
                 var result = await service.GetStreamSource(dto.Username);
 
                 if (result.IsFailure)
                 {
+                    logger.LogError("Ошибка получения стрима {Username}: {Error}", dto.Username, result.Error.Message);
+                    
                     return result.Error.Code switch
                     {
                         ErrorCode.StreamNotFound or ErrorCode.NotFound1080P => Results.NotFound(result.Error.Message),
                         _ => Results.BadRequest(result.Error.Message)
                     };
                 }
+                
+                logger.LogInformation("Стрим отправлен: {Username}", dto.Username);
 
                 return Results.Ok(result.Value);
             })
