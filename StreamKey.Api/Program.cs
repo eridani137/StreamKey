@@ -1,7 +1,9 @@
+using System.Net.Http.Headers;
 using Carter;
 using Serilog;
 using StreamKey.Api;
 using StreamKey.Application;
+using StreamKey.Application.Services;
 using StreamKey.Core.Configs;
 using StreamKey.Core.Configuration;
 
@@ -20,24 +22,47 @@ try
     OpenTelemetryConfiguration.Configure(builder, otlpConfig);
 
     builder.Host.UseSerilog(Log.Logger);
-    
+
     builder.Services.AddCarter();
 
     builder.Services.AddApplication();
-    
+
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
-    
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddOpenApi();
-    
+
+    builder.Services.AddHttpClient<ITwitchService, TwitchService>((_, client) =>
+    {
+        client.BaseAddress = TwitchService.QqlUrl;
+        client.DefaultRequestHeaders.Referrer = new Uri(TwitchService.SiteUrl);
+        foreach (var header in TwitchService.Headers)
+        {
+            client.DefaultRequestHeaders.Add(header.Key, header.Value);
+        }
+
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    });
+
+    builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
+    {
+        client.BaseAddress = UsherService.UsherUrl;
+        client.DefaultRequestHeaders.Referrer = new Uri(TwitchService.SiteUrl);
+        foreach (var header in TwitchService.Headers)
+        {
+            client.DefaultRequestHeaders.Add(header.Key, header.Value);
+        }
+
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    });
+
     CorsConfiguration.ConfigureCors(builder);
-    
+
     var app = builder.Build();
 
-
     app.UseCors("AllowAll");
-    
+
     app.UseExceptionHandler();
     // app.UseHttpsRedirection(); // TODO https
     app.MapCarter();

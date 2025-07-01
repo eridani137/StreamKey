@@ -1,6 +1,7 @@
 using Carter;
 using StreamKey.Application.DTOs;
-using StreamKey.Application.Interfaces;
+using StreamKey.Application.Results;
+using StreamKey.Application.Services;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -10,13 +11,20 @@ public class StreamEndpoint : ICarterModule
     {
         var group = app.MapGroup("/api/stream");
 
-        group.MapPost("get", async (StreamReceiveDto dto, IStreamService service) =>
+        group.MapPost("get", async (StreamRequestDto dto, ITwitchService service) =>
             {
-                var source = await service.GetSource(dto.Username);
+                var result = await service.GetStreamSource(dto.Username);
 
-                if (source is null) return Results.NotFound();
+                if (result.IsFailure)
+                {
+                    return result.Error.Code switch
+                    {
+                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
+                        _ => Results.BadRequest(result.Error.Message)
+                    };
+                }
 
-                return Results.Ok(source);
+                return Results.Ok(result);
             })
             .Produces<string>()
             .Produces(StatusCodes.Status400BadRequest)

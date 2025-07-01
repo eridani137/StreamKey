@@ -1,6 +1,6 @@
 namespace StreamKey.Application.DTOs;
 
-public class StreamReceiveDto
+public class StreamRequestDto
 {
     public required string Username { get; set; }
 }
