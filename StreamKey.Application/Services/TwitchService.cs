@@ -47,7 +47,14 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
                 var accessToken = await GetAccessToken(username);
                 if (accessToken is null) return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
                 
-                return await usherService.Get1080PStream(username, accessToken);
+                var result = await usherService.Get1080PStream(username, accessToken);
+                if (string.IsNullOrEmpty(result.Value.Source))
+                {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
+                    return Result.Failure<StreamResponseDto>(Error.NullValue);
+                }
+
+                return result;
             }
             catch (Exception e)
             {
