@@ -20,7 +20,7 @@ public class StreamEndpoint : ICarterModule
                 {
                     return result.Error.Code switch
                     {
-                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
+                        ErrorCode.StreamNotFound or ErrorCode.NotFound1080P => Results.NotFound(result.Error.Message),
                         _ => Results.BadRequest(result.Error.Message)
                     };
                 }

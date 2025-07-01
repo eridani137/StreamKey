@@ -29,14 +29,31 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
         },
     };
 
+    private const string CacheKeyPrefix = "Username";
+    private readonly TimeSpan _slidingExpiration = TimeSpan.FromSeconds(45);
+    private readonly TimeSpan _absoluteExpiration = TimeSpan.FromMinutes(1);
+
     public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
     {
-        
-        
-        var accessToken = await GetAccessToken(username);
-        if (accessToken is null) return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
-
-        return await usherService.Get1080PStream(username, accessToken);
+        return await cache.GetOrCreateAsync($"{CacheKeyPrefix}:{username}", async entry =>
+        {
+            try
+            {
+                entry.SetSlidingExpiration(_slidingExpiration);
+                entry.SetAbsoluteExpiration(_absoluteExpiration);
+            
+                var accessToken = await GetAccessToken(username);
+                if (accessToken is null) return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
+                
+                return await usherService.Get1080PStream(username, accessToken);
+            }
+            catch (Exception e)
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
+                logger.LogError(e, "Ошибка возврата StreamResponseDto");
+                return Result.Failure<StreamResponseDto>(Error.UnexpectedError);
+            }
+        }) ?? Result.Failure<StreamResponseDto>(Error.UnexpectedError);
     }
 
     private async Task<PlaybackAccessTokenResponse?> GetAccessToken(string username)
