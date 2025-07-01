@@ -30,7 +30,7 @@ public static class ConfigureLogging
             .Enrich.WithEnvironmentName()
             .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
             .WriteTo.File($"{logsPath}/.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate, levelSwitch: levelSwitch)
-            .WriteTo.Seq(otlpConfig.Endpoint, apiKey: otlpConfig.Token)
+            .WriteTo.Seq(otlpConfig.Endpoint)
             .CreateLogger();
     }
 }
