@@ -30,8 +30,8 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
     };
 
     private const string CacheKeyPrefix = "Username";
-    private readonly TimeSpan _slidingExpiration = TimeSpan.FromSeconds(45);
-    private readonly TimeSpan _absoluteExpiration = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _slidingExpiration = TimeSpan.FromSeconds(90);
+    private readonly TimeSpan _absoluteExpiration = TimeSpan.FromMinutes(3);
 
     public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
     {
