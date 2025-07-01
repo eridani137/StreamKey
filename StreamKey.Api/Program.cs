@@ -4,6 +4,7 @@ using Carter;
 using Serilog;
 using StreamKey.Api;
 using StreamKey.Application;
+using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
 using StreamKey.Core.Configs;
 using StreamKey.Core.Configuration;
@@ -31,11 +32,11 @@ try
     ConfigureLogging.Configure(otlpConfig);
     OpenTelemetryConfiguration.Configure(builder, otlpConfig);
 
-    builder.Host.UseSerilog(Log.Logger);
-
-    builder.Services.AddCarter();
-
     builder.Services.AddApplication();
+    
+    builder.Host.UseSerilog(Log.Logger);
+    
+    builder.Services.AddCarter();
 
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
@@ -45,8 +46,8 @@ try
 
     builder.Services.AddHttpClient<ITwitchService, TwitchService>((_, client) =>
     {
-        client.BaseAddress = TwitchService.QqlUrl;
-        client.DefaultRequestHeaders.Referrer = new Uri(TwitchService.SiteUrl);
+        client.BaseAddress = StaticData.QqlUrl;
+        client.DefaultRequestHeaders.Referrer = new Uri(StaticData.SiteUrl);
         foreach (var header in TwitchService.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);
@@ -57,8 +58,8 @@ try
 
     builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
-        client.BaseAddress = UsherService.UsherUrl;
-        client.DefaultRequestHeaders.Referrer = new Uri(TwitchService.SiteUrl);
+        client.BaseAddress = StaticData.UsherUrl;
+        client.DefaultRequestHeaders.Referrer = new Uri(StaticData.SiteUrl);
         foreach (var header in TwitchService.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);

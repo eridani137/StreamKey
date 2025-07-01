@@ -2,19 +2,13 @@ using System.Text.RegularExpressions;
 using M3U8Parser;
 using StreamKey.Application.DTOs;
 using StreamKey.Application.DTOs.TwitchGraphQL;
+using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
 
 namespace StreamKey.Application.Services;
 
-public interface IUsherService
-{
-    Task<Result<StreamResponseDto>> Get1080PStream(string username, PlaybackAccessTokenResponse accessToken);
-}
-
 public partial class UsherService(HttpClient client) : IUsherService
 {
-    public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
-
     private static readonly Regex[] AdPatterns =
     [
         TwitchStitchedAdRegex(),
@@ -25,7 +19,7 @@ public partial class UsherService(HttpClient client) : IUsherService
 
     public async Task<Result<StreamResponseDto>> Get1080PStream(string username, PlaybackAccessTokenResponse accessToken)
     {
-        var url = $"api/channel/hls/{username}.m3u8?client_id={TwitchService.ClientId}&token={accessToken.Data!.StreamPlaybackAccessToken!.Value}&sig={accessToken.Data.StreamPlaybackAccessToken.Signature}&allow_source=true";
+        var url = $"api/channel/hls/{username}.m3u8?client_id={StaticData.ClientId}&token={accessToken.Data!.StreamPlaybackAccessToken!.Value}&sig={accessToken.Data.StreamPlaybackAccessToken.Signature}&allow_source=true";
 
         var response = await client.GetStringAsync(url);
 

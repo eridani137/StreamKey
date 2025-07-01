@@ -1,5 +1,6 @@
 using Carter;
 using StreamKey.Application.DTOs;
+using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
 using StreamKey.Application.Services;
 
