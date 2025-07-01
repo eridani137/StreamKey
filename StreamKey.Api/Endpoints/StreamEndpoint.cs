@@ -31,9 +31,8 @@ public class StreamEndpoint : ICarterModule
 
                 return Results.Ok(result.Value);
             })
-            .Produces<string>()
+            .Produces<StreamResponseDto>()
             .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status404NotFound);
     }
 }
