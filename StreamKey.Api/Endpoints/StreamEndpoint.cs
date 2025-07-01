@@ -24,7 +24,7 @@ public class StreamEndpoint : ICarterModule
                     };
                 }
 
-                return Results.Ok(result);
+                return Results.Ok(result.Value);
             })
             .Produces<string>()
             .Produces(StatusCodes.Status400BadRequest)

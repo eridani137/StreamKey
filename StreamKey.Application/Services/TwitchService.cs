@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using StreamKey.Application.DTOs;
 using StreamKey.Application.DTOs.TwitchGraphQL;
 using StreamKey.Application.Results;
 
@@ -8,7 +9,7 @@ namespace StreamKey.Application.Services;
 
 public interface ITwitchService
 {
-    Task<Result<string>> GetStreamSource(string username);
+    Task<Result<StreamResponseDto>> GetStreamSource(string username);
 }
 
 public class TwitchService(HttpClient client, IUsherService usherService, ILogger<TwitchService> logger) : ITwitchService
@@ -35,13 +36,12 @@ public class TwitchService(HttpClient client, IUsherService usherService, ILogge
         },
     };
 
-    public async Task<Result<string>> GetStreamSource(string username)
+    public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
     {
         var accessToken = await GetAccessToken(username);
-        if (accessToken is null) return Result.Failure<string>(Error.StreamNotFound);
+        if (accessToken is null) return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
 
-        var hlsStreams = await usherService.GetHlsStreams(username, accessToken);
-        return hlsStreams;
+        return await usherService.Get1080PStream(username, accessToken);
     }
 
     private async Task<PlaybackAccessTokenResponse?> GetAccessToken(string username)

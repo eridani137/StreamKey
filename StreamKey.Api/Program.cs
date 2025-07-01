@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using Carter;
 using Serilog;
@@ -11,6 +12,15 @@ using StreamKey.Core.Configuration;
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    if (builder.Environment.IsProduction())
+    {
+        builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Any, 5555); });
+    }
+    else
+    {
+        builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Loopback, 5142); });
+    }
 
     var otlpConfig = builder.Configuration.GetSection(nameof(OpenTelemetryConfig)).Get<OpenTelemetryConfig>();
     if (otlpConfig is null)
