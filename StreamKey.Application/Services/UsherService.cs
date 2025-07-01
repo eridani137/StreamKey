@@ -38,6 +38,11 @@ public partial class UsherService(HttpClient client) : IUsherService
         //     stream1080PUrl = stream.Uri;
         // }
 
+        if (string.IsNullOrEmpty(stream1080PUrl))
+        {
+            return Result.Failure<StreamResponseDto>(Error.NullValue);
+        }
+
         return Result.Success(new StreamResponseDto
         {
             Source = stream1080PUrl
