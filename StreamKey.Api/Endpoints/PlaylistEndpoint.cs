@@ -44,6 +44,6 @@ public class PlaylistEndpoint : ICarterModule
         })
         .Produces<string>()
         .Produces(StatusCodes.Status400BadRequest)
-        .Produces(StatusCodes.Status404NotFound);;
+        .Produces(StatusCodes.Status404NotFound);
     }
 }
