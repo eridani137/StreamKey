@@ -20,7 +20,7 @@ try
     }
     else
     {
-        builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Loopback, 5142); });
+        builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Any, 5142); });
     }
 
     var otlpConfig = builder.Configuration.GetSection(nameof(OpenTelemetryConfig)).Get<OpenTelemetryConfig>();
