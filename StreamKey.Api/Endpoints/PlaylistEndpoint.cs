@@ -1,4 +1,6 @@
 using Carter;
+using Newtonsoft.Json.Linq;
+using StreamKey.Application.Interfaces;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -8,17 +10,16 @@ public class PlaylistEndpoint : ICarterModule
     {
         var group = app.MapGroup("/playlist");
 
-        group.MapGet("/", (HttpContext context) =>
+        group.MapGet("/", async (HttpContext context, ITwitchService twitchService) =>
         {
-            var queryParams = context.Request.Query;
-    
-            foreach (var param in queryParams)
-            {
-                Console.WriteLine($"{param.Key}: {param.Value}");
-            }
-    
-            var fullQueryString = context.Request.QueryString.ToString();
-            Console.WriteLine($"Full query string: {fullQueryString}");
+            var queryString = context.Request.QueryString.ToString();
+            if (!context.Request.Query.TryGetValue("token", out var tokenValue)) return Results.BadRequest();
+            var obj = JObject.Parse(tokenValue.ToString());
+            var username = obj.SelectToken(".channel")?.ToString();
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(queryString)) return Results.BadRequest();
+            var playlist = await twitchService.GetPlaylist(username, queryString);
+
+            return Results.Ok(playlist.Value);
         });
     }
 }

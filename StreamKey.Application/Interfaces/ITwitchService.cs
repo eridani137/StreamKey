@@ -5,5 +5,6 @@ namespace StreamKey.Application.Interfaces;
 
 public interface ITwitchService
 {
-    Task<Result<StreamResponseDto>> GetStreamSource(string username);
+    Task<Result<string>> GetPlaylist(string username, string query);
+    // Task<Result<StreamResponseDto>> GetStreamSource(string username);
 }
