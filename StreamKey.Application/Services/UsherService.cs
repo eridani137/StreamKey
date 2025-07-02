@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.RegularExpressions;
 using M3U8Parser;
 using StreamKey.Application.DTOs;
@@ -21,32 +22,49 @@ public partial class UsherService(HttpClient client) : IUsherService
     {
         var url = $"api/channel/hls/{username}.m3u8?client_id={StaticData.ClientId}&token={accessToken.Data!.StreamPlaybackAccessToken!.Value}&sig={accessToken.Data.StreamPlaybackAccessToken.Signature}&allow_source=true";
 
-        var response = await client.GetStringAsync(url);
-
-        response = OptimizePlaylist(response);
-
-        var stream1080PUrl = Extract1080PStreamUrl(response);
-        // if (string.IsNullOrEmpty(stream1080PUrl))
-        // {
-        //     var playlist = MasterPlaylist.LoadFromText(response);
-        //     if (playlist is null) return Result.Failure<StreamResponseDto>(Error.PlaylistNotReceived);
-        //
-        //     var stream = playlist.Streams.FirstOrDefault(s =>
-        //         s.Resolution.Height >= 1080 && s.Resolution.Width >= 1920);
-        //
-        //     if (stream is null) return Result.Failure<StreamResponseDto>(Error.NotFound1080P);
-        //     stream1080PUrl = stream.Uri;
-        // }
-
-        if (string.IsNullOrEmpty(stream1080PUrl))
+        try
         {
-            return Result.Failure<StreamResponseDto>(Error.NullValue);
+            var response = await client.GetAsync(url);
+        
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
+            }
+        
+            response.EnsureSuccessStatusCode();
+        
+            var content = await response.Content.ReadAsStringAsync();
+            content = OptimizePlaylist(content);
+
+            var stream1080PUrl = Extract1080PStreamUrl(content);
+
+            if (string.IsNullOrEmpty(stream1080PUrl))
+            {
+                return Result.Failure<StreamResponseDto>(Error.NullValue);
+            }
+
+            return Result.Success(new StreamResponseDto
+            {
+                Source = stream1080PUrl
+            });
         }
-
-        return Result.Success(new StreamResponseDto
+        catch (HttpRequestException httpEx)
         {
-            Source = stream1080PUrl
-        });
+            if (httpEx.StatusCode is HttpStatusCode.NotFound)
+            {
+                return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
+            }
+        
+            return Result.Failure<StreamResponseDto>(Error.UnexpectedError);
+        }
+        catch (TaskCanceledException)
+        {
+            return Result.Failure<StreamResponseDto>(Error.Timeout);
+        }
+        catch (Exception)
+        {
+            return Result.Failure<StreamResponseDto>(Error.UnexpectedError);
+        }
     }
 
     private static string OptimizePlaylist(string playlistContent)

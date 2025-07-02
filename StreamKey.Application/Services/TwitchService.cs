@@ -89,6 +89,10 @@ public class TwitchService(
             logger.LogError(httpEx, "HTTP ошибка при получении стрима для пользователя: {Username}. Код: {StatusCode}", username, httpEx.Data["StatusCode"]);
             return Result.Failure<StreamResponseDto>(Error.UnexpectedError);
         }
+        catch (TaskCanceledException)
+        {
+            return Result.Failure<StreamResponseDto>(Error.Timeout);
+        }
         catch (Exception e)
         {
             logger.LogError(e, "Неожиданная ошибка при получении стрима для пользователя: {Username}. Тип: {ExceptionType}, Сообщение: {Message}", username, e.GetType().Name, e.Message);

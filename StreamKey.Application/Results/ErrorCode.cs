@@ -8,4 +8,5 @@ public enum ErrorCode
     PlaylistNotReceived = 3,
     NotFound1080P = 4,
     UnexpectedError = 5,
+    Timeout = 6,
 }
