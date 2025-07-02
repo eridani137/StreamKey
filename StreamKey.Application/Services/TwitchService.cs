@@ -39,7 +39,7 @@ public class TwitchService(
 
     public async Task<Result<string>> GetPlaylist(string username)
     {
-        
+        return "";
     }
     
     public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
