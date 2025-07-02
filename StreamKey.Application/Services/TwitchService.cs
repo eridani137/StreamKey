@@ -35,34 +35,49 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
 
     public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
     {
-        return await cache.GetOrCreateAsync($"{CacheKeyPrefix}:{username}", async entry =>
+        var cacheKey = $"{CacheKeyPrefix}:{username}";
+        
+        if (cache.TryGetValue(cacheKey, out StreamResponseDto? streamResponseDto))
         {
-            try
+            if (streamResponseDto is not null)
             {
-                entry.SetSlidingExpiration(_slidingExpiration);
-                entry.SetAbsoluteExpiration(_absoluteExpiration);
-                
-                logger.LogInformation("Получение стрима: {Username}", username);
-            
-                var accessToken = await GetAccessToken(username);
-                if (accessToken is null) return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
-                
-                var result = await usherService.Get1080PStream(username, accessToken);
-                if (string.IsNullOrEmpty(result.Value.Source))
-                {
-                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
-                    return Result.Failure<StreamResponseDto>(Error.NullValue);
-                }
+                logger.LogInformation("Стрим получен из кеша: {Username}", username);
+                return Result.Success(streamResponseDto);
+            }
+        }
 
-                return result;
-            }
-            catch (Exception e)
+        try
+        {
+            logger.LogInformation("Получение стрима из API: {Username}", username);
+
+            var accessToken = await GetAccessToken(username);
+            if (accessToken is null)
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.Zero;
-                logger.LogError(e, "Ошибка возврата StreamResponseDto");
-                return Result.Failure<StreamResponseDto>(Error.UnexpectedError);
+                logger.LogWarning("Не удалось получить токен доступа для пользователя: {Username}", username);
+                return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
             }
-        }) ?? Result.Failure<StreamResponseDto>(Error.UnexpectedError);
+
+            var result = await usherService.Get1080PStream(username, accessToken);
+            if (string.IsNullOrEmpty(result.Value.Source))
+            {
+                logger.LogWarning("Не удалось получить ссылку на видео поток: {Username}", username);
+                return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
+            }
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(_slidingExpiration)
+                .SetAbsoluteExpiration(_absoluteExpiration);
+
+            cache.Set(cacheKey, result.Value, cacheOptions);
+            
+            logger.LogInformation("Стрим успешно получен и закеширован: {Username}", username);
+            return result;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при получении стрима для пользователя: {Username}", username);
+            return Result.Failure<StreamResponseDto>(Error.UnexpectedError);
+        }
     }
 
     private async Task<PlaybackAccessTokenResponse?> GetAccessToken(string username)
