@@ -4,7 +4,7 @@ namespace StreamKey.Application.Results;
 
 public class Result
 {
-    protected bool IsSuccess { get; }
+    public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
     public Error Error { get; }
 
@@ -32,7 +32,7 @@ public class Result
 public class Result<TValue>(TValue? value, bool isSuccess, Error error) : Result(isSuccess, error)
 {
     [NotNull]
-    public TValue Value => IsSuccess
+    public TValue? Value => IsSuccess
         ? value!
         : throw new InvalidOperationException("The value of a failure result can't be accessed");
 

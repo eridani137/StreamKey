@@ -9,7 +9,11 @@ using StreamKey.Application.Results;
 
 namespace StreamKey.Application.Services;
 
-public class TwitchService(HttpClient client, IUsherService usherService, IMemoryCache cache, ILogger<TwitchService> logger) : ITwitchService
+public class TwitchService(
+    HttpClient client,
+    IUsherService usherService,
+    IMemoryCache cache,
+    ILogger<TwitchService> logger) : ITwitchService
 {
     public static Dictionary<string, string> Headers { get; } = new()
     {
@@ -36,7 +40,7 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
     public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
     {
         var cacheKey = $"{CacheKeyPrefix}:{username}";
-        
+
         if (cache.TryGetValue(cacheKey, out StreamResponseDto? streamResponseDto))
         {
             if (streamResponseDto is not null)
@@ -58,6 +62,13 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
             }
 
             var result = await usherService.Get1080PStream(username, accessToken);
+
+            if (!result.IsSuccess)
+            {
+                logger.LogWarning("Не удалось получить стрим для пользователя: {Username}", username);
+                return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
+            }
+
             if (string.IsNullOrEmpty(result.Value.Source))
             {
                 logger.LogWarning("Не удалось получить ссылку на видео поток: {Username}", username);
@@ -69,7 +80,7 @@ public class TwitchService(HttpClient client, IUsherService usherService, IMemor
                 .SetAbsoluteExpiration(_absoluteExpiration);
 
             cache.Set(cacheKey, result.Value, cacheOptions);
-            
+
             logger.LogInformation("Стрим успешно получен и закеширован: {Username}", username);
             return result;
         }
