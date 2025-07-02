@@ -11,6 +11,14 @@ public class PlaylistEndpoint : ICarterModule
         group.MapGet("/", (HttpContext context) =>
         {
             var queryParams = context.Request.Query;
+    
+            foreach (var param in queryParams)
+            {
+                Console.WriteLine($"{param.Key}: {param.Value}");
+            }
+    
+            var fullQueryString = context.Request.QueryString.ToString();
+            Console.WriteLine($"Full query string: {fullQueryString}");
         });
     }
 }

@@ -18,7 +18,7 @@ public partial class UsherService(HttpClient client) : IUsherService
         AmazonAdRegex()
     ];
 
-    public async Task<Result<StreamResponseDto>> Get1080PStream(string username, PlaybackAccessTokenResponse accessToken)
+    public async Task<Result<StreamResponseDto>> GetPlaylist(string username, PlaybackAccessTokenResponse accessToken)
     {
         var url = $"api/channel/hls/{username}.m3u8?client_id={StaticData.ClientId}&token={accessToken.Data!.StreamPlaybackAccessToken!.Value}&sig={accessToken.Data.StreamPlaybackAccessToken.Signature}&allow_source=true";
 

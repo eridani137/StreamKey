@@ -34,9 +34,14 @@ public class TwitchService(
     };
 
     private const string CacheKeyPrefix = "Username";
-    private readonly TimeSpan _slidingExpiration = TimeSpan.FromSeconds(90);
-    private readonly TimeSpan _absoluteExpiration = TimeSpan.FromMinutes(3);
+    private readonly TimeSpan _slidingExpiration = TimeSpan.FromSeconds(60);
+    private readonly TimeSpan _absoluteExpiration = TimeSpan.FromMinutes(2);
 
+    public async Task<Result<string>> GetPlaylist(string username)
+    {
+        
+    }
+    
     public async Task<Result<StreamResponseDto>> GetStreamSource(string username)
     {
         var cacheKey = $"{CacheKeyPrefix}:{username}";
@@ -61,7 +66,7 @@ public class TwitchService(
                 return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
             }
 
-            var result = await usherService.Get1080PStream(username, accessToken);
+            var result = await usherService.GetPlaylist(username, accessToken);
 
             if (!result.IsSuccess)
             {

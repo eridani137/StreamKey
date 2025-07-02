@@ -6,5 +6,5 @@ namespace StreamKey.Application.Interfaces;
 
 public interface IUsherService
 {
-    Task<Result<StreamResponseDto>> Get1080PStream(string username, PlaybackAccessTokenResponse accessToken);
+    Task<Result<StreamResponseDto>> GetPlaylist(string username, PlaybackAccessTokenResponse accessToken);
 }
