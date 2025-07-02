@@ -14,14 +14,10 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    if (builder.Environment.IsProduction())
+    builder.WebHost.ConfigureKestrel(options =>
     {
-        builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Any, 5555); });
-    }
-    else
-    {
-        builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Any, 5142); });
-    }
+        options.Listen(IPAddress.Any, 5555);
+    });
 
     var otlpConfig = builder.Configuration.GetSection(nameof(OpenTelemetryConfig)).Get<OpenTelemetryConfig>();
     if (otlpConfig is null)
@@ -33,9 +29,9 @@ try
     OpenTelemetryConfiguration.Configure(builder, otlpConfig);
 
     builder.Services.AddApplication();
-    
+
     builder.Host.UseSerilog(Log.Logger);
-    
+
     builder.Services.AddCarter();
 
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -73,7 +69,7 @@ try
     var app = builder.Build();
 
     // app.UseSerilogRequestLogging();
-    
+
     app.UseCors("AllowAll");
 
     app.UseExceptionHandler();
