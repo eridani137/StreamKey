@@ -72,6 +72,8 @@ try
 
     var app = builder.Build();
 
+    app.UseSerilogRequestLogging();
+    
     app.UseCors("AllowAll");
 
     app.UseExceptionHandler();

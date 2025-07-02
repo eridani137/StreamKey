@@ -28,6 +28,8 @@ public static class ConfigureLogging
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()
+            .Enrich.WithClientIp()
+            .Enrich.WithCorrelationId()
             .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
             .WriteTo.File($"{logsPath}/.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate, levelSwitch: levelSwitch)
             .WriteTo.Seq(otlpConfig.Endpoint)
