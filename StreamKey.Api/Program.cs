@@ -40,23 +40,11 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddOpenApi();
 
-    builder.Services.AddHttpClient<ITwitchService, TwitchService>((_, client) =>
-    {
-        client.BaseAddress = StaticData.QqlUrl;
-        client.DefaultRequestHeaders.Referrer = new Uri(StaticData.SiteUrl);
-        foreach (var header in TwitchService.Headers)
-        {
-            client.DefaultRequestHeaders.Add(header.Key, header.Value);
-        }
-
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    });
-
     builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
         client.BaseAddress = StaticData.UsherUrl;
         client.DefaultRequestHeaders.Referrer = new Uri(StaticData.SiteUrl);
-        foreach (var header in TwitchService.Headers)
+        foreach (var header in StaticData.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
@@ -73,7 +61,7 @@ try
     app.UseCors("AllowAll");
 
     app.UseExceptionHandler();
-    // app.UseHttpsRedirection(); // TODO https
+    app.UseHttpsRedirection();
     app.MapCarter();
     app.MapOpenApi("/openapi/v1.json");
 

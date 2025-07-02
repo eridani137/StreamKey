@@ -8,7 +8,6 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<ITwitchService, TwitchService>();
         services.AddScoped<IUsherService, UsherService>();
         services.AddMemoryCache();
         

@@ -1,8 +1,5 @@
 using System.Net;
 using System.Text.RegularExpressions;
-using M3U8Parser;
-using StreamKey.Application.DTOs;
-using StreamKey.Application.DTOs.TwitchGraphQL;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
 
