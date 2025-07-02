@@ -72,7 +72,7 @@ try
 
     var app = builder.Build();
 
-    app.UseSerilogRequestLogging();
+    // app.UseSerilogRequestLogging();
     
     app.UseCors("AllowAll");
 
