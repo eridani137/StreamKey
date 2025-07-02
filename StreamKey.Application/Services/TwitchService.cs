@@ -69,7 +69,7 @@ public class TwitchService(
                 return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
             }
 
-            if (string.IsNullOrEmpty(result.Value.Source))
+            if (result.Value?.Source is null or "")
             {
                 logger.LogWarning("Не удалось получить ссылку на видео поток: {Username}", username);
                 return Result.Failure<StreamResponseDto>(Error.StreamNotFound);
