@@ -19,7 +19,7 @@ public class PlaylistEndpoint : ICarterModule
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(queryString)) return Results.BadRequest();
             var playlist = await twitchService.GetPlaylist(username, queryString);
 
-            return Results.Ok(playlist.Value);
+            return Results.Content(playlist.Value, "application/vnd.apple.mpegurl");
         });
     }
 }
