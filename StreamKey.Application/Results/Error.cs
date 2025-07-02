@@ -8,7 +8,6 @@ public record Error(ErrorCode Code, string Message)
     
     public static Error StreamNotFound => new(ErrorCode.StreamNotFound, "Стрим не найден");
     public static Error PlaylistNotReceived => new(ErrorCode.PlaylistNotReceived, "Плейлист не получен");
-    public static Error NotFound1080P => new(ErrorCode.NotFound1080P, "Не найден 1080p");
     public static Error UnexpectedError => new(ErrorCode.UnexpectedError, "Необработанная ошибка");
     public static Error Timeout => new(ErrorCode.Timeout, "Таймаут");
 

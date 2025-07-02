@@ -42,7 +42,7 @@ public partial class UsherService(HttpClient client) : IUsherService
                 return Result.Failure<string>(Error.StreamNotFound);
             }
         
-            return Result.Failure<string>(Error.UnexpectedError);
+            return Result.Failure<string>(Error.PlaylistNotReceived);
         }
         catch (TaskCanceledException)
         {
