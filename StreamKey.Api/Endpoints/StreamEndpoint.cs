@@ -10,9 +10,9 @@ public class StreamEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/stream");
+        var group = app.MapGroup("/stream");
 
-        group.MapPost("get", async (StreamRequestDto dto, ITwitchService service, ILogger<StreamEndpoint> logger) =>
+        group.MapPost("/", async (StreamRequestDto dto, ITwitchService service, ILogger<StreamEndpoint> logger) =>
             {
                 var result = await service.GetStreamSource(dto.Username);
 
