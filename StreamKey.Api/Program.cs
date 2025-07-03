@@ -14,8 +14,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.WebHost.ConfigureKestrel(options => { options.Listen(IPAddress.Any, 5555); });
-
     var otlpConfig = builder.Configuration.GetSection(nameof(OpenTelemetryConfig)).Get<OpenTelemetryConfig>();
     if (otlpConfig is null)
     {
