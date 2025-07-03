@@ -56,7 +56,7 @@ try
     app.UseCors("AllowAll");
 
     app.UseExceptionHandler();
-    app.UseHttpsRedirection();
+    // app.UseHttpsRedirection();
     app.MapCarter();
     app.MapOpenApi("/openapi/v1.json");
 
