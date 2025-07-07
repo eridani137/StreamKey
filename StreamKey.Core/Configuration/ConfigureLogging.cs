@@ -9,7 +9,7 @@ public static class ConfigureLogging
 {
     public static void Configure(OpenTelemetryConfig otlpConfig)
     {
-        const string logs = "Logs";
+        const string logs = "logs";
         var logsPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logs));
 
         if (!Directory.Exists(logsPath))
