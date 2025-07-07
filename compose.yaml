@@ -11,7 +11,8 @@
       - ./logs:/app/logs
     networks:
       - shared-net
-      -
+        
+  
   seq:
     image: datalust/seq:latest
     container_name: seq
