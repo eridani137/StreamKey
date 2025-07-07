@@ -39,7 +39,7 @@ public class PlaylistEndpoint : ICarterModule
                     };
                 }
 
-                logger.LogInformation("Плейлист успешно отправлен: {Channel}\n{@Playlist}", channel, result.Value);
+                // logger.LogInformation("Плейлист успешно отправлен: {Channel}\n{@Playlist}", channel, result.Value);
                 return Results.Content(result.Value, "application/vnd.apple.mpegurl");
             })
             .Produces<string>()
