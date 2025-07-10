@@ -14,7 +14,7 @@ public class PlaylistEndpoint : ICarterModule
         group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<PlaylistEndpoint> logger) =>
             {
                 var queryString = context.Request.QueryString.ToString();
-                logger.LogInformation("{Query}", queryString);
+                // logger.LogInformation("{Query}", queryString);
                 if (!context.Request.Query.TryGetValue("token", out var tokenValue)) return Results.BadRequest();
 
                 var obj = JObject.Parse(tokenValue.ToString());
