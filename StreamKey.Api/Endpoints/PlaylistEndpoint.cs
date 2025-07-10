@@ -33,7 +33,6 @@ public class PlaylistEndpoint : ICarterModule
                     switch (result.Error.Code)
                     {
                         case ErrorCode.StreamNotFound:
-                            logger.LogError("Стрим уже оффлайн {Channel}", channel);
                             return Results.NotFound(result.Error.Message);
                         case ErrorCode.None:
                         case ErrorCode.NullValue:

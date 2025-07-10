@@ -1,4 +1,5 @@
 using Carter;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json.Linq;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
@@ -26,15 +27,19 @@ public class Testing : ICarterModule
                     return Results.BadRequest();
                 }
 
+                var updatedToken = await usherService.ModifyToken(obj);
+                var queryDict = context.Request.Query
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Key == "token" ? updatedToken : kvp.Value.ToString());
+                var newQueryString = QueryHelpers.AddQueryString("/", queryDict!);
+
                 logger.LogInformation("Получение стрима: {Channel}", channel);
-                var result = await usherService.GetPlaylist(channel, queryString);
+                var result = await usherService.GetPlaylist(channel, newQueryString);
 
                 if (result.IsFailure)
                 {
                     switch (result.Error.Code)
                     {
                         case ErrorCode.StreamNotFound:
-                            logger.LogError("Стрим уже оффлайн {Channel}", channel);
                             return Results.NotFound(result.Error.Message);
                         case ErrorCode.None:
                         case ErrorCode.NullValue:
@@ -47,7 +52,7 @@ public class Testing : ICarterModule
                             return Results.BadRequest(result.Error.Message);
                     }
                 }
-                
+
                 logger.LogInformation("{Channel}: {@Playlist}", channel, result.Value);
 
                 return Results.Content(result.Value, "application/vnd.apple.mpegurl");

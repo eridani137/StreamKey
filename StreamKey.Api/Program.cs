@@ -21,6 +21,9 @@ try
 
     ConfigureLogging.Configure(otlpConfig);
     OpenTelemetryConfiguration.Configure(builder, otlpConfig);
+    
+    Log.Information("OTLP Endpoint: {Endpoint}", otlpConfig.Endpoint);
+    Log.Information("OTLP Token: {Token}", otlpConfig.Token);
 
     builder.Services.AddApplication();
 

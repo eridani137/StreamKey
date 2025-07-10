@@ -1,5 +1,8 @@
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
 
@@ -14,6 +17,23 @@ public partial class UsherService(HttpClient client) : IUsherService
         TvTwitchAdRegex(),
         AmazonAdRegex()
     ];
+
+    public Task<string> ModifyToken(JObject tokenValue)
+    {
+        const string maximumResolution = "maximum_resolution";
+        if (tokenValue[maximumResolution] is not null)
+        {
+            tokenValue[maximumResolution] = "ULTRA_HD";
+        }
+
+        const string maximumResolutionReasons = "maximum_resolution_reasons";
+        if (tokenValue[maximumResolutionReasons] is not null)
+        {
+            tokenValue[maximumResolutionReasons] = new JObject();
+        }
+                
+        return Task.FromResult(tokenValue.ToString(Formatting.None));
+    }
 
     public async Task<Result<string>> GetPlaylist(string username, string query)
     {

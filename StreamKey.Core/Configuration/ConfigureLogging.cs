@@ -32,7 +32,7 @@ public static class ConfigureLogging
             .Enrich.WithCorrelationId()
             .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
             .WriteTo.File($"{logsPath}/.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate, levelSwitch: levelSwitch)
-            .WriteTo.Seq(otlpConfig.Endpoint)
+            .WriteTo.Seq(otlpConfig.Endpoint, apiKey: otlpConfig.Token)
             .CreateLogger();
     }
 }
