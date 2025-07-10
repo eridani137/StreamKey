@@ -5,15 +5,16 @@ using StreamKey.Application.Results;
 
 namespace StreamKey.Api.Endpoints;
 
-public class PlaylistEndpoint : ICarterModule
+public class Testing : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/playlist");
+        var group = app.MapGroup("/testing");
 
-        group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<PlaylistEndpoint> logger) =>
+        group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<Testing> logger) =>
             {
                 var queryString = context.Request.QueryString.ToString();
+                logger.LogInformation("{Query}", queryString);
                 if (!context.Request.Query.TryGetValue("token", out var tokenValue)) return Results.BadRequest();
 
                 var obj = JObject.Parse(tokenValue.ToString());
@@ -46,6 +47,8 @@ public class PlaylistEndpoint : ICarterModule
                             return Results.BadRequest(result.Error.Message);
                     }
                 }
+                
+                logger.LogInformation("{Channel}: {@Playlist}", channel, result.Value);
 
                 return Results.Content(result.Value, "application/vnd.apple.mpegurl");
             })

@@ -56,8 +56,7 @@ public partial class UsherService(HttpClient client) : IUsherService
 
     private static string OptimizePlaylist(string playlistContent)
     {
-        playlistContent = AdPatterns.Aggregate(playlistContent, (current, pattern) => pattern.Replace(current, string.Empty));
-        return playlistContent;
+        return AdPatterns.Aggregate(playlistContent, (current, pattern) => pattern.Replace(current, string.Empty));
     }
 
     [GeneratedRegex(@"#EXT-X-DATERANGE:.*twitch-stitched-ad.*\n", RegexOptions.Compiled)]
