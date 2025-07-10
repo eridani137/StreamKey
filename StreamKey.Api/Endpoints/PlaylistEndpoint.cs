@@ -14,6 +14,7 @@ public class PlaylistEndpoint : ICarterModule
         group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<PlaylistEndpoint> logger) =>
             {
                 var queryString = context.Request.QueryString.ToString();
+                logger.LogInformation("{Query}", queryString);
                 if (!context.Request.Query.TryGetValue("token", out var tokenValue)) return Results.BadRequest();
 
                 var obj = JObject.Parse(tokenValue.ToString());
@@ -30,13 +31,21 @@ public class PlaylistEndpoint : ICarterModule
 
                 if (result.IsFailure)
                 {
-                    logger.LogError("Ошибка получения стрима {Channel}: {Error}", channel, result.Error.Message);
-
-                    return result.Error.Code switch
+                    switch (result.Error.Code)
                     {
-                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
-                        _ => Results.BadRequest(result.Error.Message)
-                    };
+                        case ErrorCode.StreamNotFound:
+                            logger.LogError("Стрим уже оффлайн {Channel}: {Error}", channel, result.Error.Message);
+                            return Results.NotFound(result.Error.Message);
+                        case ErrorCode.None:
+                        case ErrorCode.NullValue:
+                        case ErrorCode.PlaylistNotReceived:
+                        case ErrorCode.UnexpectedError:
+                        case ErrorCode.Timeout:
+                            break;
+                        default:
+                            logger.LogError("Ошибка получения стрима {Channel}: {Error}", channel, result.Error.Message);
+                            return Results.BadRequest(result.Error.Message);
+                    }
                 }
 
                 // logger.LogInformation("Плейлист успешно отправлен: {Channel}\n{@Playlist}", channel, result.Value);
