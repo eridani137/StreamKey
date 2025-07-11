@@ -39,7 +39,7 @@ public class PlaylistEndpoint : ICarterModule
                         case ErrorCode.PlaylistNotReceived:
                         case ErrorCode.UnexpectedError:
                         case ErrorCode.Timeout:
-                            break;
+                            return Results.Problem(result.Error.Message);
                         default:
                             logger.LogError("{Error}: {Channel}", result.Error.Message, channel);
                             return Results.BadRequest(result.Error.Message);
