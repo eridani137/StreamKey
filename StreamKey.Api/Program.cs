@@ -47,7 +47,8 @@ try
         }
 
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    });
+    })
+    .AddStandardResilienceHandler();
 
     CorsConfiguration.ConfigureCors(builder);
 

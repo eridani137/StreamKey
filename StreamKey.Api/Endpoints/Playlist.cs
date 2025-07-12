@@ -5,13 +5,13 @@ using StreamKey.Application.Results;
 
 namespace StreamKey.Api.Endpoints;
 
-public class PlaylistEndpoint : ICarterModule
+public class Playlist : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/playlist");
 
-        group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<PlaylistEndpoint> logger) =>
+        group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<Playlist> logger) =>
             {
                 var queryString = context.Request.QueryString.ToString();
                 if (!context.Request.Query.TryGetValue("token", out var tokenValue)) return Results.BadRequest();
