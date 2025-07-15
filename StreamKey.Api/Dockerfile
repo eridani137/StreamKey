@@ -19,5 +19,6 @@ RUN dotnet publish "./StreamKey.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 
 FROM base AS final
 WORKDIR /app
+ENV HTTP_PORTS="" HTTPS_PORTS=""
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "StreamKey.Api.dll"]

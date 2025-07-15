@@ -1,11 +1,10 @@
 using System.Net.Http.Headers;
 using Carter;
 using Serilog;
-using StreamKey.Api;
 using StreamKey.Application;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
-using StreamKey.Core.Configs;
+using StreamKey.Core;
 using StreamKey.Core.Configuration;
 
 
@@ -13,17 +12,11 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    var otlpConfig = builder.Configuration.GetSection(nameof(OpenTelemetryConfig)).Get<OpenTelemetryConfig>();
-    if (otlpConfig is null)
-    {
-        throw new ApplicationException("Нужно указать настройки OpenTelemetry");
-    }
-
-    ConfigureLogging.Configure(otlpConfig);
-    OpenTelemetryConfiguration.Configure(builder, otlpConfig);
+    ConfigureLogging.Configure();
+    OpenTelemetryConfiguration.Configure(builder);
     
-    Log.Information("OTLP Endpoint: {Endpoint}", otlpConfig.Endpoint);
-    Log.Information("OTLP Token: {Token}", otlpConfig.Token);
+    Log.ForContext<Program>().Information("OTLP Endpoint: {Endpoint}", EnvironmentHelper.GetOtlpEndpoint());
+    Log.ForContext<Program>().Information("OTLP Protocol: {Protocol}", EnvironmentHelper.GetOtlpProtocol());
 
     builder.Services.AddApplication();
 
