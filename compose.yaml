@@ -5,10 +5,6 @@
       context: .
       dockerfile: StreamKey.Api/Dockerfile
     restart: unless-stopped
-    ports:
-      - "5555:5555"
-    volumes:
-      - ./logs:/app/logs
     environment:
       - ASPNETCORE_URLS=http://+:5555
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:4317
@@ -18,10 +14,8 @@
     networks:
       - shared-net
 
-
   seq:
     image: datalust/seq:latest
-    container_name: seq
     restart: unless-stopped
     volumes:
       - ./seq_data:/data
@@ -30,10 +24,21 @@
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
       - SEQ_OPENTELEMETRY_GRPC_ENDPOINT=0.0.0.0:4317
+    networks:
+      - shared-net
+
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
     ports:
-      - "5341:5341"
-      - "8082:80"
-      - "4317:4317"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl:ro
+    depends_on:
+      - streamkey.api
+      - seq
     networks:
       - shared-net
 
