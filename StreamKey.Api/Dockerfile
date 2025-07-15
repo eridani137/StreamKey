@@ -6,7 +6,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["StreamKey.Api/StreamKey.Api.csproj", "StreamKey.Api/"]
-COPY ["StreamKey.Core/StreamKey.Core.csproj", "StreamKey.Core/"]
 COPY ["StreamKey.Application/StreamKey.Application.csproj", "StreamKey.Application/"]
 RUN dotnet restore "StreamKey.Api/StreamKey.Api.csproj"
 COPY . .
