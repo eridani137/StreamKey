@@ -17,8 +17,8 @@
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
     networks:
       - shared-net
-  
-  
+ 
+
   seq:
     image: datalust/seq:latest
     container_name: seq
