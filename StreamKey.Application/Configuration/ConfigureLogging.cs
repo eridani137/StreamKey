@@ -31,6 +31,7 @@ public static class ConfigureLogging
             .MinimumLevel.ControlledBy(levelSwitch)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
+            .MinimumLevel.Override("Polly", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()
