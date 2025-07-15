@@ -38,9 +38,8 @@ public static class ConfigureLogging
             .Enrich.WithSpan()
             .Enrich.WithProperty("ServiceName", serviceName)
             .Enrich.WithProperty("Environment", environment)
-            .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
-            .WriteTo.File($"{logsPath}/.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate,
-                levelSwitch: levelSwitch)
+            //.WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
+            //.WriteTo.File($"{logsPath}/.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate, levelSwitch: levelSwitch)
             .WriteTo.Seq(serverUrl: seqEndpoint, apiKey: seqApiKey, controlLevelSwitch: levelSwitch)
             .CreateLogger();
     }
