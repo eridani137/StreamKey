@@ -31,7 +31,6 @@ try
 
     builder.Services.AddCarter();
 
-    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
     builder.Services.AddEndpointsApiExplorer();
@@ -58,7 +57,6 @@ try
 
     app.UseCors("AllowAll");
 
-    app.UseExceptionHandler();
     // app.UseHttpsRedirection();
     app.MapCarter();
     app.MapOpenApi("/openapi/v1.json");
