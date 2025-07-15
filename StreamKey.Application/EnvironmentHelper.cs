@@ -1,4 +1,4 @@
-namespace StreamKey.Core;
+namespace StreamKey.Application;
 
 public static class EnvironmentHelper
 {

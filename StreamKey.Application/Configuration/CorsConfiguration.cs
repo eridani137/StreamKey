@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace StreamKey.Core.Configuration;
+namespace StreamKey.Application.Configuration;
 
 public static class CorsConfiguration
 {

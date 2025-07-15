@@ -17,7 +17,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\StreamKey.Application\StreamKey.Application.csproj" />
-      <ProjectReference Include="..\StreamKey.Core\StreamKey.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -5,7 +5,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace StreamKey.Core.Configuration;
+namespace StreamKey.Application.Configuration;
 
 public static class OpenTelemetryConfiguration
 {

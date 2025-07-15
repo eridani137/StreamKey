@@ -2,10 +2,9 @@ using System.Net.Http.Headers;
 using Carter;
 using Serilog;
 using StreamKey.Application;
+using StreamKey.Application.Configuration;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
-using StreamKey.Core;
-using StreamKey.Core.Configuration;
 
 
 try
@@ -46,11 +45,7 @@ try
 
     var app = builder.Build();
 
-    // app.UseSerilogRequestLogging();
-
     app.UseCors("AllowAll");
-
-    // app.UseHttpsRedirection();
     app.MapCarter();
     app.MapOpenApi("/openapi/v1.json");
 
