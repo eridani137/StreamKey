@@ -1,4 +1,5 @@
 using System.Net;
+using Newtonsoft.Json.Linq;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
 
@@ -22,7 +23,15 @@ public class UsherService(HttpClient client) : IUsherService
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                return Result.Failure<string>(Error.PlaylistNotReceived($"Статус: {response.StatusCode}. Ответ: {errorContent}"));
+                var array = JArray.Parse(errorContent);
+                foreach (var jToken in array)
+                {
+                    if (jToken is JObject obj)
+                    {
+                        obj.Remove("url");
+                    }
+                }
+                return Result.Failure<string>(Error.PlaylistNotReceived($"Статус: {response.StatusCode}. Ответ: {array}"));
             }
         
             var content = await response.Content.ReadAsStringAsync();
