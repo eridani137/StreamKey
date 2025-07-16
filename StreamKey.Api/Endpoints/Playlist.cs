@@ -42,7 +42,7 @@ public class Playlist : ICarterModule
                             case ErrorCode.UnexpectedError:
                             case ErrorCode.Timeout:
                             default:
-                                logger.LogError("{Error}: {Channel}", result.Error.Message, channel);
+                                logger.LogWarning("{Error}: {Channel}", result.Error.Message, channel);
                                 return Results.InternalServerError(result.Error.Message);
                         }
                     }
