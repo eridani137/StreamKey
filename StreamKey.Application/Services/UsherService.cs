@@ -14,15 +14,15 @@ public class UsherService(HttpClient client) : IUsherService
         {
             var response = await client.GetAsync(url);
 
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Result.Failure<string>(Error.StreamNotFound);
+            }
+            
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 return Result.Failure<string>(Error.PlaylistNotReceived($"Статус: {response.StatusCode}. Ответ: {errorContent}"));
-            }
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Result.Failure<string>(Error.StreamNotFound);
             }
         
             var content = await response.Content.ReadAsStringAsync();
