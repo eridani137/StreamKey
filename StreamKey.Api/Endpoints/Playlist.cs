@@ -53,7 +53,7 @@ public class Playlist : ICarterModule
                         }
                         else if (rateLimit.IsBanned)
                         {
-                            logger.LogWarning("IP {IP} находится в бане", ip);
+                            logger.LogWarning("[{Channel}] IP {IP} находится в бане", channel, ip);
                             return Results.StatusCode(StatusCodes.Status429TooManyRequests);
                         }
                         else if (rateLimit.ExpiresAt <= now)
@@ -64,13 +64,13 @@ public class Playlist : ICarterModule
                         }
                         else if (rateLimit.Count >= StaticData.MaxRequestsPerMinute)
                         {
-                            logger.LogWarning("IP {IP} превысил лимит, бан на 5 минут", ip);
-    
+                            logger.LogWarning("[{Channel}] IP {IP} превысил лимит, бан на 5 минут", channel, ip);
+
                             rateLimit.IsBanned = true;
                             rateLimit.ExpiresAt = now.AddMinutes(5);
 
                             cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
-    
+
                             return Results.StatusCode(StatusCodes.Status429TooManyRequests);
                         }
                         else
