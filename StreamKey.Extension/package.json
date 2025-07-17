@@ -1,0 +1,24 @@
+{
+  "name": "streamkey-chrome-extension",
+  "version": "1.0.0",
+  "description": "A Chrome extension built with Vue.js",
+  "scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "build:chrome-dev": "vite build --mode extension-dev -- --target=chrome",
+  "build:firefox-dev": "vite build --mode extension-dev -- --target=firefox",
+  "build:chrome-prod": "vite build --mode extension -- --target=chrome",
+  "build:firefox-prod": "vite build --mode extension -- --target=firefox"
+},
+  "dependencies": {
+    "vue": "^3.5.17"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "javascript-obfuscator": "^4.1.1",
+    "terser": "^5.43.1",
+    "vite": "^6.0.0"
+  },
+  "type": "module"
+}

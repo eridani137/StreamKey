@@ -4,3 +4,10 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 **/.env
+.idea
+.config
+seq_data
+logs
+StreamKey.sln.DotSettings.user
+**/dist
+**/node_modules
