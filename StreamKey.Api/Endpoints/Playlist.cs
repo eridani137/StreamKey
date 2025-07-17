@@ -20,7 +20,6 @@ public class Playlist : ICarterModule
 
                     var obj = JObject.Parse(tokenValue.ToString());
                     var channel = obj.SelectToken(".channel")?.ToString();
-                    var ip = obj.SelectToken(".user_ip")?.ToString();
 
                     if (string.IsNullOrEmpty(channel) || string.IsNullOrEmpty(queryString))
                     {
@@ -28,13 +27,7 @@ public class Playlist : ICarterModule
                         return Results.BadRequest();
                     }
 
-                    if (string.IsNullOrEmpty(ip))
-                    {
-                        logger.LogError("Не удалось получить IP: {Json}", obj.ToString());
-                        return Results.BadRequest();
-                    }
-
-                    logger.LogInformation("Получение стрима: {Channel} [{IP}]", channel, ip);
+                    logger.LogInformation("Получение стрима: {Channel}", channel);
                     var result = await usherService.GetPlaylist(channel, queryString);
 
                     if (result.IsFailure)
