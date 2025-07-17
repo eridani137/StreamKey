@@ -45,21 +45,32 @@ public class Playlist : ICarterModule
                             rateLimit = new RateLimitInfo
                             {
                                 Count = 1,
-                                ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds)
+                                ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds),
+                                IsBanned = false
                             };
 
                             cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
+                        }
+                        else if (rateLimit.IsBanned)
+                        {
+                            logger.LogWarning("IP {IP} находится в бане", ip);
+                            return Results.StatusCode(StatusCodes.Status429TooManyRequests);
                         }
                         else if (rateLimit.ExpiresAt <= now)
                         {
                             rateLimit.Count = 1;
                             rateLimit.ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds);
-
                             cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
                         }
                         else if (rateLimit.Count >= StaticData.MaxRequestsPerMinute)
                         {
-                            logger.LogWarning("Превышен лимит запросов в минуту для IP: {IP}", ip);
+                            logger.LogWarning("IP {IP} превысил лимит, бан на 5 минут", ip);
+    
+                            rateLimit.IsBanned = true;
+                            rateLimit.ExpiresAt = now.AddMinutes(5);
+
+                            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
+    
                             return Results.StatusCode(StatusCodes.Status429TooManyRequests);
                         }
                         else
