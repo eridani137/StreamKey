@@ -1,7 +1,10 @@
 using Carter;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
+using StreamKey.Application;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
+using StreamKey.Application.Types;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -11,53 +14,92 @@ public class Playlist : ICarterModule
     {
         var group = app.MapGroup("/playlist");
 
-        group.MapGet("/", async (HttpContext context, IUsherService usherService, ILogger<Playlist> logger) =>
-            {
-                var queryString = context.Request.QueryString.ToString();
-                try
+        group.MapGet("/",
+                async (HttpContext context, IUsherService usherService, IMemoryCache cache, ILogger<Playlist> logger) =>
                 {
-                    if (!context.Request.Query.TryGetValue("token", out var tokenValue)) return Results.BadRequest();
-
-                    var obj = JObject.Parse(tokenValue.ToString());
-                    var channel = obj.SelectToken(".channel")?.ToString();
-
-                    if (string.IsNullOrEmpty(channel) || string.IsNullOrEmpty(queryString))
+                    var queryString = context.Request.QueryString.ToString();
+                    try
                     {
-                        logger.LogError("Не удалось получить channel: {Json}", obj.ToString());
-                        return Results.BadRequest();
-                    }
+                        if (!context.Request.Query.TryGetValue("token", out var tokenValue))
+                            return Results.BadRequest();
 
-                    logger.LogInformation("Получение стрима: {Channel}", channel);
-                    var result = await usherService.GetPlaylist(channel, queryString);
+                        var obj = JObject.Parse(tokenValue.ToString());
+                        var channel = obj.SelectToken(".channel")?.ToString();
+                        var ip = obj.SelectToken(".user_ip")?.ToString();
 
-                    if (result.IsFailure)
-                    {
-                        switch (result.Error.Code)
+                        if (string.IsNullOrEmpty(channel) || string.IsNullOrEmpty(queryString))
                         {
-                            case ErrorCode.StreamNotFound:
-                                return Results.NotFound(result.Error.Message);
-                            case ErrorCode.None:
-                            case ErrorCode.NullValue:
-                            case ErrorCode.PlaylistNotReceived:
-                            case ErrorCode.UnexpectedError:
-                            case ErrorCode.Timeout:
-                            default:
-                                logger.LogWarning("{Error}: {Channel}", result.Error.Message, channel);
-                                return Results.InternalServerError(result.Error.Message);
+                            logger.LogError("Не удалось получить channel: {Json}", obj.ToString());
+                            return Results.BadRequest();
                         }
-                    }
 
-                    return Results.Content(result.Value, "application/vnd.apple.mpegurl");
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Query: {Query}", queryString);
-                    return Results.InternalServerError();
-                }
-            })
+                        if (string.IsNullOrEmpty(ip))
+                        {
+                            logger.LogError("Не удалось получить IP: {Json}", obj.ToString());
+                            return Results.BadRequest();
+                        }
+
+                        var now = DateTime.UtcNow;
+                        if (!cache.TryGetValue<RateLimitInfo>(ip, out var rateLimit) || rateLimit == null)
+                        {
+                            rateLimit = new RateLimitInfo
+                            {
+                                Count = 1,
+                                ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds)
+                            };
+
+                            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
+                        }
+                        else if (rateLimit.ExpiresAt <= now)
+                        {
+                            rateLimit.Count = 1;
+                            rateLimit.ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds);
+
+                            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
+                        }
+                        else if (rateLimit.Count >= StaticData.MaxRequestsPerMinute)
+                        {
+                            logger.LogWarning("Превышен лимит запросов в минуту для IP: {IP}", ip);
+                            return Results.StatusCode(StatusCodes.Status429TooManyRequests);
+                        }
+                        else
+                        {
+                            rateLimit.Count++;
+                            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
+                        }
+
+                        logger.LogInformation("Получение стрима: {Channel} [{Calls}]", channel, rateLimit.Count);
+                        var result = await usherService.GetPlaylist(channel, queryString);
+
+                        if (result.IsFailure)
+                        {
+                            switch (result.Error.Code)
+                            {
+                                case ErrorCode.StreamNotFound:
+                                    return Results.NotFound(result.Error.Message);
+                                case ErrorCode.None:
+                                case ErrorCode.NullValue:
+                                case ErrorCode.PlaylistNotReceived:
+                                case ErrorCode.UnexpectedError:
+                                case ErrorCode.Timeout:
+                                default:
+                                    logger.LogWarning("{Error}: {Channel}", result.Error.Message, channel);
+                                    return Results.InternalServerError(result.Error.Message);
+                            }
+                        }
+
+                        return Results.Content(result.Value, "application/vnd.apple.mpegurl");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, "Query: {Query}", queryString);
+                        return Results.InternalServerError();
+                    }
+                })
             .Produces<string>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError);
     }
 }
