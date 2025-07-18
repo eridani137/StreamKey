@@ -88,9 +88,11 @@ public class Playlist : ICarterModule
                             {
                                 case ErrorCode.StreamNotFound:
                                     return Results.NotFound(result.Error.Message);
+                                case ErrorCode.PlaylistNotReceived:
+                                    logger.LogWarning("{Channel}: {Error}", channel, result.Error.Message);
+                                    return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
                                 case ErrorCode.None:
                                 case ErrorCode.NullValue:
-                                case ErrorCode.PlaylistNotReceived:
                                 case ErrorCode.UnexpectedError:
                                 case ErrorCode.Timeout:
                                 default:

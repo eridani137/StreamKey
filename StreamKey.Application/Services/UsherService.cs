@@ -1,7 +1,9 @@
 using System.Net;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Results;
+using StreamKey.Application.Types;
 
 namespace StreamKey.Application.Services;
 
@@ -31,20 +33,11 @@ public class UsherService(HttpClient client) : IUsherService
                         obj.Remove("url");
                     }
                 }
-                return Result.Failure<string>(Error.PlaylistNotReceived($"Статус: {response.StatusCode}. Ответ: {array}"));
+                return Result.Failure<string>(Error.PlaylistNotReceived(array.ToString(Formatting.None), (int)response.StatusCode));
             }
         
             var content = await response.Content.ReadAsStringAsync();
             return Result.Success(content);
-        }
-        catch (HttpRequestException httpEx)
-        {
-            if (httpEx.StatusCode is HttpStatusCode.NotFound)
-            {
-                return Result.Failure<string>(Error.StreamNotFound);
-            }
-            
-            return Result.Failure<string>(Error.PlaylistNotReceived($"Статус: {httpEx.StatusCode}. Ошибка: {httpEx.Message}"));
         }
         catch (TaskCanceledException)
         {
