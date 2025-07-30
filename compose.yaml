@@ -1,6 +1,6 @@
 ﻿services:
-  streamkey.api:
-    image: streamkey.api
+  streamkey-api:
+    image: streamkey-api
     build:
       context: .
       dockerfile: StreamKey.Api/Dockerfile
@@ -8,11 +8,12 @@
     environment:
       - ASPNETCORE_URLS=http://+:5555
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:4317
-      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_SERVICE_NAME=StreamKey.Api
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
+    volumes:
+      - ./keys:/root/.aspnet/DataProtection-Keys
     networks:
-      - shared-net
+      - internal
 
   seq:
     image: datalust/seq:latest
@@ -25,7 +26,7 @@
       - SEQ_OPENTELEMETRY_ENABLED=True
       - SEQ_OPENTELEMETRY_GRPC_ENDPOINT=0.0.0.0:4317
     networks:
-      - shared-net
+      - internal
 
   nginx:
     image: nginx:latest
@@ -37,11 +38,11 @@
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/ssl:ro
     depends_on:
-      - streamkey.api
+      - streamkey-api
       - seq
     networks:
-      - shared-net
+      - internal
 
 networks:
-  shared-net:
+  internal:
     external: true

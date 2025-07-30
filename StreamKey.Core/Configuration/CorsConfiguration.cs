@@ -5,16 +5,18 @@ namespace StreamKey.Application.Configuration;
 
 public static class CorsConfiguration
 {
+    public const string ProductionCorsPolicyName = "ProductionPolicy";
+    
     public static void ConfigureCors(WebApplicationBuilder builder)
     {
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", policy =>
+            options.AddPolicy(ProductionCorsPolicyName, policy =>
             {
                 policy
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .WithHeaders("Content-Type", "User-Agent");
             });
         });
     }

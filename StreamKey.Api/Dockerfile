@@ -4,12 +4,19 @@ EXPOSE 5555
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+
 WORKDIR /src
+
 COPY ["StreamKey.Api/StreamKey.Api.csproj", "StreamKey.Api/"]
-COPY ["StreamKey.Application/StreamKey.Application.csproj", "StreamKey.Application/"]
+COPY ["StreamKey.Core/StreamKey.Core.csproj", "StreamKey.Core/"]
+
 RUN dotnet restore "StreamKey.Api/StreamKey.Api.csproj"
-COPY . .
+
+COPY ["StreamKey.Api/", "StreamKey.Api/"]
+COPY ["StreamKey.Core/", "StreamKey.Core/"]
+
 WORKDIR "/src/StreamKey.Api"
+
 RUN dotnet build "./StreamKey.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
@@ -18,6 +25,5 @@ RUN dotnet publish "./StreamKey.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 
 FROM base AS final
 WORKDIR /app
-ENV HTTP_PORTS="" HTTPS_PORTS=""
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "StreamKey.Api.dll"]

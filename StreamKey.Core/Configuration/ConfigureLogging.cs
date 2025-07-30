@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Span;
@@ -8,7 +9,7 @@ namespace StreamKey.Application.Configuration;
 
 public static class ConfigureLogging
 {
-    public static void Configure()
+    public static void Configure(WebApplicationBuilder builder)
     {
         const string logs = "logs";
         var logsPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logs));
@@ -24,10 +25,8 @@ public static class ConfigureLogging
         var levelSwitch = new LoggingLevelSwitch();
         var seqEndpoint = EnvironmentHelper.GetSeqEndpoint();
         var seqApiKey = EnvironmentHelper.GetSeqApiKey();
-        var serviceName = EnvironmentHelper.GetServiceName();
-        var environment = EnvironmentHelper.GetEnvironment();
 
-        Log.Logger = new LoggerConfiguration()
+        var configuration = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(levelSwitch)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
@@ -37,11 +36,16 @@ public static class ConfigureLogging
             .Enrich.WithEnvironmentName()
             .Enrich.WithExceptionDetails()
             .Enrich.WithSpan()
-            .Enrich.WithProperty("ServiceName", serviceName)
-            .Enrich.WithProperty("Environment", environment)
-            .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
-            //.WriteTo.File($"{logsPath}/.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate, levelSwitch: levelSwitch)
-            .WriteTo.Seq(serverUrl: seqEndpoint, apiKey: seqApiKey, controlLevelSwitch: levelSwitch)
-            .CreateLogger();
+            .Enrich.WithProperty("ServiceName", builder.Environment.ApplicationName)
+            .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch);
+        
+        if (!string.IsNullOrWhiteSpace(seqEndpoint))
+        {
+            configuration.WriteTo.Seq(serverUrl: seqEndpoint, apiKey: seqApiKey, controlLevelSwitch: levelSwitch);
+        }
+        
+        Log.Logger = configuration.CreateLogger();
+        
+        builder.Host.UseSerilog(Log.Logger);
     }
 }

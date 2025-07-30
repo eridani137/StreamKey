@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Api", "StreamKey.Api\StreamKey.Api.csproj", "{ED21CF0E-4022-4E71-932E-D35893E1FBEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Application", "StreamKey.Application\StreamKey.Application.csproj", "{3355CBA7-57AF-4EA6-BC34-A3FFCAB56D7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Core", "StreamKey.Core\StreamKey.Core.csproj", "{3355CBA7-57AF-4EA6-BC34-A3FFCAB56D7D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B8E3A27-3687-4639-BB16-75BDB0D3F850}"
 	ProjectSection(SolutionItems) = preProject

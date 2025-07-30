@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using Carter;
+using Scalar.AspNetCore;
 using Serilog;
 using StreamKey.Application;
 using StreamKey.Application.Configuration;
@@ -7,28 +8,21 @@ using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
 
 
-try
-{
-    var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-    ConfigureLogging.Configure();
-    OpenTelemetryConfiguration.Configure(builder);
-    
-    Log.ForContext<Program>().Information("OTLP Endpoint: {Endpoint}", EnvironmentHelper.GetOtlpEndpoint());
-    Log.ForContext<Program>().Information("OTLP Protocol: {Protocol}", EnvironmentHelper.GetOtlpProtocol());
+ConfigureLogging.Configure(builder);
+OpenTelemetryConfiguration.Configure(builder);
 
-    builder.Services.AddApplication();
+builder.Services.AddApplication();
 
-    builder.Host.UseSerilog(Log.Logger);
+builder.Services.AddCarter();
 
-    builder.Services.AddCarter();
+builder.Services.AddProblemDetails();
 
-    builder.Services.AddProblemDetails();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApi();
 
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddOpenApi();
-
-    builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
+builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
         client.BaseAddress = StaticData.UsherUrl;
         client.DefaultRequestHeaders.Referrer = new Uri(StaticData.SiteUrl);
@@ -41,21 +35,17 @@ try
     })
     .AddStandardResilienceHandler();
 
-    CorsConfiguration.ConfigureCors(builder);
+CorsConfiguration.ConfigureCors(builder);
 
-    var app = builder.Build();
+var app = builder.Build();
 
-    app.UseCors("AllowAll");
-    app.MapCarter();
-    app.MapOpenApi("/openapi/v1.json");
+app.UseSerilogRequestLogging();
 
-    app.Run();
-}
-catch (Exception e)
-{
-    Log.ForContext<Program>().Fatal(e, "Ошибка инициализации сервиса");
-}
-finally
-{
-    await Log.CloseAndFlushAsync();
-}
+app.MapOpenApi();
+app.MapScalarApiReference();
+
+app.UseCors(CorsConfiguration.ProductionCorsPolicyName);
+
+app.MapCarter();
+
+app.Run();
