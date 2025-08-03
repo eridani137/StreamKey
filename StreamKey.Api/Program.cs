@@ -1,11 +1,14 @@
 using System.Net.Http.Headers;
 using Carter;
+using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 using Serilog;
 using StreamKey.Application;
 using StreamKey.Application.Configuration;
+using StreamKey.Application.Entities;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
+using StreamKey.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +24,11 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
@@ -44,8 +52,12 @@ app.UseSerilogRequestLogging();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
+await app.ApplyMigrations();
+
 app.UseCors(CorsConfiguration.ProductionCorsPolicyName);
 
 app.MapCarter();
+
+app.MapIdentityApi<User>();
 
 app.Run();

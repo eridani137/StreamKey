@@ -11,3 +11,6 @@ logs
 StreamKey.sln.DotSettings.user
 **/dist
 **/node_modules
+ssl
+postgres_data
+keys
