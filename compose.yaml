@@ -8,7 +8,7 @@
     environment:
       - ASPNETCORE_URLS=http://+:5555
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:4317
-      - OTEL_SERVICE_NAME=StreamKey.Api
+      - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
@@ -45,4 +45,4 @@
 
 networks:
   internal:
-    external: true
+    driver: bridge

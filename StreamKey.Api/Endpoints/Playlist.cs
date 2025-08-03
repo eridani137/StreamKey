@@ -14,7 +14,7 @@ public class Playlist : ICarterModule
     {
         var group = app.MapGroup("/playlist");
 
-        group.MapGet("/",
+        group.MapGet("",
                 async (HttpContext context, IUsherService usherService, IMemoryCache cache, ILogger<Playlist> logger) =>
                 {
                     var queryString = context.Request.QueryString.ToString();
