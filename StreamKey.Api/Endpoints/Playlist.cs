@@ -101,7 +101,7 @@ public class Playlist : ICarterModule
                             }
                         }
 
-                        return Results.Content(result.Value, "application/vnd.apple.mpegurl");
+                        return Results.Content(result.Value, StaticData.PlaylistContentType);
                     }
                     catch (Exception e)
                     {
@@ -109,7 +109,7 @@ public class Playlist : ICarterModule
                         return Results.InternalServerError();
                     }
                 })
-            .Produces<string>()
+            .Produces<string>(contentType: StaticData.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)

@@ -2,6 +2,7 @@ namespace StreamKey.Application;
 
 public static class StaticData
 {
+    public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     public const int MaxRequestsPerMinute = 100;
     public const int TimeWindowSeconds = 60;
     public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
