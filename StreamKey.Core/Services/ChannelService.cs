@@ -1,3 +1,4 @@
+using System.Transactions;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Results;
@@ -20,9 +21,15 @@ public class ChannelService(CachedChannelRepository channelRepository) : IChanne
             return Result.Failure<ChannelEntity>(Error.ChannelAlreadyExist);
         }
 
+        if (await channelRepository.HasInPosition(dto.Position))
+        {
+            return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
+        }
+
         var channel = new ChannelEntity()
         {
-            Name = dto.ChannelName
+            Name = dto.ChannelName,
+            Position = dto.Position
         };
 
         await channelRepository.Create(channel);

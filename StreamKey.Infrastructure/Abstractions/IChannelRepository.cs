@@ -9,4 +9,5 @@ public interface IChannelRepository
     Task<List<ChannelEntity>> GetAll();
     Task<bool> HasEntity(string channelName);
     Task<ChannelEntity?> GetByName(string channelName);
+    Task<bool> HasInPosition(int position);
 }

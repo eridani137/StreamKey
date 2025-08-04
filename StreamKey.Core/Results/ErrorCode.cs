@@ -11,4 +11,5 @@ public enum ErrorCode
     
     ChannelNotFound = 6,
     ChannelAlreadyExists = 7,
+    ChannelPositionIsBusy = 8,
 }

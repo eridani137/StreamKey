@@ -13,6 +13,9 @@ public record Error(ErrorCode Code, string Message, int StatusCode)
         new(ErrorCode.ChannelAlreadyExists, "Канал с таким именем уже существует", 409);
     public static Error ChannelNotFound =>
         new(ErrorCode.ChannelNotFound, "Канал не найден", 404);
+    public static Error ChannelPositionIsBusy =>
+        new(ErrorCode.ChannelPositionIsBusy, "Позиция уже занята", 409);
+    
 
     public override string ToString()
     {

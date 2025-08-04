@@ -35,4 +35,9 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
     {
         return Repository.GetByName(channelName);
     }
+
+    public Task<bool> HasInPosition(int position)
+    {
+        return Repository.HasInPosition(position);
+    }
 }

@@ -7,11 +7,11 @@ public static class ChannelMapper
 {
     public static ChannelDto Map(this ChannelEntity channel)
     {
-        return new ChannelDto(channel.Name);
+        return new ChannelDto(channel.Name, channel.Position);
     }
 
-    public static List<string> Map(this IEnumerable<ChannelEntity> channels)
+    public static List<ChannelDto> Map(this IEnumerable<ChannelEntity> channels)
     {
-        return channels.Select(c => c.Name).ToList();
+        return channels.Select(Map).ToList();
     }
 }
