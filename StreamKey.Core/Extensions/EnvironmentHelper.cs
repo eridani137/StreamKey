@@ -6,7 +6,7 @@ public static class EnvironmentHelper
         Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_HEADERS");
 
     public static string GetSeqEndpoint() =>
-        Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://seq:4317";
+        Environment.GetEnvironmentVariable("SEQ_ENDPOINT")!;
     
     public static string? GetSeqApiKey() => ExtractApiKeyFromHeaders();
 

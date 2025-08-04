@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  memory_limiter:
+    limit_mib: 128
+    spike_limit_mib: 32
+  batch:
+    send_batch_size: 8192
+    timeout: 5s
+
+exporters:
+  otlphttp/seq:
+    endpoint: http://seq:4318
+    headers:
+      X-Seq-ApiKey: ${SEQ_API_KEY}
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: detailed
+
+service:
+  telemetry:
+    logs:
+      level: "info"
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/seq, debug]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/seq, debug]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/seq, debug]

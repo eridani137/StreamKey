@@ -7,21 +7,23 @@
     restart: unless-stopped
     environment:
       - ASPNETCORE_URLS=http://+:5555
-#      - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:4317 TODO
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
+      - SEQ_ENDPOINT=http://seq:5341
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - OTEL_SERVICE_NAME=StreamKey.API
-      - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
     networks:
       - internal
-        
+  
   postgres:
     image: postgres:latest
     restart: unless-stopped
-    environment: 
+    environment:
       - POSTGRES_DB=StreamKey
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=Qwerty123_
@@ -29,6 +31,11 @@
       - "5432:5432" # TODO
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - internal
 
@@ -41,9 +48,22 @@
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
-#      - SEQ_OPENTELEMETRY_GRPC_ENDPOINT=0.0.0.0:4317 TODO
+      - SEQ_OPENTELEMETRY_GRPC_ENDPOINT=0.0.0.0:4317
+      - SEQ_OPENTELEMETRY_HTTP_ENDPOINT=0.0.0.0:4318
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    environment:
+      - SEQ_API_KEY=${SEQ_API_KEY}
     networks:
       - internal
 
@@ -55,7 +75,7 @@
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#      - ./ssl:/etc/ssl:ro TODO
+    #      - ./ssl:/etc/ssl:ro TODO
     depends_on:
       - streamkey-api
     networks:
