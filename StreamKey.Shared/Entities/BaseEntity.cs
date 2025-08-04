@@ -1,4 +1,4 @@
-namespace StreamKey.Application.Entities;
+namespace StreamKey.Shared.Entities;
 
 public class BaseEntity
 {

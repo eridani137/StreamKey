@@ -1,3 +1,3 @@
-namespace StreamKey.Application.DTOs;
+namespace StreamKey.Core.DTOs;
 
 public record ChannelDto(string ChannelName);

@@ -1,8 +1,7 @@
-using System.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity.Data;
 
-namespace StreamKey.Application.Validation;
+namespace StreamKey.Core.Validation;
 
 public class LoginRequestValidation : AbstractValidator<LoginRequest>
 {

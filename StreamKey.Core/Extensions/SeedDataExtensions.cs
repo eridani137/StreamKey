@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using StreamKey.Application.Interfaces;
+using StreamKey.Core.Abstractions;
 
-namespace StreamKey.Infrastructure.Extensions;
+namespace StreamKey.Core.Extensions;
 
 public static class SeedDataExtensions
 {

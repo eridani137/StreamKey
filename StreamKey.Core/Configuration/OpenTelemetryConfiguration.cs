@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace StreamKey.Application.Configuration;
+namespace StreamKey.Core.Configuration;
 
 public static class OpenTelemetryConfiguration
 {

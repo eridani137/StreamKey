@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace StreamKey.Application.Results;
+namespace StreamKey.Core.Results;
 
 public class Result
 {

@@ -1,4 +1,4 @@
-namespace StreamKey.Application.Types;
+namespace StreamKey.Core.Types;
 
 public class RateLimitInfo
 {

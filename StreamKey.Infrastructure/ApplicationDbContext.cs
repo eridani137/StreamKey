@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using StreamKey.Application.Entities;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure;
 

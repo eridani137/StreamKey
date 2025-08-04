@@ -1,4 +1,4 @@
-namespace StreamKey.Application.Interfaces;
+namespace StreamKey.Core.Abstractions;
 
 public interface IDatabaseSeeder
 {

@@ -1,4 +1,4 @@
-namespace StreamKey.Application.Results;
+namespace StreamKey.Core.Results;
 
 public enum ErrorCode
 {

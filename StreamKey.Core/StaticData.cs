@@ -1,4 +1,4 @@
-namespace StreamKey.Application;
+namespace StreamKey.Core;
 
 public static class StaticData
 {

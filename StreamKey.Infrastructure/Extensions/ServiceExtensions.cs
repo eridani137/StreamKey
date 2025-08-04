@@ -2,10 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Interfaces;
-using StreamKey.Application.Services;
+using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Extensions;
 
@@ -13,8 +12,6 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
-        
         services.AddIdentityCore<IdentityUser>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -23,20 +20,19 @@ public static class ServiceExtensions
                 options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequiredUniqueChars = 3;
-                
+
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddApiEndpoints();
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("Database"));
         });
 
-        services.AddScoped<IBaseRepository<ChannelEntity>, BaseRepository<ChannelEntity>>();
+        services.AddScoped<ChannelRepository>();
         
         services.AddMemoryCache();
 

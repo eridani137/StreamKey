@@ -4,9 +4,9 @@ using Serilog.Core;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 using Serilog.Exceptions;
-using StreamKey.Application.Extensions;
+using StreamKey.Core.Extensions;
 
-namespace StreamKey.Application.Configuration;
+namespace StreamKey.Core.Configuration;
 
 public static class ConfigureLogging
 {

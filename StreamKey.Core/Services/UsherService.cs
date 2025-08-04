@@ -1,11 +1,10 @@
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using StreamKey.Application.Interfaces;
-using StreamKey.Application.Results;
-using StreamKey.Application.Types;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.Results;
 
-namespace StreamKey.Application.Services;
+namespace StreamKey.Core.Services;
 
 public class UsherService(HttpClient client) : IUsherService
 {

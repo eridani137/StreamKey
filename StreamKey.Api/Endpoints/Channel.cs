@@ -1,9 +1,9 @@
 using Carter;
 using Microsoft.AspNetCore.Mvc;
-using StreamKey.Application.DTOs;
-using StreamKey.Application.Filters;
-using StreamKey.Application.Interfaces;
-using StreamKey.Application.Mappers;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.DTOs;
+using StreamKey.Core.Filters;
+using StreamKey.Core.Mappers;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -11,7 +11,7 @@ public class Channel : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/channel")
+        var group = app.MapGroup("/channels")
             .WithTags("Работа с каналами")
             .RequireAuthorization();
 
@@ -23,7 +23,8 @@ public class Channel : ICarterModule
                     
                     return Results.Ok(mapped);
                 })
-            .Produces<List<ChannelDto>>();
+            .Produces<List<ChannelDto>>()
+            .AllowAnonymous();
 
         group.MapPost("",
                 async (ChannelDto dto, IChannelService service) =>

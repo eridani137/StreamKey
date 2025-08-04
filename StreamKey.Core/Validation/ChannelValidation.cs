@@ -1,7 +1,7 @@
 using FluentValidation;
-using StreamKey.Application.DTOs;
+using StreamKey.Core.DTOs;
 
-namespace StreamKey.Application.Validation;
+namespace StreamKey.Core.Validation;
 
 public class ChannelValidation : AbstractValidator<ChannelDto>
 {

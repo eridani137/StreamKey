@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Interfaces;
+using StreamKey.Core.Abstractions;
 
-namespace StreamKey.Application.Services;
+namespace StreamKey.Core.Services;
 
 public class DatabaseSeeder(
     UserManager<IdentityUser> userManager,

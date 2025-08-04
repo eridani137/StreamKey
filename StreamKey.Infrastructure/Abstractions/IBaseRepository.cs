@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using StreamKey.Application.Entities;
+using StreamKey.Shared.Entities;
 
-namespace StreamKey.Application.Interfaces;
+namespace StreamKey.Infrastructure.Abstractions;
 
 public interface IBaseRepository<TEntity> where TEntity : BaseEntity
 {

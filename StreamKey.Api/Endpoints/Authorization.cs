@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Filters;
+using StreamKey.Core.Filters;
 
 namespace StreamKey.Api.Endpoints;
 

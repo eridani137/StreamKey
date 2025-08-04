@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using StreamKey.Infrastructure;
 
-namespace StreamKey.Infrastructure.Extensions;
+namespace StreamKey.Core.Extensions;
 
 public static class MigrationExtensions
 {

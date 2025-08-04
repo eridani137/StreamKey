@@ -1,7 +1,7 @@
-using StreamKey.Application.DTOs;
-using StreamKey.Application.Entities;
+using StreamKey.Core.DTOs;
+using StreamKey.Shared.Entities;
 
-namespace StreamKey.Application.Mappers;
+namespace StreamKey.Core.Mappers;
 
 public static class ChannelMapper
 {

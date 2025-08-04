@@ -1,4 +1,4 @@
-namespace StreamKey.Application.Validation;
+namespace StreamKey.Core.Validation;
 
 public interface IValidatorMarker
 {

@@ -1,8 +1,8 @@
-using StreamKey.Application.DTOs;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Results;
+using StreamKey.Core.DTOs;
+using StreamKey.Core.Results;
+using StreamKey.Shared.Entities;
 
-namespace StreamKey.Application.Interfaces;
+namespace StreamKey.Core.Abstractions;
 
 public interface IChannelService
 {

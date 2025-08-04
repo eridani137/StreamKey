@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
-namespace StreamKey.Application.Filters;
+namespace StreamKey.Core.Filters;
 
 public class ValidationFilter<T>(IValidator<T> validator) : IEndpointFilter
     where T : class

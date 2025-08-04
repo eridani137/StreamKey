@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Interfaces;
+using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories;
 

@@ -1,10 +1,10 @@
 using Carter;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
-using StreamKey.Application;
-using StreamKey.Application.Interfaces;
-using StreamKey.Application.Results;
-using StreamKey.Application.Types;
+using StreamKey.Core;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.Results;
+using StreamKey.Core.Types;
 
 namespace StreamKey.Api.Endpoints;
 

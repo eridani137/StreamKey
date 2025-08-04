@@ -1,6 +1,6 @@
-using StreamKey.Application.Results;
+using StreamKey.Core.Results;
 
-namespace StreamKey.Application.Interfaces;
+namespace StreamKey.Core.Abstractions;
 
 public interface IUsherService
 {

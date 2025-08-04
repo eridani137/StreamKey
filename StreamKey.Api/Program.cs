@@ -3,12 +3,11 @@ using Carter;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 using Serilog;
-using StreamKey.Application;
-using StreamKey.Application.Configuration;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Extensions;
-using StreamKey.Application.Interfaces;
-using StreamKey.Application.Services;
+using StreamKey.Core;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.Configuration;
+using StreamKey.Core.Extensions;
+using StreamKey.Core.Services;
 using StreamKey.Infrastructure;
 using StreamKey.Infrastructure.Extensions;
 

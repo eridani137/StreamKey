@@ -1,21 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-using StreamKey.Application.DTOs;
-using StreamKey.Application.Entities;
-using StreamKey.Application.Interfaces;
-using StreamKey.Application.Results;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.DTOs;
+using StreamKey.Core.Results;
+using StreamKey.Infrastructure.Repositories;
+using StreamKey.Shared.Entities;
 
-namespace StreamKey.Application.Services;
+namespace StreamKey.Core.Services;
 
-public class ChannelService(IBaseRepository<ChannelEntity> channelRepository) : IChannelService
+public class ChannelService(ChannelRepository channelRepository) : IChannelService
 {
     public async Task<List<ChannelEntity>> GetChannels()
     {
-        return await channelRepository.GetSet().AsQueryable().ToListAsync();
+        return await channelRepository.GetAll();
     }
 
     public async Task<Result<ChannelEntity>> AddChannel(ChannelDto dto)
     {
-        if (await channelRepository.GetSet().AsQueryable().AnyAsync(c => c.Name == dto.ChannelName))
+        if (await channelRepository.HasEntity(dto.ChannelName))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelAlreadyExist);
         }
@@ -24,25 +24,21 @@ public class ChannelService(IBaseRepository<ChannelEntity> channelRepository) : 
         {
             Name = dto.ChannelName
         };
-        
-        await channelRepository.Add(channel);
-        await channelRepository.Save();
+
+        await channelRepository.Create(channel);
 
         return Result.Success(channel);
     }
 
     public async Task<Result<ChannelEntity>> RemoveChannel(string channelName)
     {
-        var channel = await channelRepository.GetSet()
-            .AsQueryable()
-            .FirstOrDefaultAsync(c => c.Name == channelName);
+        var channel = await channelRepository.GetByName(channelName);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
 
-        channelRepository.Delete(channel);
-        await channelRepository.Save();
+        await channelRepository.Remove(channel);
 
         return Result.Success(channel);
     }
