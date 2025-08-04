@@ -14,7 +14,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<ChannelEntity>(entity =>
         {
-            entity.HasIndex(e => e.Id).IsUnique();
             entity.HasIndex(e => e.Name).IsUnique();
             
             entity.Property<uint>("xmin")
