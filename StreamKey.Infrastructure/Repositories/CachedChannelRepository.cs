@@ -21,6 +21,12 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
         await Repository.Save();
     }
 
+    async Task IChannelRepository.Update(ChannelEntity channel)
+    {
+        Update(channel);
+        await Repository.Save();
+    }
+
     public Task<List<ChannelEntity>> GetAll()
     {
         return GetCachedData(GetCacheKey(), Repository.GetAll, TimeSpan.FromDays(7));

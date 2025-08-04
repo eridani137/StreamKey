@@ -17,7 +17,13 @@ public class ChannelRepository(ApplicationDbContext context) : BaseRepository<Ch
         Delete(channel);
         await Save();
     }
-    
+
+    Task IChannelRepository.Update(ChannelEntity channel)
+    {
+        Update(channel);
+        return Save();
+    }
+
     public async Task<List<ChannelEntity>> GetAll()
     {
         return await GetSet().ToListAsync();

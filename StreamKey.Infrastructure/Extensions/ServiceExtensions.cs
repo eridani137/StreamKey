@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Entities;
 
@@ -17,7 +18,7 @@ public static class ServiceExtensions
         });
 
         services.AddScoped<ChannelRepository>();
-        services.AddScoped<CachedChannelRepository>();
+        services.AddScoped<IChannelRepository, CachedChannelRepository>();
 
         services.AddMemoryCache();
 

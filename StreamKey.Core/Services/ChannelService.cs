@@ -1,13 +1,12 @@
-using System.Transactions;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Results;
-using StreamKey.Infrastructure.Repositories;
+using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
 
-public class ChannelService(CachedChannelRepository channelRepository) : IChannelService
+public class ChannelService(IChannelRepository channelRepository) : IChannelService
 {
     public async Task<List<ChannelEntity>> GetChannels()
     {
@@ -47,6 +46,26 @@ public class ChannelService(CachedChannelRepository channelRepository) : IChanne
 
         await channelRepository.Remove(channel);
 
+        return Result.Success(channel);
+    }
+
+    public async Task<Result<ChannelEntity>> UpdateChannel(ChannelDto dto)
+    {
+        var channel = await channelRepository.GetByName(dto.ChannelName);
+        if (channel is null)
+        {
+            return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
+        }
+        
+        if (await channelRepository.HasInPosition(dto.Position))
+        {
+            return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
+        }
+        
+        channel.Position = dto.Position;
+
+        await channelRepository.Update(channel);
+        
         return Result.Success(channel);
     }
 }

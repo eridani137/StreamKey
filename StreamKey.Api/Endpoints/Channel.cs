@@ -54,5 +54,19 @@ public class Channel : ICarterModule
                     return Results.Ok(result.Value);
                 })
             .Produces<ChannelDto>();
+
+        group.MapPut("",
+            async (ChannelDto dto, IChannelService service) =>
+            {
+                var result = await service.UpdateChannel(dto);
+
+                if (!result.IsSuccess)
+                {
+                    return Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
+                }
+                
+                return Results.Ok(result.Value.Map());
+            })
+            .Produces<ChannelDto>();
     }
 }
