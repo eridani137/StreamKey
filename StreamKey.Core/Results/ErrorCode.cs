@@ -8,4 +8,7 @@ public enum ErrorCode
     PlaylistNotReceived = 3,
     UnexpectedError = 4,
     Timeout = 5,
+    
+    ChannelNotFound = 6,
+    ChannelAlreadyExists = 7,
 }

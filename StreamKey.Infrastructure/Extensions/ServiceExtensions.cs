@@ -24,7 +24,7 @@ public static class ServiceExtensions
             options.UseNpgsql(configuration.GetConnectionString("Database"));
         });
 
-        services.AddScoped<ChannelRepository>();
+        services.AddScoped<IBaseRepository<ChannelEntity>, BaseRepository<ChannelEntity>>();
         
         services.AddMemoryCache();
 
