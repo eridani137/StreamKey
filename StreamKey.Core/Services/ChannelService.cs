@@ -31,11 +31,11 @@ public class ChannelService(IBaseRepository<ChannelEntity> channelRepository) : 
         return Result.Success(channel);
     }
 
-    public async Task<Result<ChannelEntity>> RemoveChannel(ChannelDto dto)
+    public async Task<Result<ChannelEntity>> RemoveChannel(string channelName)
     {
         var channel = await channelRepository.GetSet()
             .AsQueryable()
-            .FirstOrDefaultAsync(c => c.Name == dto.ChannelName);
+            .FirstOrDefaultAsync(c => c.Name == channelName);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
@@ -44,6 +44,6 @@ public class ChannelService(IBaseRepository<ChannelEntity> channelRepository) : 
         channelRepository.Delete(channel);
         await channelRepository.Save();
 
-        return channel;
+        return Result.Success(channel);
     }
 }

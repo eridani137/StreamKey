@@ -15,7 +15,19 @@ public static class ServiceExtensions
     {
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         
-        services.AddIdentityCore<IdentityUser>()
+        services.AddIdentityCore<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequiredUniqueChars = 3;
+                
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+            })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddApiEndpoints();
 

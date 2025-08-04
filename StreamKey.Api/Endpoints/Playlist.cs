@@ -12,7 +12,8 @@ public class Playlist : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/playlist");
+        var group = app.MapGroup("/playlist")
+            .WithTags("Работа с плейлистами");
 
         group.MapGet("",
                 async (HttpContext context, IUsherService usherService, IMemoryCache cache, ILogger<Playlist> logger) =>

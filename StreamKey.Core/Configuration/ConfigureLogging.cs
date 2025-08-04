@@ -4,6 +4,7 @@ using Serilog.Core;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 using Serilog.Exceptions;
+using StreamKey.Application.Extensions;
 
 namespace StreamKey.Application.Configuration;
 

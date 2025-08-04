@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using StreamKey.Application.Entities;
+using StreamKey.Application.Filters;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -11,7 +12,8 @@ public class Authorization : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/auth");
+        var group = app.MapGroup("/auth")
+            .WithTags("Аутентификация");
 
         group.MapPost("/login",
             async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
@@ -40,6 +42,7 @@ public class Authorization : ICarterModule
                 }
 
                 return TypedResults.Empty;
-            });
+            })
+            .AddEndpointFilter<ValidationFilter<LoginRequest>>();
     }
 }

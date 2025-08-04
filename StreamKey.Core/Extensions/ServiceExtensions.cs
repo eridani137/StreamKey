@@ -1,8 +1,10 @@
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
+using StreamKey.Application.Validation;
 
-namespace StreamKey.Application;
+namespace StreamKey.Application.Extensions;
 
 public static class ServiceExtensions
 {
@@ -10,6 +12,8 @@ public static class ServiceExtensions
     {
         services.AddScoped<IUsherService, UsherService>();
         services.AddScoped<IChannelService, ChannelService>();
+        
+        services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
         
         return services;
     }

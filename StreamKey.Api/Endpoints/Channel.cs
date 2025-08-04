@@ -1,6 +1,7 @@
 using Carter;
 using Microsoft.AspNetCore.Mvc;
 using StreamKey.Application.DTOs;
+using StreamKey.Application.Filters;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Mappers;
 
@@ -11,44 +12,46 @@ public class Channel : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/channel")
+            .WithTags("Работа с каналами")
             .RequireAuthorization();
 
         group.MapGet("",
                 async (IChannelService service) =>
                 {
                     var channels = await service.GetChannels();
-
-                    Results.Ok(channels.Map());
+                    var mapped = channels.Map();
+                    
+                    return Results.Ok(mapped);
                 })
             .Produces<List<ChannelDto>>();
 
         group.MapPost("",
-                async ([FromBody] ChannelDto dto, IChannelService service) =>
+                async (ChannelDto dto, IChannelService service) =>
                 {
                     var result = await service.AddChannel(dto);
 
                     if (!result.IsSuccess)
                     {
-                        Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
+                        return Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
                     }
 
-                    Results.Ok(result.Value);
+                    return Results.Ok(result.Value);
                 })
+            .AddEndpointFilter<ValidationFilter<ChannelDto>>()
             .Produces<ChannelDto>();
 
-        group.MapDelete("",
-                async ([FromBody] ChannelDto dto, IChannelService service) =>
+        group.MapDelete("/{channelName}",
+                async (string channelName, IChannelService service) =>
                 {
-                    var result = await service.RemoveChannel(dto);
+                    var result = await service.RemoveChannel(channelName);
 
                     if (!result.IsSuccess)
                     {
-                        Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
+                        return Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
                     }
 
-                    Results.Ok(result.Value);
+                    return Results.Ok(result.Value);
                 })
             .Produces<ChannelDto>();
-        ;
     }
 }

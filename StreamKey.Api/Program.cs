@@ -6,6 +6,7 @@ using Serilog;
 using StreamKey.Application;
 using StreamKey.Application.Configuration;
 using StreamKey.Application.Entities;
+using StreamKey.Application.Extensions;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
 using StreamKey.Infrastructure;
@@ -23,8 +24,8 @@ builder.Services.AddCarter();
 
 builder.Services.AddProblemDetails();
 
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>
