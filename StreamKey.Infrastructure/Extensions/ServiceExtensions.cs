@@ -3,14 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StreamKey.Application.Entities;
+using StreamKey.Application.Interfaces;
+using StreamKey.Application.Services;
+using StreamKey.Infrastructure.Repositories;
 
-namespace StreamKey.Infrastructure;
+namespace StreamKey.Infrastructure.Extensions;
 
 public static class ServiceExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddIdentityCore<User>()
+        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+        
+        services.AddIdentityCore<IdentityUser>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddApiEndpoints();
 
@@ -18,6 +23,10 @@ public static class ServiceExtensions
         {
             options.UseNpgsql(configuration.GetConnectionString("Database"));
         });
+
+        services.AddScoped<ChannelRepository>();
+        
+        services.AddMemoryCache();
 
         return services;
     }

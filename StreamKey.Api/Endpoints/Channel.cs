@@ -6,5 +6,6 @@ public class Channel : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
+        
     }
 }

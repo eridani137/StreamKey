@@ -9,6 +9,7 @@ using StreamKey.Application.Entities;
 using StreamKey.Application.Interfaces;
 using StreamKey.Application.Services;
 using StreamKey.Infrastructure;
+using StreamKey.Infrastructure.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+builder.Services.AddAuthentication()
+    .AddCookie(IdentityConstants.ApplicationScheme)
+    .AddBearerToken(IdentityConstants.BearerScheme);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -58,6 +61,6 @@ app.UseCors(CorsConfiguration.ProductionCorsPolicyName);
 
 app.MapCarter();
 
-app.MapIdentityApi<User>();
+await app.SeedDatabase();
 
 app.Run();

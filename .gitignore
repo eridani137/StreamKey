@@ -14,3 +14,4 @@ StreamKey.sln.DotSettings.user
 ssl
 postgres_data
 keys
+**/Migrations
