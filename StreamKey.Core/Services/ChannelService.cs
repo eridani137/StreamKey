@@ -6,7 +6,7 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
 
-public class ChannelService(ChannelRepository channelRepository) : IChannelService
+public class ChannelService(CachedChannelRepository channelRepository) : IChannelService
 {
     public async Task<List<ChannelEntity>> GetChannels()
     {

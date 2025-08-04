@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using StreamKey.Core.Filters;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -16,7 +18,7 @@ public class Authorization : ICarterModule
 
         group.MapPost("/login",
             async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
-                (LoginRequest login, SignInManager<IdentityUser> signInManager) =>
+                (LoginRequest login, SignInManager<ApplicationUser> signInManager) =>
             {
                 signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
 

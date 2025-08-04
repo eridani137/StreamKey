@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
 
 public class DatabaseSeeder(
-    UserManager<IdentityUser> userManager,
+    UserManager<ApplicationUser> userManager,
     ILogger<DatabaseSeeder> logger
 ) : IDatabaseSeeder
 {
@@ -17,7 +18,7 @@ public class DatabaseSeeder(
         var rootUser = await userManager.FindByNameAsync(rootUsername);
         if (rootUser is null)
         {
-            rootUser = new IdentityUser()
+            rootUser = new ApplicationUser()
             {
                 UserName = rootUsername
             };

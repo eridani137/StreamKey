@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Entities;
 
@@ -12,7 +11,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddIdentityCore<IdentityUser>(options =>
+        services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
@@ -25,7 +24,9 @@ public static class ServiceExtensions
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders()
+            .AddSignInManager<SignInManager<ApplicationUser>>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -33,6 +34,7 @@ public static class ServiceExtensions
         });
 
         services.AddScoped<ChannelRepository>();
+        services.AddScoped<CachedChannelRepository>();
         
         services.AddMemoryCache();
 

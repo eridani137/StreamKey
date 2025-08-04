@@ -1,0 +1,38 @@
+using Microsoft.Extensions.Caching.Memory;
+using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared.Entities;
+
+namespace StreamKey.Infrastructure.Repositories;
+
+public class CachedChannelRepository(ChannelRepository repository, IMemoryCache cache)
+    : BaseCachedRepository<ChannelEntity, ChannelRepository>(repository, cache), IChannelRepository
+{
+    protected override string CacheKeyPrefix => "Channel";
+
+    public async Task Create(ChannelEntity channel)
+    {
+        await Add(channel);
+        await Repository.Save();
+    }
+
+    public async Task Remove(ChannelEntity channel)
+    {
+        Delete(channel);
+        await Repository.Save();
+    }
+
+    public Task<List<ChannelEntity>> GetAll()
+    {
+        return GetCachedData(GetCacheKey(), Repository.GetAll, TimeSpan.FromDays(7));
+    }
+
+    public Task<bool> HasEntity(string channelName)
+    {
+        return Repository.HasEntity(channelName);
+    }
+
+    public Task<ChannelEntity?> GetByName(string channelName)
+    {
+        return Repository.GetByName(channelName);
+    }
+}

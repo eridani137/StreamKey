@@ -4,7 +4,7 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories;
 
-public class BaseRepository<TEntity>(ApplicationDbContext context)
+public abstract class BaseRepository<TEntity>(ApplicationDbContext context)
     : IBaseRepository<TEntity> where TEntity : BaseEntity
 {
     public DbSet<TEntity> GetSet()

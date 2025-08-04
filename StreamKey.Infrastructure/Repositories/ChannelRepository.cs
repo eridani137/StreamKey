@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories;
 
-public class ChannelRepository(ApplicationDbContext context) : BaseRepository<ChannelEntity>(context)
+public class ChannelRepository(ApplicationDbContext context) : BaseRepository<ChannelEntity>(context), IChannelRepository
 {
     public async Task Create(ChannelEntity channel)
     {
