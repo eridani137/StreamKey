@@ -25,8 +25,7 @@ public static class ServiceExtensions
                 options.Lockout.AllowedForNewUsers = true;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders()
-            .AddSignInManager<SignInManager<ApplicationUser>>();
+            .AddApiEndpoints();
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
