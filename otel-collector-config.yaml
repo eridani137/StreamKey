@@ -6,6 +6,7 @@ receivers:
 
 processors:
   memory_limiter:
+    check_interval: 1s
     limit_mib: 128
     spike_limit_mib: 32
   batch:
@@ -13,8 +14,20 @@ processors:
     timeout: 5s
 
 exporters:
-  otlphttp/seq:
-    endpoint: http://seq:4318
+  otlphttp/seq_traces:
+    endpoint: http://seq:5341/v1/traces
+    headers:
+      X-Seq-ApiKey: ${SEQ_API_KEY}
+    tls:
+      insecure: true
+  otlphttp/seq_metrics:
+    endpoint: http://seq:5341/v1/metrics
+    headers:
+      X-Seq-ApiKey: ${SEQ_API_KEY}
+    tls:
+      insecure: true
+  otlphttp/seq_logs:
+    endpoint: http://seq:5341/v1/logs
     headers:
       X-Seq-ApiKey: ${SEQ_API_KEY}
     tls:
@@ -32,14 +45,14 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/seq, debug]
+      exporters: [otlphttp/seq_traces, debug]
 
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/seq, debug]
+      exporters: [otlphttp/seq_metrics, debug]
 
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/seq, debug]
+      exporters: [otlphttp/seq_logs, debug]

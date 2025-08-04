@@ -9,11 +9,12 @@ WORKDIR /src
 
 COPY ["StreamKey.Api/StreamKey.Api.csproj", "StreamKey.Api/"]
 COPY ["StreamKey.Core/StreamKey.Core.csproj", "StreamKey.Core/"]
+COPY ["StreamKey.Infrastructure/StreamKey.Infrastructure.csproj", "StreamKey.Infrastructure/"]
+COPY ["StreamKey.Shared/StreamKey.Shared.csproj", "StreamKey.Shared/"]
 
 RUN dotnet restore "StreamKey.Api/StreamKey.Api.csproj"
 
-COPY ["StreamKey.Api/", "StreamKey.Api/"]
-COPY ["StreamKey.Core/", "StreamKey.Core/"]
+COPY . .
 
 WORKDIR "/src/StreamKey.Api"
 
