@@ -11,7 +11,22 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddIdentityCore<ApplicationUser>(options =>
+        services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseNpgsql(configuration.GetConnectionString("Database"));
+        });
+
+        services.AddScoped<ChannelRepository>();
+        services.AddScoped<CachedChannelRepository>();
+
+        services.AddMemoryCache();
+
+        return services;
+    }
+
+    public static IdentityBuilder AddIdentity(this IServiceCollection services)
+    {
+        return services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
@@ -24,19 +39,6 @@ public static class ServiceExtensions
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddApiEndpoints();
-
-        services.AddDbContext<ApplicationDbContext>(options =>
-        {
-            options.UseNpgsql(configuration.GetConnectionString("Database"));
-        });
-
-        services.AddScoped<ChannelRepository>();
-        services.AddScoped<CachedChannelRepository>();
-        
-        services.AddMemoryCache();
-
-        return services;
+            .AddEntityFrameworkStores<ApplicationDbContext>();
     }
 }

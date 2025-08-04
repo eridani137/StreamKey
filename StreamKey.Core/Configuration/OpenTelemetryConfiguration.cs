@@ -27,19 +27,19 @@ public static class OpenTelemetryConfiguration
                         options.Protocol = OtlpExportProtocol.Grpc;
                         options.TimeoutMilliseconds = 10_000;
                     });
-            })
-            .WithMetrics(metrics =>
-            {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation()
-                    .AddProcessInstrumentation()
-                    .AddOtlpExporter(o =>
-                    {
-                        o.Endpoint = OtlpEndpoint;
-                        o.Protocol = OtlpExportProtocol.Grpc;
-                        o.TimeoutMilliseconds = 10_000;
-                    });
             });
+        // .WithMetrics(metrics =>
+        // {
+        //     metrics.AddAspNetCoreInstrumentation()
+        //         .AddHttpClientInstrumentation()
+        //         .AddRuntimeInstrumentation()
+        //         .AddProcessInstrumentation()
+        //         .AddOtlpExporter(o =>
+        //         {
+        //             o.Endpoint = OtlpEndpoint;
+        //             o.Protocol = OtlpExportProtocol.Grpc;
+        //             o.TimeoutMilliseconds = 10_000;
+        //         });
+        // });
     }
 }

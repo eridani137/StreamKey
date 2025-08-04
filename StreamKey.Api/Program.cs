@@ -10,6 +10,7 @@ using StreamKey.Core.Extensions;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure;
 using StreamKey.Infrastructure.Extensions;
+using StreamKey.Shared.Entities;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,8 @@ builder.Services.AddAuthentication(options =>
     .AddBearerToken(IdentityConstants.BearerScheme);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddIdentity().AddApiEndpoints();
 
 builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
