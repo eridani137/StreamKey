@@ -13,7 +13,7 @@ RUN apt-get update && \
         curl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir camoufox[geoip] colorlog fastapi uvicorn
+RUN pip install --no-cache-dir camoufox[geoip] scalar-fastapi colorlog fastapi uvicorn
 
 RUN python -m camoufox fetch
 

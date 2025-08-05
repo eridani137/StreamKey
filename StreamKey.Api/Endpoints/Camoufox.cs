@@ -23,7 +23,7 @@ public class Camoufox : ICarterModule
         group.MapPost("/screenshot",
                 async ([FromBody] CamoufoxRequest dto, ICamoufoxService service) =>
                 {
-                    var screenshot = await service.GetPageScreenshot(dto.Url);
+                    var screenshot = await service.GetPageScreenshot(dto);
                     return Results.File(screenshot, "image/png");
                 })
             .Produces(StatusCodes.Status200OK);

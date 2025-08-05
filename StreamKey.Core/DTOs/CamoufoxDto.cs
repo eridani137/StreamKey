@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 namespace StreamKey.Core.DTOs;
 
 public sealed record CamoufoxRequest(
-    [property: JsonPropertyName("url")] string Url);
+    [property: JsonPropertyName("url")] string Url,
+    [property: JsonPropertyName("wait_time")] int WaitTime);
 
 public sealed record CamoufoxHtmlResponse(
     [property: JsonPropertyName("url")] string Url,

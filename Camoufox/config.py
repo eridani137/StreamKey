@@ -1,8 +1,6 @@
 import typing
 
-from browserforge.fingerprints import Screen
-
-WAIT_UNTIL: typing.Optional[typing.Literal["domcontentloaded", "load", "networkidle"]] = "networkidle"
+WAIT_UNTIL: typing.Optional[typing.Literal["domcontentloaded", "load", "networkidle"]] = "domcontentloaded"
 
 MAX_CONCURRENT_TABS = 8
 AUTO_RESTART_MINUTES = 5
@@ -20,7 +18,7 @@ RETRY_DELAY_MIN = 1
 RETRY_DELAY_MAX = 5
 
 BROWSER_OPTIONS = {
-    "headless": "virtual",
+    "headless": True,
     "os": ["windows", "macos", "linux"],
     "humanize": True,
     "enable_cache": False,

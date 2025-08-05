@@ -27,9 +27,8 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
         }
     }
 
-    public async Task<byte[]> GetPageScreenshot(string url)
+    public async Task<byte[]> GetPageScreenshot(CamoufoxRequest request)
     {
-        var request = new CamoufoxRequest(url);
         try
         {
             var httpResponse = await client.PostAsJsonAsync("/fetch-screenshot", request);
@@ -42,7 +41,7 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Ошибка получения скриншота для URL: {Url}", url);
+            logger.LogError(ex, "Ошибка получения скриншота для URL: {Url}", request.Url);
             throw;
         }
     }
