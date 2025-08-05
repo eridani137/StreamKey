@@ -1,6 +1,5 @@
 using FluentValidation;
 using StreamKey.Core.DTOs;
-using StreamKey.Infrastructure.Repositories;
 
 namespace StreamKey.Core.Validation;
 
