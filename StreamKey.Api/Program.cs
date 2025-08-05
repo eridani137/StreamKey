@@ -55,8 +55,6 @@ CorsConfiguration.ConfigureCors(builder);
 
 var app = builder.Build();
 
-app.UseSerilogRequestLogging();
-
 app.MapOpenApi();
 app.MapScalarApiReference();
 

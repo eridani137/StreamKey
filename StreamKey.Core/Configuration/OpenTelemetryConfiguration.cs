@@ -1,45 +1,46 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using StreamKey.Core.Extensions;
 
 namespace StreamKey.Core.Configuration;
 
 public static class OpenTelemetryConfiguration
 {
-    private static readonly Uri OtlpEndpoint = new("http://otel-collector:4317");
+    private static readonly string OtlpEndpoint = EnvironmentHelper.GetSeqEndpoint();
 
     public static void Configure(WebApplicationBuilder builder)
     {
         builder.Services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource
-                .AddService(builder.Environment.ApplicationName))
+            .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
             .WithTracing(tracing =>
             {
                 tracing
-                    .AddAspNetCoreInstrumentation(options => options.RecordException = true)
-                    .AddHttpClientInstrumentation(options => options.RecordException = true)
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation()
+                    .AddNpgsql()
                     .AddOtlpExporter(options =>
                     {
-                        options.Endpoint = OtlpEndpoint;
-                        options.Protocol = OtlpExportProtocol.Grpc;
-                        options.TimeoutMilliseconds = 10_000;
+                        options.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/traces");
+                        options.Protocol = OtlpExportProtocol.HttpProtobuf;
                     });
-            });
-        // .WithMetrics(metrics =>
-        // {
-        //     metrics.AddAspNetCoreInstrumentation()
-        //         .AddHttpClientInstrumentation()
-        //         .AddRuntimeInstrumentation()
-        //         .AddProcessInstrumentation()
-        //         .AddOtlpExporter(o =>
-        //         {
-        //             o.Endpoint = OtlpEndpoint;
-        //             o.Protocol = OtlpExportProtocol.Grpc;
-        //             o.TimeoutMilliseconds = 10_000;
-        //         });
-        // });
+            })
+        .WithMetrics(metrics =>
+        {
+            metrics.AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/metrics");;
+                    o.Protocol = OtlpExportProtocol.HttpProtobuf;
+                });
+        });
     }
 }

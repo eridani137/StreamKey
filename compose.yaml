@@ -7,13 +7,12 @@
     restart: unless-stopped
     environment:
       - ASPNETCORE_URLS=http://+:5555
-      - SEQ_ENDPOINT=http://seq:5341
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
     depends_on:
       postgres:
         condition: service_healthy
-      otel-collector:
+      seq:
         condition: service_started
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
@@ -48,24 +47,9 @@
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
-      - SEQ_INGESTION_OTLP_ENABLED=true
-      - SEQ_INGESTION_OTLP_GRPC_PORT=4319
-    ports:
-      - "4319:4319"
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - internal
-
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    restart: unless-stopped
-    command: [ "--config=/etc/otel-collector-config.yaml" ]
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
-    environment:
-      - SEQ_API_KEY=${SEQ_API_KEY}
     networks:
       - internal
 
