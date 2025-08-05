@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import logging
 from contextlib import asynccontextmanager
 
@@ -7,8 +6,11 @@ from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 import uvicorn
 
-logging.basicConfig(level=logging.INFO)
+from browser_utils import safe_goto
+from configure_logger import configure
+
 logger = logging.getLogger(__name__)
+configure(logger)
 
 class URLRequest(BaseModel):
     url: str
@@ -56,10 +58,8 @@ async def fetch_html(req: URLRequest):
         logger.info(f"⏩ HTML-запрос: {req.url}")
         
         page = await browser.new_page()
-        
-        # Переход на страницу
-        response = await page.goto(req.url, wait_until="networkidle", timeout=30000)
-        if not response:
+
+        if not await safe_goto(page, req.url):
             raise HTTPException(400, "Не удалось загрузить страницу")
         
         # Дополнительное ожидание
@@ -104,8 +104,8 @@ async def fetch_screenshot(req: URLRequest):
         # Установка viewport для консистентных скриншотов
         await page.set_viewport_size({"width": 1920, "height": 1080})
         
-        # Переход на страницу
-        await page.goto(req.url, wait_until="networkidle", timeout=30000)
+        if not await safe_goto(page, req.url):
+            raise HTTPException(400, "Не удалось загрузить страницу")
         
         # Дополнительное ожидание
         await page.wait_for_timeout(3000)

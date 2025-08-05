@@ -44,9 +44,6 @@
       context: .
       dockerfile: Camoufox/Dockerfile
     restart: unless-stopped
-    environment:
-      - DISPLAY=:99
-      - HEADLESS=true
     expose:
       - "8080"
     healthcheck:

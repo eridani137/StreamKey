@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,11 +13,11 @@ RUN apt-get update && \
         curl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir camoufox[geoip] fastapi uvicorn
+RUN pip install --no-cache-dir camoufox[geoip] colorlog fastapi uvicorn
 
 RUN python -m camoufox fetch
 
-COPY Camoufox/camoufox_server.py Camoufox/start_camoufox.sh /app/
+COPY Camoufox/ /app/
 RUN chmod +x /app/start_camoufox.sh
 
 EXPOSE 8080
