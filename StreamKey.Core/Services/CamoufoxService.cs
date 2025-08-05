@@ -1,0 +1,49 @@
+using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.DTOs;
+
+namespace StreamKey.Core.Services;
+
+public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger) : ICamoufoxService
+{
+    public async Task<CamoufoxHtmlResponse> GetPageHtml(CamoufoxRequest request)
+    {
+        try
+        {
+            var httpResponse = await client.PostAsJsonAsync("/fetch-html", request);
+            
+            httpResponse.EnsureSuccessStatusCode();
+            
+            var response = await httpResponse.Content.ReadFromJsonAsync<CamoufoxHtmlResponse>()
+                           ?? throw new InvalidOperationException("Пустой ответ Camoufox");
+
+            return response;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка получения HTML для URL: {Url}", request.Url);
+            throw;
+        }
+    }
+
+    public async Task<byte[]> GetPageScreenshot(string url)
+    {
+        var request = new CamoufoxRequest(url);
+        try
+        {
+            var httpResponse = await client.PostAsJsonAsync("/fetch-screenshot", request);
+            
+            httpResponse.EnsureSuccessStatusCode();
+            
+            var bytes = await httpResponse.Content.ReadAsByteArrayAsync();
+            
+            return bytes;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Ошибка получения скриншота для URL: {Url}", url);
+            throw;
+        }
+    }
+}

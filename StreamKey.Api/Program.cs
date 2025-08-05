@@ -28,10 +28,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
-    })
+builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme; })
     .AddBearerToken(IdentityConstants.BearerScheme);
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -52,6 +49,12 @@ builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     .AddStandardResilienceHandler();
 
 CorsConfiguration.ConfigureCors(builder);
+
+builder.Services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
+{
+    client.BaseAddress = new Uri("http://camoufox:8080");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 var app = builder.Build();
 

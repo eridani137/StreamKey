@@ -17,6 +17,8 @@ public static class ServiceExtensions
         
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         
+        services.AddSingleton<ICamoufoxService, CamoufoxService>();
+        
         return services;
     }
 } 

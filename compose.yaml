@@ -32,9 +32,28 @@
       - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
+  
+  camoufox:
+    image: camoufox
+    build:
+      context: .
+      dockerfile: Camoufox/Dockerfile
+    restart: unless-stopped
+    environment:
+      - DISPLAY=:99
+      - HEADLESS=true
+    expose:
+      - "8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - internal
 
