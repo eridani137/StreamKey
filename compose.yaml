@@ -19,18 +19,6 @@
     networks:
       - internal
   
-  migration:
-    build: .
-    depends_on:
-      - postgres
-    command: >
-      sh -c "dotnet ef database update 
-             --project StreamKey.Infrastructure 
-             --startup-project StreamKey.Api 
-             --context StreamKey.Infrastructure.ApplicationDbContext"
-    networks:
-      - default
-  
   postgres:
     image: postgres:latest
     restart: unless-stopped
