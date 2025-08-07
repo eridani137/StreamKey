@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Carter;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
+using Serilog;
 using StreamKey.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Configuration;
@@ -52,6 +53,12 @@ builder.Services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
     client.BaseAddress = new Uri("http://camoufox:8080");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
+
+var seqEndpoint = EnvironmentHelper.GetSeqEndpoint();
+var seqApiKey = EnvironmentHelper.GetSeqApiKey();
+    
+Log.Information("Seq endpoint: {SeqEndpoint}", seqEndpoint);
+Log.Information("Seq API key: {SeqApiKey}", seqApiKey ?? "null");
 
 var app = builder.Build();
 
