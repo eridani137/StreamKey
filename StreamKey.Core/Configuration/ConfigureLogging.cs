@@ -24,7 +24,7 @@ public static class ConfigureLogging
             "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
 
         var levelSwitch = new LoggingLevelSwitch();
-        const string seqEndpoint = "http://seq:5341";
+        const string seqEndpoint = "http://seq:80";
         var seqApiKey = EnvironmentHelper.GetSeqApiKey();
 
         var configuration = new LoggerConfiguration()

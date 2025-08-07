@@ -59,14 +59,11 @@
     restart: unless-stopped
     volumes:
       - ./seq_data:/data
-    expose:
-      - "5341"
     environment:
       - ACCEPT_EULA=Y
       - SEQ_OPENTELEMETRY_GRPC_ENDPOINT=0.0.0.0:4317
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
-      - SEQ_LISTENURI=http://0.0.0.0:5341
     depends_on:
       postgres:
         condition: service_healthy
