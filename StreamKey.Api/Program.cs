@@ -2,15 +2,12 @@ using System.Net.Http.Headers;
 using Carter;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
-using Serilog;
 using StreamKey.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Services;
-using StreamKey.Infrastructure;
 using StreamKey.Infrastructure.Extensions;
-using StreamKey.Shared.Entities;
 
 
 var builder = WebApplication.CreateBuilder(args);
