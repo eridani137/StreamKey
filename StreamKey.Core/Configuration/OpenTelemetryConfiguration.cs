@@ -27,7 +27,7 @@ public static class OpenTelemetryConfiguration
                     .AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/traces");
-                        options.Protocol = OtlpExportProtocol.HttpProtobuf;
+                        options.Protocol = OtlpExportProtocol.Grpc;
                     });
             })
         .WithMetrics(metrics =>
@@ -39,7 +39,7 @@ public static class OpenTelemetryConfiguration
                 .AddOtlpExporter(o =>
                 {
                     o.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/metrics");;
-                    o.Protocol = OtlpExportProtocol.HttpProtobuf;
+                    o.Protocol = OtlpExportProtocol.Grpc;
                 });
         });
     }
