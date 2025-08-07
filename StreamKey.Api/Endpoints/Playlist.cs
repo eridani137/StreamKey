@@ -102,6 +102,8 @@ public class Playlist : ICarterModule
                             }
                         }
 
+                        logger.LogInformation("{Playlist}", result.Value);
+
                         return Results.Content(result.Value, StaticData.PlaylistContentType);
                     }
                     catch (Exception e)
