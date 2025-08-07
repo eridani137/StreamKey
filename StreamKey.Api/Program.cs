@@ -54,12 +54,6 @@ builder.Services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
-var seqEndpoint = EnvironmentHelper.GetSeqEndpoint();
-var seqApiKey = EnvironmentHelper.GetSeqApiKey();
-    
-Log.Information("Seq endpoint: {SeqEndpoint}", seqEndpoint);
-Log.Information("Seq API key: {SeqApiKey}", seqApiKey ?? "null");
-
 var app = builder.Build();
 
 app.MapOpenApi();

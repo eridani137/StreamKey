@@ -39,14 +39,13 @@ public static class ConfigureLogging
             .Enrich.WithExceptionDetails()
             .Enrich.WithSpan()
             .Enrich.WithProperty("ServiceName", builder.Environment.ApplicationName)
-            .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch);
-        
-        if (!string.IsNullOrWhiteSpace(seqEndpoint))
-        {
-            configuration.WriteTo.Seq(serverUrl: seqEndpoint, apiKey: seqApiKey, controlLevelSwitch: levelSwitch);
-        }
+            .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch)
+            .WriteTo.Seq(serverUrl: seqEndpoint, apiKey: seqApiKey, controlLevelSwitch: levelSwitch);
         
         Log.Logger = configuration.CreateLogger();
+        
+        Log.Information("Seq endpoint: {SeqEndpoint}", seqEndpoint);
+        Log.Information("Seq API key: {SeqApiKey}", seqApiKey ?? "null");
         
         builder.Host.UseSerilog(Log.Logger);
     }
