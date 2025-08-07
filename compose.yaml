@@ -7,7 +7,7 @@
     restart: unless-stopped
     environment:
       - ASPNETCORE_URLS=http://+:5555
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:4317
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
     depends_on:
       postgres:
@@ -61,7 +61,6 @@
       - ./seq_data:/data
     environment:
       - ACCEPT_EULA=Y
-      - SEQ_OPENTELEMETRY_GRPC_ENDPOINT=0.0.0.0:4317
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
     depends_on:
