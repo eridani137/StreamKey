@@ -58,7 +58,7 @@ var app = builder.Build();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-await app.ApplyMigrations();
+// await app.ApplyMigrations();
 
 app.UseCors(CorsConfiguration.ProductionCorsPolicyName);
 
