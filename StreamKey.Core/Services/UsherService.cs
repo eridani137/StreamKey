@@ -4,10 +4,11 @@ using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
+using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.Services;
 
-public class UsherService(HttpClient client) : IUsherService
+public class UsherService(HttpClient client, ISettingsRepository settings) : IUsherService
 {
     public async Task<Result<string>> GetPlaylist(string username, string query)
     {
@@ -37,8 +38,13 @@ public class UsherService(HttpClient client) : IUsherService
             }
         
             var content = await response.Content.ReadAsStringAsync();
+
+            if (await settings.GetValue<bool>("RemoveAds"))
+            {
+                content = content.RemoveAds();
+            }
             
-            return Result.Success(content.RemoveAds());
+            return Result.Success(content);
         }
         catch (TaskCanceledException)
         {

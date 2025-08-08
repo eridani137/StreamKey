@@ -30,7 +30,7 @@
     ports:
       - "5432:5432" # TODO
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -59,7 +59,7 @@
     image: datalust/seq:latest
     restart: unless-stopped
     volumes:
-      - ./seq_data:/data
+      - seq_data:/data
     environment:
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
@@ -87,3 +87,7 @@
 networks:
   internal:
     driver: bridge
+
+volumes:
+  db-data:
+  seq-data:

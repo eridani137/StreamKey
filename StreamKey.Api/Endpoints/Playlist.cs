@@ -5,6 +5,7 @@ using StreamKey.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Types;
+using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -16,7 +17,7 @@ public class Playlist : ICarterModule
             .WithTags("Работа с плейлистами");
 
         group.MapGet("",
-                async (HttpContext context, IUsherService usherService, IMemoryCache cache, ILogger<Playlist> logger) =>
+                async (HttpContext context, IUsherService usherService, IMemoryCache cache, ISettingsRepository settings, ILogger<Playlist> logger) =>
                 {
                     var queryString = context.Request.QueryString.ToString();
                     try
@@ -102,7 +103,10 @@ public class Playlist : ICarterModule
                             }
                         }
 
-                        logger.LogInformation("{Playlist}", result.Value);
+                        if (await settings.GetValue<bool>("LogPlaylists"))
+                        {
+                            logger.LogInformation("{Playlist}", result.Value);
+                        }
 
                         return Results.Content(result.Value, StaticData.PlaylistContentType);
                     }
