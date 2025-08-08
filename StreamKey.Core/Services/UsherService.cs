@@ -39,10 +39,10 @@ public class UsherService(HttpClient client, ISettingsRepository settings) : IUs
         
             var content = await response.Content.ReadAsStringAsync();
 
-            // if (await settings.GetValue<bool>("RemoveAds"))
-            // {
-            //     content = content.RemoveAds();
-            // }
+            if (await settings.GetValue<bool>("RemoveAds") is var remove && remove)
+            {
+                content = content.RemoveAds();
+            }
             
             content = content.RemoveAds();
             
