@@ -2,6 +2,7 @@ using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
+using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 
 namespace StreamKey.Core.Services;
@@ -36,7 +37,8 @@ public class UsherService(HttpClient client) : IUsherService
             }
         
             var content = await response.Content.ReadAsStringAsync();
-            return Result.Success(content);
+            
+            return Result.Success(content.RemoveAds());
         }
         catch (TaskCanceledException)
         {
