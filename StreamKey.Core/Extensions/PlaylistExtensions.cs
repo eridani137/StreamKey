@@ -24,12 +24,17 @@ public static partial class PlaylistExtensions
 
     private static string RemoveAdsFromPlaylist(string m3U8Content)
     {
-        var lines = m3U8Content.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+        // Разделяем по строкам (удаляем пустые строки)
+        var lines = m3U8Content
+            .Split(['\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.TrimEnd('\r')) // убрать возможный CR
+            .ToArray();
+
         var resultLines = new List<string>();
         var currentDateTime = DateTime.MinValue;
         var lastSegmentWasContent = false;
 
-        // --- Первый проход: Идентификация рекламных временных диапазонов (Date Ranges) ---
+        // --- Первый проход: сбор DATERANGE (рекламных) --- 
         var adDateRanges = (
                 from line in lines
                 where line.StartsWith("#EXT-X-DATERANGE") && IsAdDateRangeLine(line)
@@ -40,92 +45,140 @@ public static partial class PlaylistExtensions
         {
             var line = lines[i].Trim();
             if (string.IsNullOrEmpty(line)) continue;
-            
+
             // Обновляем текущее время плейлиста из тега #EXT-X-PROGRAM-DATE-TIME
             if (line.StartsWith("#EXT-X-PROGRAM-DATE-TIME:"))
             {
-                DateTime.TryParse(line[25..].Trim(), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out currentDateTime);
-            }
-            
-            // Пропускаем теги, однозначно указывающие на рекламу
-            if (line.StartsWith("#EXT-X-DATERANGE") && IsAdDateRangeLine(line))
-            {
-                continue; 
-            }
-            
-            // Пропускаем теги предзагрузки Twitch, так как они часто связаны с рекламой
-            if (line.StartsWith("#EXT-X-TWITCH-PREFETCH:"))
-            {
-                // Пропускаем и сам тег, и следующую за ним строку с URI
-                i++; 
+                var dateStr = line["#EXT-X-PROGRAM-DATE-TIME:".Length..].Trim();
+                if (DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dt))
+                {
+                    currentDateTime = dt;
+                }
+                else if (DateTimeOffset.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dto))
+                {
+                    currentDateTime = dto.UtcDateTime;
+                }
+                // добавляем в результат — PROGRAM-DATE-TIME полезно сохранить
+                resultLines.Add(line);
+                lastSegmentWasContent = false;
                 continue;
             }
-            
-            // Обрабатываем информацию о сегменте
-            if (line.StartsWith("#EXTINF:"))
-            {
-                // Определяем, является ли сегмент рекламным
-                var segmentTitle = line.Contains(',') ? line.Split(',')[1] : "";
-                var segmentDuration = ExtractDurationFromExtInf(line);
 
-                if (IsSegmentInAdDateRange(currentDateTime, adDateRanges) || IsAdExtInf(segmentTitle))
+            // Пропускаем теги предзагрузки Twitch (вместе с URI)
+            if (line.StartsWith("#EXT-X-TWITCH-PREFETCH:", StringComparison.OrdinalIgnoreCase))
+            {
+                Log.Debug("Пропускаем TWITCH PREFETCH тег.");
+                // пропускаем сам тег; следующий может быть URI (или нет) — безопасно пропустить одну строку
+                if (i + 1 < lines.Length && !lines[i + 1].StartsWith('#')) i++;
+                continue;
+            }
+
+            // Пропускаем сами DATERANGE теги, которые помечены как реклама
+            if (line.StartsWith("#EXT-X-DATERANGE") && IsAdDateRangeLine(line))
+            {
+                Log.Debug("Пропускаем EXT-X-DATERANGE (реклама): {Line}", line);
+                continue;
+            }
+
+            // Обработка #EXTINF (сегмент)
+            if (line.StartsWith("#EXTINF:", StringComparison.OrdinalIgnoreCase))
+            {
+                var segmentDuration = ExtractDurationFromExtInf(line);
+                var segmentTitle = line.Contains(',') ? line.Split(',', 2)[1] : "";
+
+                // Получаем следующую строку — это ожидаемо URI сегмента
+                var nextUri = (i + 1 < lines.Length) ? lines[i + 1].Trim() : null;
+
+                // Определяем, рекламный ли сегмент:
+                var inAdRangeByTime = IsSegmentInAdDateRange(currentDateTime, adDateRanges);
+                var byExtInfTitle = IsAdExtInf(segmentTitle);
+                var byUri = !string.IsNullOrEmpty(nextUri) && AdSegment().IsMatch(nextUri);
+
+                var isAdSegment = inAdRangeByTime || byExtInfTitle || byUri;
+
+                if (isAdSegment)
                 {
-                    // Если сегмент рекламный, мы его пропускаем.
-                    // Также пропускаем следующую строку, которая является URI этого сегмента.
-                    i++;
+                    Log.Debug("Пропускаем рекламный сегмент. reason: time={InTime}, title={TitleMatch}, uri={UriMatch}. EXTINF='{ExtInf}', URI='{Uri}'",
+                        inAdRangeByTime, byExtInfTitle, byUri, line, nextUri ?? "<none>");
+
+                    // Пропустить сам EXTINF и следующую строку (URI), если она существует
+                    if (i + 1 < lines.Length && !lines[i + 1].StartsWith('#'))
+                    {
+                        i++; // пропускаем URI
+                    }
+
+                    // Если у нас есть метка времени, продвигаем её на длительность сегмента,
+                    // чтобы корректно вычислять время следующих сегментов
+                    if (currentDateTime != DateTime.MinValue && segmentDuration > 0)
+                    {
+                        currentDateTime = currentDateTime.AddSeconds(segmentDuration);
+                    }
+
                     lastSegmentWasContent = false;
                     continue;
                 }
-                    
-                // Если это не реклама, обновляем время для следующего сегмента
+
+                // Если это не реклама — сохраняем EXTINF (URI добавится на следующей итерации)
+                resultLines.Add(line);
+
+                // Обновляем время для следующего сегмента, если есть
                 if (currentDateTime != DateTime.MinValue && segmentDuration > 0)
                 {
                     currentDateTime = currentDateTime.AddSeconds(segmentDuration);
                 }
+
+                // не меняем lastSegmentWasContent здесь — URI будет помечать это
+                continue;
             }
-            
-            // Обработка тегов разрыва (Discontinuity)
-            if (line.StartsWith("#EXT-X-DISCONTINUITY"))
+
+            // Обработка разрывов
+            if (line.StartsWith("#EXT-X-DISCONTINUITY", StringComparison.OrdinalIgnoreCase))
             {
-                // Проверяем, нужно ли удалять этот тег.
-                if (lastSegmentWasContent)
+                // избегаем подряд идущих #EXT-X-DISCONTINUITY
+                if (resultLines.Count > 0 && resultLines[^1].Equals("#EXT-X-DISCONTINUITY", StringComparison.OrdinalIgnoreCase))
                 {
-                    continue; // Пропускаем лишний тег разрыва
+                    // уже есть разрыв — пропускаем
+                    continue;
                 }
+
+                // Если прямо перед этим у нас не было контента (например мы удалили рекламу), то, возможно,
+                // нет смысла добавлять разрыв — но в большинстве случаев безопаснее оставить один разрыв.
+                resultLines.Add(line);
+                lastSegmentWasContent = false;
+                continue;
             }
-            
-            // Если строка не является URI рекламного сегмента, добавляем её в результат
+
+            // URI сегмента или другие теги — добавляем в результат
             resultLines.Add(line);
-                
-            // Обновляем флаг, если последняя добавленная строка была не-комментарием (т.е. URI сегмента)
+
+            // если строка — URI (не комментарий), отмечаем, что последний добавленный сегмент — контент
             if (!line.StartsWith('#'))
             {
                 lastSegmentWasContent = true;
             }
-            // Сбрасываем флаг, если это был тег, который может предшествовать рекламе
-            else if (line.StartsWith("#EXT-X-DISCONTINUITY"))
+            else
             {
-                lastSegmentWasContent = false;
+                // для других тегов — оставляем флаг нетронутым, кроме явных действий выше
             }
         }
-        
+
         return string.Join("\n", resultLines);
     }
-    
+
     private static bool IsAdExtInf(string extinfTitle)
     {
         return !string.IsNullOrEmpty(extinfTitle) &&
                (extinfTitle.Contains("Amazon", StringComparison.OrdinalIgnoreCase) ||
                 AdSegment().IsMatch(extinfTitle));
     }
-    
+
     private static bool IsSegmentInAdDateRange(DateTime segmentTime, List<AdDateRangeInfo> adDateRanges)
     {
         if (segmentTime == DateTime.MinValue || adDateRanges.Count == 0) return false;
 
         return adDateRanges.Any(range => range.Contains(segmentTime));
     }
-        
+
     private static double ExtractDurationFromExtInf(string extinf)
     {
         var match = ExtInfDuration().Match(extinf);
@@ -138,8 +191,8 @@ public static partial class PlaylistExtensions
 
     private static bool IsAdDateRangeLine(string dateRangeLine)
     {
-        return dateRangeLine.Contains("CLASS=\"twitch-stitched-ad\"") ||
-               dateRangeLine.Contains("ID=\"stitched-ad-") ||
+        return dateRangeLine.Contains("CLASS=\"twitch-stitched-ad\"", StringComparison.OrdinalIgnoreCase) ||
+               dateRangeLine.Contains("ID=\"stitched-ad-", StringComparison.OrdinalIgnoreCase) ||
                TwitchAdAttribute().IsMatch(dateRangeLine);
     }
 
@@ -169,11 +222,18 @@ public static partial class PlaylistExtensions
 
     private static DateTime ParseAttributeDateTime(string line, string attributeName)
     {
-        var match = Regex.Match(line, $"{attributeName}=\"([^\"]+)\"");
-        if (match.Success && DateTime.TryParse(match.Groups[1].Value, CultureInfo.InvariantCulture,
-                DateTimeStyles.RoundtripKind, out var result))
+        var match = Regex.Match(line, $"{attributeName}=\"([^\"]+)\"", RegexOptions.IgnoreCase);
+        if (match.Success)
         {
-            return result;
+            var s = match.Groups[1].Value;
+            if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var result))
+            {
+                return result;
+            }
+            if (DateTimeOffset.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dto))
+            {
+                return dto.UtcDateTime;
+            }
         }
 
         return DateTime.MinValue;
@@ -196,8 +256,8 @@ public static partial class PlaylistExtensions
 
     [GeneratedRegex(@"(?:amazon|twitch-ad|stitched-ad|/ads/)", RegexOptions.IgnoreCase)]
     private static partial Regex AdSegment();
-    
-    [GeneratedRegex(@"#EXTINF:(\d+(?:\.\d+)?)")]
+
+    [GeneratedRegex(@"#EXTINF:(\d+(?:\.\d+)?)", RegexOptions.IgnoreCase)]
     private static partial Regex ExtInfDuration();
 
     private class AdDateRangeInfo
@@ -207,10 +267,14 @@ public static partial class PlaylistExtensions
 
         public bool Contains(DateTime time)
         {
+            if (StartDate == DateTime.MinValue && EndDate == DateTime.MinValue) return false;
+
             if (StartDate == DateTime.MinValue || EndDate == DateTime.MinValue)
             {
-                // Если диапазон неполный, но существует, считаем что реклама идет ~5 минут
-                return time >= StartDate && time < StartDate.AddMinutes(5);
+                // Если диапазон неполный — делаем безопасное предположение: 5 минут от START (если есть)
+                if (StartDate != DateTime.MinValue)
+                    return time >= StartDate && time < StartDate.AddMinutes(5);
+                return false;
             }
 
             return time >= StartDate && time < EndDate;
