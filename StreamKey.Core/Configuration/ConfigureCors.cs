@@ -3,11 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace StreamKey.Core.Configuration;
 
-public static class CorsConfiguration
+public static class ConfigureCors
 {
     public const string ProductionCorsPolicyName = "ProductionPolicy";
     
-    public static void ConfigureCors(WebApplicationBuilder builder)
+    public static void Configure(WebApplicationBuilder builder)
     {
         builder.Services.AddCors(options =>
         {

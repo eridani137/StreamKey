@@ -1,9 +1,7 @@
 using Carter;
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
+using StreamKey.Core.Abstractions;
+using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
 using StreamKey.Shared.Entities;
 
@@ -17,33 +15,41 @@ public class Authorization : ICarterModule
             .WithTags("Аутентификация");
 
         group.MapPost("/login",
-            async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
-                (LoginRequest login, SignInManager<ApplicationUser> signInManager) =>
-            {
-                signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
-
-                var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, false, true);
-
-                if (result.RequiresTwoFactor)
+                async (
+                    LoginRequest login,
+                    SignInManager<ApplicationUser> signInManager,
+                    UserManager<ApplicationUser> userManager,
+                    IJwtService jwtService) =>
                 {
-                    if (!string.IsNullOrEmpty(login.TwoFactorCode))
-                    {
-                        result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, false,
-                            false);
-                    }
-                    else if (!string.IsNullOrEmpty(login.TwoFactorRecoveryCode))
-                    {
-                        result = await signInManager.TwoFactorRecoveryCodeSignInAsync(login.TwoFactorRecoveryCode);
-                    }
-                }
+                    var user = await userManager.FindByNameAsync(login.Username);
+                    if (user is null) return Results.NotFound();
 
-                if (!result.Succeeded)
-                {
-                    return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
-                }
+                    var result = await signInManager.PasswordSignInAsync(login.Username, login.Password, false, true);
 
-                return TypedResults.Empty;
-            })
+                    // if (result.RequiresTwoFactor)
+                    // {
+                    //     if (!string.IsNullOrEmpty(login.TwoFactorCode))
+                    //     {
+                    //         result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, false,
+                    //             false);
+                    //     }
+                    //     else if (!string.IsNullOrEmpty(login.TwoFactorRecoveryCode))
+                    //     {
+                    //         result = await signInManager.TwoFactorRecoveryCodeSignInAsync(login.TwoFactorRecoveryCode);
+                    //     }
+                    // }
+
+                    if (!result.Succeeded)
+                    {
+                        return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
+                    }
+                    
+                    await userManager.ResetAccessFailedCountAsync(user);
+                    
+                    var token = jwtService.GenerateToken(user, await userManager.GetRolesAsync(user));
+
+                    return Results.Ok(token);
+                })
             .AddEndpointFilter<ValidationFilter<LoginRequest>>();
     }
 }

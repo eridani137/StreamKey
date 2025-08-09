@@ -8,7 +8,7 @@ namespace StreamKey.Infrastructure.Repositories;
 public class SettingsRepository(ApplicationDbContext context)
     : BaseRepository<SettingsEntity>(context), ISettingsRepository
 {
-    public async Task<Dictionary<string, object>> GetAll()
+    public async Task<Dictionary<string, object>?> GetAll()
     {
         var settings = await GetSet()
             .Select(s => new

@@ -10,6 +10,11 @@
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
+      - ConnectionStrings__Database=${ConnectionStrings__Database}
+      - JwtConfig__Secret=${JwtConfig__Secret}
+      - JwtConfig__Issuer=${JwtConfig__Issuer}
+      - JwtConfig__Audience=${JwtConfig__Audience}
+      - JwtConfig__AccessTokenDuration=${JwtConfig__AccessTokenDuration}
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,9 +29,9 @@
     image: postgres:latest
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=StreamKey
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=Qwerty123_
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
       - "5432:5432" # TODO
     volumes:

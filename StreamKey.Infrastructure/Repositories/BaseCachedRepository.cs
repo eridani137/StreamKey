@@ -14,7 +14,7 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
     protected string GetCacheKey(string suffix = "") => 
         string.IsNullOrEmpty(suffix) ? CacheKeyPrefix : $"{CacheKeyPrefix}:{suffix}";
     
-    private void InvalidateKeyCache()
+    protected void InvalidateKeyCache()
     {
         cache.Remove(GetCacheKey());
     }
@@ -49,5 +49,19 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
         });
     
         return result ?? [];
+    }
+    
+    protected async Task<TResult?> GetCachedData<TResult>(
+        string cacheKey, 
+        Func<Task<TResult>> dataLoader,
+        TimeSpan? absoluteExpiration = null)
+    {
+        var result = await cache.GetOrCreateAsync(cacheKey, entry =>
+        {
+            entry.SetAbsoluteExpiration(absoluteExpiration ?? TimeSpan.FromMinutes(5));
+            return dataLoader();
+        });
+    
+        return result;
     }
 }

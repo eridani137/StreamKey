@@ -1,8 +1,8 @@
 using System.Net.Http.Headers;
 using Carter;
+using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
-using Serilog;
 using StreamKey.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Configuration;
@@ -12,6 +12,8 @@ using StreamKey.Infrastructure.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
 
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder);
@@ -46,13 +48,17 @@ builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     })
     .AddStandardResilienceHandler();
 
-CorsConfiguration.ConfigureCors(builder);
+ConfigureCors.Configure(builder);
+ConfigureJwt.Configure(builder);
 
 builder.Services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
 {
     client.BaseAddress = new Uri("http://camoufox:8080");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -61,7 +67,12 @@ app.MapScalarApiReference();
 
 // await app.ApplyMigrations();
 
-app.UseCors(CorsConfiguration.ProductionCorsPolicyName);
+app.UseCors(ConfigureCors.ProductionCorsPolicyName);
+
+app.UseExceptionHandler();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapCarter();
 

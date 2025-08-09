@@ -15,3 +15,4 @@ ssl
 postgres_data
 keys
 **/Migrations
+/StreamKey.Api/appsettings.Development.json
