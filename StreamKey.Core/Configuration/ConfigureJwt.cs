@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +27,7 @@ public static class ConfigureJwt
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -40,7 +42,8 @@ public static class ConfigureJwt
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero,
                 };
-            });
+            })
+            .AddCookie(IdentityConstants.ApplicationScheme);;
 
         builder.Services.AddAuthorization();
     }
