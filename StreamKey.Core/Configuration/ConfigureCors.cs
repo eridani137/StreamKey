@@ -16,7 +16,7 @@ public static class ConfigureCors
                 policy
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .WithHeaders("Content-Type", "User-Agent");
+                    .AllowAnyHeader();
             });
         });
     }
