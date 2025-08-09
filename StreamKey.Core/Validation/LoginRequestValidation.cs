@@ -1,5 +1,5 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity.Data;
+using StreamKey.Core.DTOs;
 
 namespace StreamKey.Core.Validation;
 
@@ -7,7 +7,7 @@ public class LoginRequestValidation : AbstractValidator<LoginRequest>
 {
     public LoginRequestValidation()
     {
-        RuleFor(x => x.Email)
+        RuleFor(x => x.Username)
             .NotEmpty().WithMessage("Нужно ввести логин");
         
         RuleFor(x => x.Password)
