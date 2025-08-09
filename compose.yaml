@@ -42,11 +42,11 @@
       - internal
   
   camoufox:
-    #    image: eridani137/camoufox:latest
-    image: camoufox
-    build:
-      context: .
-      dockerfile: Camoufox/Dockerfile
+    image: eridani137/camoufox:latest
+#    image: camoufox
+#    build:
+#      context: .
+#      dockerfile: Camoufox/Dockerfile
     restart: unless-stopped
     expose:
       - "8080"
