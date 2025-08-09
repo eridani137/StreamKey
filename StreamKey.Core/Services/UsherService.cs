@@ -5,6 +5,7 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
@@ -39,12 +40,10 @@ public class UsherService(HttpClient client, ISettingsRepository settings) : IUs
         
             var content = await response.Content.ReadAsStringAsync();
 
-            // if (await settings.GetValue<bool>("RemoveAds") is var remove && remove)
-            // {
-            //     content = content.RemoveAds();
-            // }
-            
-            content = content.RemoveAds();
+            if (await settings.GetValue<BaseSettings>(nameof(BaseSettings)) is { RemoveAds: true })
+            {
+                content = content.RemoveAds();
+            }
             
             return Result.Success(content);
         }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using StreamKey.Core.Abstractions;
+using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.Extensions;
 

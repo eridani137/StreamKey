@@ -10,7 +10,8 @@ RUN apt-get update && \
         libgtk-3-0 \
         libx11-xcb1 \
         libasound2 \
-        curl && \
+        curl \
+        dos2unix && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir camoufox[geoip] scalar-fastapi colorlog fastapi uvicorn
@@ -18,8 +19,8 @@ RUN pip install --no-cache-dir camoufox[geoip] scalar-fastapi colorlog fastapi u
 RUN python -m camoufox fetch
 
 COPY Camoufox/ /app/
-RUN chmod +x /app/start_camoufox.sh
+RUN dos2unix /app/start_camoufox.sh && chmod +x /app/start_camoufox.sh
 
 EXPOSE 8080
 
-ENTRYPOINT ["/app/start_camoufox.sh"]
+ENTRYPOINT ["bash", "/app/start_camoufox.sh"]

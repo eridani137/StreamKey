@@ -6,6 +6,7 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Types;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -103,12 +104,10 @@ public class Playlist : ICarterModule
                             }
                         }
 
-                        // if (await settings.GetValue<bool>("LoggingPlaylists") is var logging && logging)
-                        // {
-                        //     logger.LogInformation("{Playlist}", result.Value);
-                        // }
-                        
-                        logger.LogInformation("{Playlist}", result.Value);
+                        if (await settings.GetValue<BaseSettings>(nameof(BaseSettings)) is { LoggingPlaylists: true })
+                        {
+                            logger.LogInformation("{Playlist}", result.Value);
+                        }
 
                         return Results.Content(result.Value, StaticData.PlaylistContentType);
                     }

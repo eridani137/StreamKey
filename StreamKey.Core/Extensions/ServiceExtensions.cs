@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Services;
 using StreamKey.Core.Validation;
+using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Infrastructure.Services;
 
 namespace StreamKey.Core.Extensions;
 

@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using StreamKey.Core.Abstractions;
+using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared;
 using StreamKey.Shared.Entities;
 
-namespace StreamKey.Core.Services;
+namespace StreamKey.Infrastructure.Services;
 
 public class DatabaseSeeder(
     UserManager<ApplicationUser> userManager,
-    ILogger<DatabaseSeeder> logger
+    ILogger<DatabaseSeeder> logger,
+    ISettingsRepository settingsRepository
 ) : IDatabaseSeeder
 {
     public async Task Seed()
@@ -31,6 +33,11 @@ public class DatabaseSeeder(
             }
             
             logger.LogInformation($"root пользователь успешно создан");
+        }
+
+        if (await settingsRepository.GetValue<BaseSettings>(nameof(BaseSettings)) is null)
+        {
+            await settingsRepository.SetValue(nameof(BaseSettings), new BaseSettings());
         }
     }
 }
