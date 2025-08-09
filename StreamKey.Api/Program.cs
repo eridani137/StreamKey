@@ -27,10 +27,6 @@ builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme; })
-    .AddBearerToken(IdentityConstants.BearerScheme);
-
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddIdentity().AddApiEndpoints();
