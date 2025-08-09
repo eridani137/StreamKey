@@ -11,7 +11,7 @@ namespace StreamKey.Core.Services;
 
 public class JwtService(IOptions<JwtConfig> config) : IJwtService
 {
-    public string GenerateToken(ApplicationUser user, IEnumerable<string> roleNames)
+    public string GenerateToken(ApplicationUser user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var secret = Encoding.UTF8.GetBytes(config.Value.Secret);
@@ -22,8 +22,6 @@ public class JwtService(IOptions<JwtConfig> config) : IJwtService
             new(JwtRegisteredClaimNames.Nickname, user.UserName!),
             new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
         };
-
-        claims.AddRange(roleNames.Select(roleName => new Claim(ClaimTypes.Role, roleName)));
 
         var tokenDescriptor = new SecurityTokenDescriptor()
         {

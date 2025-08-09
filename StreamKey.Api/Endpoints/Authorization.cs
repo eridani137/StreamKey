@@ -45,7 +45,7 @@ public class Authorization : ICarterModule
                     
                     await userManager.ResetAccessFailedCountAsync(user);
                     
-                    var token = jwtService.GenerateToken(user, await userManager.GetRolesAsync(user));
+                    var token = jwtService.GenerateToken(user);
 
                     return Results.Ok(token);
                 })
