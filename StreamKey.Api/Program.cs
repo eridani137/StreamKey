@@ -29,7 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddIdentity().AddApiEndpoints();
+builder.Services.AddIdentity();//.AddApiEndpoints();
 
 builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
