@@ -38,8 +38,7 @@ public static class ConfigureJwt
                     ValidAudience = jwtConfig.Audience,
                     ValidateLifetime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(secret),
-                    ValidateIssuerSigningKey = true,
-                    ClockSkew = TimeSpan.Zero,
+                    ValidateIssuerSigningKey = true
                 };
             });
 
