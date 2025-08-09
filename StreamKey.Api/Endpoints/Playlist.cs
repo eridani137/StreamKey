@@ -103,7 +103,7 @@ public class Playlist : ICarterModule
                             }
                         }
 
-                        // if (await settings.GetValue<bool>("LogPlaylists") is var logging && logging)
+                        // if (await settings.GetValue<bool>("LoggingPlaylists") is var logging && logging)
                         // {
                         //     logger.LogInformation("{Playlist}", result.Value);
                         // }
