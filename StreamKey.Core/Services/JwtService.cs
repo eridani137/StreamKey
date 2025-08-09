@@ -28,7 +28,7 @@ public class JwtService(IOptions<JwtConfig> config) : IJwtService
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.Add(config.Value.AccessTokenDuration),
+            Expires = DateTime.UtcNow.AddMinutes(15),
             Issuer = config.Value.Issuer,
             Audience = config.Value.Audience,
             SigningCredentials =
