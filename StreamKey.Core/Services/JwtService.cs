@@ -18,7 +18,7 @@ public class JwtService(IOptions<JwtConfig> config) : IJwtService
 
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Nickname, user.UserName!),
             new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
         };

@@ -16,8 +16,9 @@ public static class ServiceExtensions
         services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
         
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
-        
         services.AddSingleton<ICamoufoxService, CamoufoxService>();
+
+        services.AddScoped<IJwtService, JwtService>();
         
         return services;
     }
