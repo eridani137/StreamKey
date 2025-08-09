@@ -27,7 +27,6 @@ public static class ConfigureJwt
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -42,8 +41,7 @@ public static class ConfigureJwt
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero,
                 };
-            })
-            .AddCookie(IdentityConstants.ApplicationScheme);;
+            });
 
         builder.Services.AddAuthorization();
     }

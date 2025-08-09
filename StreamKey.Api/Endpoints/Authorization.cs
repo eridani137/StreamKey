@@ -17,14 +17,13 @@ public class Authorization : ICarterModule
         group.MapPost("/login",
                 async (
                     LoginRequest login,
-                    SignInManager<ApplicationUser> signInManager,
                     UserManager<ApplicationUser> userManager,
                     IJwtService jwtService) =>
                 {
                     var user = await userManager.FindByNameAsync(login.Username);
                     if (user is null) return Results.NotFound();
 
-                    var result = await signInManager.PasswordSignInAsync(login.Username, login.Password, false, true);
+                    var result = await userManager.CheckPasswordAsync(user, login.Password);
 
                     // if (result.RequiresTwoFactor)
                     // {
@@ -39,9 +38,9 @@ public class Authorization : ICarterModule
                     //     }
                     // }
 
-                    if (!result.Succeeded)
+                    if (!result)
                     {
-                        return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
+                        return TypedResults.Problem(statusCode: StatusCodes.Status401Unauthorized);
                     }
                     
                     await userManager.ResetAccessFailedCountAsync(user);
