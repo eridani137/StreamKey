@@ -30,7 +30,7 @@
     ports:
       - "5432:5432" # TODO
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -88,3 +88,6 @@
 networks:
   internal:
     driver: bridge
+    
+volumes:
+  db-data:
