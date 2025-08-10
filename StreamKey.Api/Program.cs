@@ -32,6 +32,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddIdentity();//.AddApiEndpoints();
 
+builder.Services.AddTransient<FilterNotFoundHandler>();
+
 builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
         client.BaseAddress = ApplicationConstants.UsherUrl;
