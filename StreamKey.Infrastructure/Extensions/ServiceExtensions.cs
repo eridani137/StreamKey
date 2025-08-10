@@ -20,10 +20,9 @@ public static class ServiceExtensions
         services.AddScoped<ChannelRepository>();
         services.AddScoped<IChannelRepository, CachedChannelRepository>();
 
-        services.AddScoped<SettingsRepository>();
-        services.AddScoped<ISettingsRepository, CachedSettingsRepository>();
-
         services.AddMemoryCache();
+
+        services.AddSingleton<ISettingsStorage, InMemorySettingsStorage>();
 
         return services;
     }

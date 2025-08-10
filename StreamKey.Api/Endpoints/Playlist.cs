@@ -6,6 +6,7 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Types;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Infrastructure.Services;
 using StreamKey.Shared;
 
 namespace StreamKey.Api.Endpoints;
@@ -18,7 +19,8 @@ public class Playlist : ICarterModule
             .WithTags("Работа с плейлистами");
 
         group.MapGet("",
-                async (HttpContext context, IUsherService usherService, IMemoryCache cache, ISettingsRepository settings, ILogger<Playlist> logger) =>
+                async (HttpContext context, IUsherService usherService, IMemoryCache cache, ISettingsStorage settings,
+                    ILogger<Playlist> logger) =>
                 {
                     var queryString = context.Request.QueryString.ToString();
                     try
@@ -48,7 +50,7 @@ public class Playlist : ICarterModule
                             rateLimit = new RateLimitInfo
                             {
                                 Count = 1,
-                                ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds),
+                                ExpiresAt = now.AddSeconds(ApplicationConstants.TimeWindowSeconds),
                                 IsBanned = false
                             };
 
@@ -62,10 +64,10 @@ public class Playlist : ICarterModule
                         else if (rateLimit.ExpiresAt <= now)
                         {
                             rateLimit.Count = 1;
-                            rateLimit.ExpiresAt = now.AddSeconds(StaticData.TimeWindowSeconds);
+                            rateLimit.ExpiresAt = now.AddSeconds(ApplicationConstants.TimeWindowSeconds);
                             cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
                         }
-                        else if (rateLimit.Count >= StaticData.MaxRequestsPerMinute)
+                        else if (rateLimit.Count >= ApplicationConstants.MaxRequestsPerMinute)
                         {
                             logger.LogWarning("[{Channel}] IP {IP} превысил лимит, бан на 5 минут", channel, ip);
 
@@ -104,12 +106,12 @@ public class Playlist : ICarterModule
                             }
                         }
 
-                        if (await settings.GetValue<bool>("LoggingPlaylists"))
+                        if (await settings.GetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false))
                         {
                             logger.LogInformation("{Playlist}", result.Value);
                         }
 
-                        return Results.Content(result.Value, StaticData.PlaylistContentType);
+                        return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);
                     }
                     catch (Exception e)
                     {
@@ -117,7 +119,7 @@ public class Playlist : ICarterModule
                         return Results.InternalServerError();
                     }
                 })
-            .Produces<string>(contentType: StaticData.PlaylistContentType)
+            .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)

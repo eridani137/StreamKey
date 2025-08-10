@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +10,7 @@ using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
-public class UsherService(HttpClient client, ISettingsRepository settings) : IUsherService
+public class UsherService(HttpClient client, ISettingsStorage settings) : IUsherService
 {
     public async Task<Result<string>> GetPlaylist(string username, string query)
     {
@@ -17,10 +18,17 @@ public class UsherService(HttpClient client, ISettingsRepository settings) : IUs
 
         try
         {
+            using var activity = Activity.Current;
+            activity?.SetTag("operation", "stream_check");
+            activity?.SetTag("username", username);
+            
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
+                activity?.SetTag("expected_not_found", "true");
+                activity?.SetStatus(ActivityStatusCode.Ok, "Stream not found - expected behavior");
+                
                 return Result.Failure<string>(Error.StreamNotFound);
             }
             
@@ -40,7 +48,7 @@ public class UsherService(HttpClient client, ISettingsRepository settings) : IUs
         
             var content = await response.Content.ReadAsStringAsync();
 
-            if (await settings.GetValue<bool>("RemoveAds"))
+            if (await settings.GetBoolSettingAsync(ApplicationConstants.RemoveAds, true))
             {
                 content = content.RemoveAds();
             }

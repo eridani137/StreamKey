@@ -1,7 +1,10 @@
-namespace StreamKey.Core;
+namespace StreamKey.Shared;
 
-public static class StaticData
+public static class ApplicationConstants
 {
+    public const string LoggingPlaylists = "LoggingPlaylists";
+    public const string RemoveAds = "RemoveAds";
+    
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     public const int MaxRequestsPerMinute = 100;
     public const int TimeWindowSeconds = 60;

@@ -9,6 +9,7 @@ using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Extensions;
+using StreamKey.Shared;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,9 +34,9 @@ builder.Services.AddIdentity();//.AddApiEndpoints();
 
 builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
     {
-        client.BaseAddress = StaticData.UsherUrl;
-        client.DefaultRequestHeaders.Referrer = new Uri(StaticData.SiteUrl);
-        foreach (var header in StaticData.Headers)
+        client.BaseAddress = ApplicationConstants.UsherUrl;
+        client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.SiteUrl);
+        foreach (var header in ApplicationConstants.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);
         }
