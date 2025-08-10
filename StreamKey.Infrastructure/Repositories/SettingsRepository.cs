@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories;
@@ -8,7 +9,7 @@ namespace StreamKey.Infrastructure.Repositories;
 public class SettingsRepository(ApplicationDbContext context)
     : BaseRepository<SettingsEntity>(context), ISettingsRepository
 {
-    public async Task<Dictionary<string, object>?> GetAll()
+    public async Task<Dictionary<string, object?>?> GetAll()
     {
         var settings = await GetSet()
             .Select(s => new
@@ -18,19 +19,36 @@ public class SettingsRepository(ApplicationDbContext context)
             })
             .ToListAsync();
     
-        return settings
-            .Where(s => !string.IsNullOrEmpty(s.Value))
-            .ToDictionary(s => s.Key, object (s) => s.Value);
+        var result = new Dictionary<string, object?>();
+        
+        foreach (var setting in settings.Where(s => !string.IsNullOrEmpty(s.Value)))
+        {
+            var deserializedValue = setting.Value.DeserializeValue();
+            result[setting.Key] = deserializedValue;
+        }
+        
+        return result;
     }
 
     public async Task<T> SetValue<T>(string key, T value)
     {
-        var jsonValue = JsonSerializer.Serialize(value);
+        string stringValue;
+        var type = typeof(T);
+    
+        if (type.IsSimpleType())
+        {
+            stringValue = value?.ToString() ?? string.Empty;
+        }
+        else
+        {
+            stringValue = JsonSerializer.Serialize(value);
+        }
+    
         var existing = await GetSet().FirstOrDefaultAsync(s => s.Key == key);
 
         if (existing is not null)
         {
-            existing.Value = jsonValue;
+            existing.Value = stringValue;
             Update(existing);
         }
         else
@@ -38,22 +56,29 @@ public class SettingsRepository(ApplicationDbContext context)
             var newSetting = new SettingsEntity
             {
                 Key = key,
-                Value = jsonValue
+                Value = stringValue
             };
             await Add(newSetting);
         }
         await Save();
-        
+    
         return value;
     }
+
 
     public async Task<T?> GetValue<T>(string key)
     {
         var setting = await GetSet().FirstOrDefaultAsync(s => s.Key == key);
-        
-        return setting?.Value is null
-            ? default 
-            : JsonSerializer.Deserialize<T>(setting.Value);
+    
+        if (setting?.Value is null) return default;
+    
+        var type = typeof(T);
+
+        if (!type.IsSimpleType()) return JsonSerializer.Deserialize<T>(setting.Value);
+        if (type == typeof(string)) return (T)(object)setting.Value;
+                
+        return (T)Convert.ChangeType(setting.Value, type);
+
     }
 
     public async Task Remove(string key)

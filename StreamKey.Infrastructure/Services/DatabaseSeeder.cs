@@ -34,10 +34,15 @@ public class DatabaseSeeder(
             
             logger.LogInformation($"root пользователь успешно создан");
         }
-
-        if (await settingsRepository.GetValue<BaseSettings>(nameof(BaseSettings)) is null)
+        
+        if (await settingsRepository.GetValue<bool>("LoggingPlaylists"))
         {
-            await settingsRepository.SetValue(nameof(BaseSettings), new BaseSettings());
+            await settingsRepository.SetValue("LoggingPlaylists", true);
+        }
+
+        if (await settingsRepository.GetValue<bool>("RemoveAds"))
+        {
+            await settingsRepository.SetValue("RemoveAds", true);
         }
     }
 }

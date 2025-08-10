@@ -104,7 +104,7 @@ public class Playlist : ICarterModule
                             }
                         }
 
-                        if (await settings.GetValue<BaseSettings>(nameof(BaseSettings)) is { LoggingPlaylists: true })
+                        if (await settings.GetValue<bool>("LoggingPlaylists"))
                         {
                             logger.LogInformation("{Playlist}", result.Value);
                         }
