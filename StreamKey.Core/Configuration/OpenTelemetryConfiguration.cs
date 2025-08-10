@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -21,7 +23,29 @@ public static class OpenTelemetryConfiguration
             {
                 tracing
                     .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
+                    .AddHttpClientInstrumentation(options =>
+                    {
+                        options.FilterHttpRequestMessage = (httpRequestMessage) => 
+                            !httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true;
+                        
+                        options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
+                        {
+                            if (httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true)
+                            {
+                                activity.SetTag("service.context", "stream_check");
+                            }
+                        };
+                        
+                        options.EnrichWithHttpResponseMessage = (activity, httpResponseMessage) =>
+                        {
+                            if (httpResponseMessage.StatusCode == HttpStatusCode.NotFound && 
+                                activity.GetTagItem("service.context")?.ToString() == "stream_check")
+                            {
+                                activity.SetTag("expected_error", "true");
+                                activity.SetStatus(ActivityStatusCode.Ok, "Expected stream not found");
+                            }
+                        };
+                    })
                     .AddEntityFrameworkCoreInstrumentation()
                     .AddNpgsql()
                     .AddOtlpExporter(options =>

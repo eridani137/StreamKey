@@ -18,17 +18,10 @@ public class UsherService(HttpClient client, ISettingsStorage settings) : IUsher
 
         try
         {
-            using var activity = Activity.Current;
-            activity?.SetTag("operation", "stream_check");
-            activity?.SetTag("username", username);
-            
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                activity?.SetTag("expected_not_found", "true");
-                activity?.SetStatus(ActivityStatusCode.Ok, "Stream not found - expected behavior");
-                
                 return Result.Failure<string>(Error.StreamNotFound);
             }
             

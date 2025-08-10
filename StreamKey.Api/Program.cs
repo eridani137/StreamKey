@@ -43,6 +43,7 @@ builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
 
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     })
+    .AddHttpMessageHandler<FilterNotFoundHandler>()
     .AddStandardResilienceHandler();
 
 ConfigureCors.Configure(builder);
