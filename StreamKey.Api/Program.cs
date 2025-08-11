@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using Carter;
 using DotNetEnv;
-using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 using StreamKey.Core;
 using StreamKey.Core.Abstractions;
@@ -30,14 +29,15 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddIdentity();//.AddApiEndpoints();
+builder.Services.AddIdentity();
 
 builder.Services.AddTransient<FilterNotFoundHandler>();
 
-builder.Services.AddHttpClient<IUsherService, UsherService>((_, client) =>
+builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client) =>
     {
         client.BaseAddress = ApplicationConstants.UsherUrl;
         client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.SiteUrl);
+        
         foreach (var header in ApplicationConstants.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);

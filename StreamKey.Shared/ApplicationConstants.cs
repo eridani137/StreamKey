@@ -2,6 +2,8 @@ namespace StreamKey.Shared;
 
 public static class ApplicationConstants
 {
+    public const string UsherClientName = "UsherClient";
+    
     public const string LoggingPlaylists = "LoggingPlaylists";
     public const string RemoveAds = "RemoveAds";
     

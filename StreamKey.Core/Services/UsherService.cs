@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -10,7 +9,7 @@ using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
-public class UsherService(HttpClient client, ISettingsStorage settings) : IUsherService
+public class UsherService(IHttpClientFactory clientFactory, ISettingsStorage settings) : IUsherService
 {
     public async Task<Result<string>> GetPlaylist(string username, string query)
     {
@@ -18,6 +17,7 @@ public class UsherService(HttpClient client, ISettingsStorage settings) : IUsher
 
         try
         {
+            using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
