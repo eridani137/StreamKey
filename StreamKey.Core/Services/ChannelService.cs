@@ -6,7 +6,7 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
 
-public class ChannelService(IChannelRepository channelRepository) : IChannelService
+public class ChannelService(IChannelRepository channelRepository, ICamoufoxService camoufox) : IChannelService
 {
     public async Task<List<ChannelEntity>> GetChannels()
     {
@@ -56,16 +56,16 @@ public class ChannelService(IChannelRepository channelRepository) : IChannelServ
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
-        
+
         if (await channelRepository.HasInPosition(dto.Position))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
         }
-        
+
         channel.Position = dto.Position;
 
         await channelRepository.Update(channel);
-        
+
         return Result.Success(channel);
     }
 }

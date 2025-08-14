@@ -11,7 +11,7 @@ public static class ApplicationConstants
     public const int MaxRequestsPerMinute = 100;
     public const int TimeWindowSeconds = 60;
     public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
-    public const string SiteUrl = "https://www.twitch.tv";
+    public const string TwitchUrl = "https://www.twitch.tv";
     private const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
     
     public static Dictionary<string, string> Headers { get; } = new()
@@ -19,7 +19,7 @@ public static class ApplicationConstants
         { "Accept", "*/*" },
         { "Accept-Language", "en-US" },
         { "Client-ID", ClientId },
-        { "Origin", SiteUrl },
+        { "Origin", TwitchUrl },
         { "sec-ch-ua", """Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138""" },
         { "sec-ch-ua-mobile", "?0" },
         { "sec-ch-ua-platform", """Windows""" },

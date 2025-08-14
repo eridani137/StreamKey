@@ -21,6 +21,8 @@ public static class ServiceExtensions
         services.AddSingleton<ICamoufoxService, CamoufoxService>();
 
         services.AddScoped<IJwtService, JwtService>();
+
+        services.AddHostedService<ChannelInfoUpdater>();
         
         return services;
     }

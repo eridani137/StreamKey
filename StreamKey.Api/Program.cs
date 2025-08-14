@@ -36,7 +36,7 @@ builder.Services.AddTransient<FilterNotFoundHandler>();
 builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client) =>
     {
         client.BaseAddress = ApplicationConstants.UsherUrl;
-        client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.SiteUrl);
+        client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
         
         foreach (var header in ApplicationConstants.Headers)
         {
