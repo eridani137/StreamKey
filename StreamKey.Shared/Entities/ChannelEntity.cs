@@ -4,6 +4,7 @@ public class ChannelEntity : BaseEntity
 {
     public required string Name { get; set; }
     public required int Position { get; set; }
+    public ChannelInfo? Info { get; set; }
 }
 
 public record ChannelInfo
