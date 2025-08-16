@@ -7,7 +7,7 @@ public class ChannelEntity : BaseEntity
     public ChannelInfo? Info { get; set; }
 }
 
-public record ChannelInfo
+public class ChannelInfo
 {
     public required string Title { get; set; }
     public required string Thumb { get; set; }

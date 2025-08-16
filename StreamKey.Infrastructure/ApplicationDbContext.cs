@@ -16,6 +16,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasIndex(e => e.Name).IsUnique();
             
+            entity.OwnsOne(c => c.Info, info =>
+            {
+                info.Property(i => i.Title).HasMaxLength(50);
+                info.Property(i => i.Thumb).HasMaxLength(200);
+                info.Property(i => i.Viewers).HasMaxLength(50);
+                info.Property(i => i.UpdateTime);
+            });
+        
             entity.Property<uint>("xmin")
                 .HasColumnName("xmin")
                 .HasColumnType("xid")
