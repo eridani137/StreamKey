@@ -32,9 +32,12 @@ public class ChannelInfoUpdater(
                 var channels = await channelRepository.GetAll();
                 foreach (var channel in channels)
                 {
+                    logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
+                    
                     var info = await ParseChannelInfo(channel.Name);
                     if (info is null) continue;
                     
+                    logger.LogInformation("Канал {ChannelName} обновлен: {ChannelInfo}", channel.Name, info);
                     channel.Info = info;
                     await channelRepository.Update(channel);
                 }
