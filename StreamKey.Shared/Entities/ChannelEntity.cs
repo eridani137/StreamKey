@@ -12,5 +12,6 @@ public class ChannelInfo
     public required string Title { get; set; }
     public required string Thumb { get; set; }
     public required string Viewers { get; set; }
+    public required string Description { get; set; }
     public DateTime UpdateTime { get; set; }
 }

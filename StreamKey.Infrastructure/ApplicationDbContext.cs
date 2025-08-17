@@ -22,6 +22,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 info.Property(i => i.Thumb).HasMaxLength(200);
                 info.Property(i => i.Viewers).HasMaxLength(50);
                 info.Property(i => i.UpdateTime);
+                info.Property(i => i.Description).HasMaxLength(1000);
             });
         
             entity.Property<uint>("xmin")

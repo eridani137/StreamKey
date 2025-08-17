@@ -78,11 +78,15 @@ public class ChannelInfoUpdater(
 
         var avatarUrl = parse.GetAttributeValue($"{baseXpath}//img[contains(@class,'tw-image-avatar')]", "src");
         var channelTitle = parse.GetInnerText($"{baseXpath}//h1[contains(@class,'tw-title')]");
-        var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']/span");
+        var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']");
+        var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
 
-        if (string.IsNullOrEmpty(avatarUrl) || string.IsNullOrEmpty(channelTitle) || string.IsNullOrEmpty(viewers))
+        if (string.IsNullOrEmpty(avatarUrl) || 
+            string.IsNullOrEmpty(channelTitle) || 
+            string.IsNullOrEmpty(viewers) ||
+            string.IsNullOrEmpty(description))
         {
-            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} is null or empty", avatarUrl, channelTitle, viewers);
+            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} is null or empty", avatarUrl, channelTitle, viewers, description);
             return null;
         }
 
@@ -91,6 +95,7 @@ public class ChannelInfoUpdater(
             Thumb = avatarUrl,
             Title = channelTitle,
             Viewers = viewers,
+            Description = description
         };
     }
 }

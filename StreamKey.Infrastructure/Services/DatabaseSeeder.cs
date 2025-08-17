@@ -39,11 +39,11 @@ public class DatabaseSeeder(
         await settings.SetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false);
         await settings.SetBoolSettingAsync(ApplicationConstants.RemoveAds, true);
 
-        // if (!await channelRepository.HasEntity("recrent"))
+        // if (!await channelRepository.HasEntity("snejjinka"))
         // {
         //     await channelRepository.Create(new ChannelEntity()
         //     {
-        //         Name = "recrent",
+        //         Name = "snejjinka",
         //         Position = 0
         //     });
         // } // TODO
