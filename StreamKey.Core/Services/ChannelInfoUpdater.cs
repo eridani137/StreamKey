@@ -16,7 +16,7 @@ public class ChannelInfoUpdater(
     ICamoufoxService camoufox)
     : BackgroundService
 {
-    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(2);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
