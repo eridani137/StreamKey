@@ -41,8 +41,8 @@ public class ChannelInfoUpdater(
                     if (fresh is null) continue;
                     
                     fresh.Info = info;
-                    await channelRepository.Update(channel);
-                    logger.LogInformation("Канал {ChannelName} обновлен: {@ChannelInfo}", channel.Name, info);
+                    await channelRepository.Update(fresh);
+                    logger.LogInformation("Канал {ChannelName} обновлен: {@ChannelInfo}", fresh.Name, info);
                 }
             }
             catch (Exception e)
