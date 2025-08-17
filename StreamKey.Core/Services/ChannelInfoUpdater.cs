@@ -41,6 +41,7 @@ public class ChannelInfoUpdater(
                     if (fresh is null) continue;
                     
                     fresh.Info = info;
+                    fresh.Info.UpdateTime = DateTime.Now;
                     await channelRepository.Update(fresh);
                     logger.LogInformation("Канал {ChannelName} обновлен: {@ChannelInfo}", fresh.Name, info);
                 }
