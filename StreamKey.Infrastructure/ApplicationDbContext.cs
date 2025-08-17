@@ -24,12 +24,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 info.Property(i => i.UpdateTime);
                 info.Property(i => i.Description).HasMaxLength(1000);
             });
-        
-            entity.Property<uint>("xmin")
-                .HasColumnName("xmin")
-                .HasColumnType("xid")
-                .ValueGeneratedOnAddOrUpdate()
-                .IsConcurrencyToken();
         });
     }
 }
