@@ -37,18 +37,18 @@ const QualityMenuEnhancer = {
 
             .${CONFIG.badgeName} {
                 padding-left: 24px !important;
+                color: white;
+                font-weight: normal;
+                pointer-events: none;
+            }
+
+            .${CONFIG.badgeName}-clickable {
                 color: #ff3194;
                 font-weight: 900;
                 text-transform: uppercase;
                 font-style: oblique;
                 cursor: pointer;
-            }
-
-            .${CONFIG.badgeName}::before {
-                content: 'с помощью ';
-                color: white;
-                font-weight: normal;
-                text-transform: none;
+                pointer-events: auto;
             }
         `;
         document.head.appendChild(this.styleElement);
@@ -70,15 +70,25 @@ const QualityMenuEnhancer = {
     },
 
     createBadge() {
-        const badge = document.createElement("span");
-        badge.classList.add(CONFIG.badgeName);
-        badge.textContent = CONFIG.badge.text;
+        const badgeContainer = document.createElement("span");
+        badgeContainer.classList.add(CONFIG.badgeName);
 
-        badge.addEventListener("click", () => {
+        const prefixText = document.createElement("span");
+        prefixText.textContent = "с помощью ";
+
+        const clickableText = document.createElement("span");
+        clickableText.classList.add(`${CONFIG.badgeName}-clickable`);
+        clickableText.textContent = CONFIG.badge.text;
+
+        clickableText.addEventListener("click", (e) => {
+            e.stopPropagation();
             window.open(CONFIG.badge.url, '_blank');
         });
 
-        return badge;
+        badgeContainer.appendChild(prefixText);
+        badgeContainer.appendChild(clickableText);
+
+        return badgeContainer;
     },
 
     handleLabelClick(selectedLabel) {
