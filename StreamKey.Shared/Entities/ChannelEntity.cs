@@ -13,5 +13,5 @@ public class ChannelInfo
     public required string Thumb { get; set; }
     public required string Viewers { get; set; }
     public required string Description { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
+    public required string Category { get; set; }
 }

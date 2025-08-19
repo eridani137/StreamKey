@@ -168,12 +168,13 @@ const ActiveChannelsEnhancer = {
     channelData: [],
 
     init() {
-        this.fetchAndUpdateChannels();
+        setTimeout(() => {
+            this.fetchAndUpdateChannels();
+        }, 5000);
 
-        const twoMinutes = 2 * 60 * 1000;
-        this.updateInterval = setInterval(() => this.fetchAndUpdateChannels(), twoMinutes);
+        this.updateInterval = setInterval(() => this.fetchAndUpdateChannels(), 60000);
 
-        this.startObserver();
+        // this.startObserver();
     },
 
     async fetchAndUpdateChannels() {
@@ -191,42 +192,6 @@ const ActiveChannelsEnhancer = {
         }
     },
 
-    createChannelElement(channel) {
-        const card = document.createElement('div');
-        card.className = 'Layout-sc-1xcs6mc-0 AoXTY side-nav-card';
-        card.innerHTML = `
-            <a data-a-id="recommended-channel-${channel.position}" data-test-selector="recommended-channel" class="ScCoreLink-sc-16kq0mq-0 fytYW InjectLayout-sc-1i43xsx-0 cnzybN side-nav-card__link tw-link" href="/${channel.channelName}">
-                <div class="Layout-sc-1xcs6mc-0 kErOMx side-nav-card__avatar">
-                    <div class="ScAvatar-sc-144b42z-0 dLsNfm tw-avatar">
-                        <img class="InjectLayout-sc-1i43xsx-0 fAYJcN tw-image tw-image-avatar" alt="${channel.info.title}" src="${channel.info.thumb}">
-                    </div>
-                </div>
-                <div class="Layout-sc-1xcs6mc-0 bLlihH">
-                    <div class="Layout-sc-1xcs6mc-0 dJfBsr">
-                        <div data-a-target="side-nav-card-metadata" class="Layout-sc-1xcs6mc-0 ffUuNa">
-                            <div class="Layout-sc-1xcs6mc-0 kvrzxX side-nav-card__title">
-                                <p title="${channel.info.title}" data-a-target="side-nav-title" class="CoreText-sc-1txzju1-0 dTdgXA InjectLayout-sc-1i43xsx-0 hnBAak">${channel.info.title}</p>
-                            </div>
-                            <div class="Layout-sc-1xcs6mc-0 dWQoKW side-nav-card__metadata" data-a-target="side-nav-game-title">
-                                <p dir="auto" title="${channel.info.description || ''}" class="CoreText-sc-1txzju1-0 iMyVXK">${channel.info.description || ''}</p>
-                            </div>
-                        </div>
-                        <div class="Layout-sc-1xcs6mc-0 cXMAQb side-nav-card__live-status" data-a-target="side-nav-live-status">
-                            <div class="Layout-sc-1xcs6mc-0 kvrzxX">
-                                <div class="ScChannelStatusIndicator-sc-bjn067-0 fJwlvq tw-channel-status-indicator"></div>
-                                <div class="Layout-sc-1xcs6mc-0 dqfEBK">
-                                    <span aria-hidden="true" class="CoreText-sc-1txzju1-0 fYAAA-D">${channel.info.viewers}</span>
-                                    <p class="CoreText-sc-1txzju1-0 cWFBTs InjectLayout-sc-1i43xsx-0 cdydzE">${channel.info.viewers} зрителя</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        `;
-        return card;
-    },
-
     replaceChannels() {
         if (!this.channelData || this.channelData.length === 0) {
             return;
@@ -237,14 +202,72 @@ const ActiveChannelsEnhancer = {
             return;
         }
 
-        const existingChannelElements = activeChannelsSection.querySelectorAll('.side-nav-card');
+        const channelCards = document.querySelectorAll('[data-test-selector="recommended-channel"]');
 
         this.channelData.forEach(channel => {
-            if (existingChannelElements[channel.position]) {
-                const newElement = this.createChannelElement(channel);
-                existingChannelElements[channel.position].replaceWith(newElement);
+            const source = channelCards[channel.position];
+            if (source) {
+                const titleElement = source.querySelector('[data-a-target="side-nav-title"]');
+                if (titleElement && channel.info.title) {
+                    if (titleElement.textContent !== channel.info.title) {
+                        titleElement.textContent = channel.info.title;
+                        titleElement.setAttribute('title', channel.info.title);
+                    }
+                }
+
+                const avatarElement = source.querySelector('.tw-image-avatar');
+                if (avatarElement && channel.info.thumb) {
+                    avatarElement.src = channel.info.thumb;
+                }
+
+                const viewerCountElement = source.querySelector('[data-a-target="side-nav-live-status"] span[aria-hidden="true"]');
+                if (viewerCountElement && channel.info.viewers) {
+                    viewerCountElement.textContent = channel.info.viewers;
+
+                    const parentDiv = viewerCountElement.parentElement;
+                    if (parentDiv) {
+                        const viewerTextElement = parentDiv.querySelector('p');
+                        if (viewerTextElement) {
+                            viewerTextElement.textContent = `${channel.info.viewers} зрителей`;
+                        }
+                    }
+                }
+
+                if (channel.channelName) {
+                    source.setAttribute('href', `/${channel.channelName}`);
+                }
             }
         });
+
+
+        // const channelCards = document.querySelectorAll('[data-test-selector="recommended-channel"]');
+        // console.log(channelCards);
+        // channelCards.forEach((card, index) => {
+        //     if (index < this.channelData.length) {
+        //         const channelInfo = this.channelData[index];
+        //
+        //         const titleElement = card.querySelector('[data-a-target="side-nav-title"]');
+        //         if (titleElement && channelInfo.info.title) {
+        //             titleElement.textContent = channelInfo.info.title;
+        //             titleElement.setAttribute('title', channelInfo.info.title);
+        //         }
+        //
+        //         const avatarElement = card.querySelector('.tw-image-avatar');
+        //         if (avatarElement && channelInfo.info.thumb) {
+        //             avatarElement.src = channelInfo.info.thumb;
+        //         }
+        //
+        //         const linkElement = card.querySelector('.side-nav-card__link');
+        //         if (linkElement && channelInfo.channelName) {
+        //             linkElement.href = `/${channelInfo.channelName}`;
+        //         }
+        //
+        //         if (channelInfo.channelName) {
+        //             card.setAttribute('data-a-id', `recommended-channel-${index}`);
+        //             linkElement.setAttribute('href', `/${channelInfo.channelName}`);
+        //         }
+        //     }
+        // });
     },
 
     startObserver() {

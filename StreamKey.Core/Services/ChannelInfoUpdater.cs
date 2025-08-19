@@ -42,11 +42,6 @@ public class ChannelInfoUpdater(
                         var info = await ParseChannelInfo(channel.Name);
                         fresh.Info = info;
 
-                        if (fresh.Info is not null)
-                        {
-                            fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
-                        }
-
                         await channelRepository.Update(fresh);
                     }
                     catch (Exception e)
@@ -96,14 +91,16 @@ public class ChannelInfoUpdater(
         var channelTitle = parse.GetInnerText($"{baseXpath}//h1[contains(@class,'tw-title')]");
         var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']");
         var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
+        var category = parse.GetInnerText($"{baseXpath}");
 
         if (string.IsNullOrEmpty(avatarUrl) ||
             string.IsNullOrEmpty(channelTitle) ||
             string.IsNullOrEmpty(viewers) ||
-            string.IsNullOrEmpty(description))
+            string.IsNullOrEmpty(description) ||
+            string.IsNullOrEmpty(category))
         {
-            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} is null or empty", avatarUrl,
-                channelTitle, viewers, description);
+            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} or {Category} is null or empty", 
+                avatarUrl, channelTitle, viewers, description, category);
             return null;
         }
 
@@ -112,7 +109,8 @@ public class ChannelInfoUpdater(
             Thumb = avatarUrl,
             Title = channelTitle,
             Viewers = viewers,
-            Description = description
+            Description = description,
+            Category = category
         };
     }
 }

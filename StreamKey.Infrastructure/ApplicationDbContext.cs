@@ -21,8 +21,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 info.Property(i => i.Title).HasMaxLength(50);
                 info.Property(i => i.Thumb).HasMaxLength(200);
                 info.Property(i => i.Viewers).HasMaxLength(50);
-                info.Property(i => i.UpdatedAt);
                 info.Property(i => i.Description).HasMaxLength(1000);
+                info.Property(i => i.Category).HasMaxLength(100);
             });
         });
     }
