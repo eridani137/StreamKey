@@ -25,7 +25,9 @@ public class Camoufox : ICarterModule
                 async ([FromBody] CamoufoxRequest dto, ICamoufoxService service) =>
                 {
                     var screenshot = await service.GetPageScreenshot(dto);
-                    return Results.File(screenshot, "image/png");
+                    return screenshot is null
+                        ? Results.Empty
+                        : Results.File(screenshot, "image/png");
                 })
             .Produces(StatusCodes.Status200OK);
     }

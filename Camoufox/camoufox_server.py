@@ -6,7 +6,6 @@ from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 import uvicorn
 
-# Импорт для Scalar
 from scalar_fastapi import get_scalar_api_reference
 
 import config
@@ -33,21 +32,64 @@ class HTMLResponse(BaseModel):
 browser: AsyncCamoufox | None = None
 
 
+async def is_browser_alive() -> bool:
+    """Проверка, что браузер жив и готов к работе."""
+    global browser
+    if browser is None:
+        return False
+    
+    try:
+        # Попытка получить версию как простая проверка живости
+        await browser.version()
+        return True
+    except Exception as e:
+        logger.warning(f"Браузер недоступен: {e}")
+        return False
+
+
+async def ensure_browser() -> AsyncCamoufox:
+    """Гарантирует наличие живого браузера."""
+    global browser
+    
+    if browser is None or not await is_browser_alive():
+        logger.info("Инициализация нового браузера...")
+        try:
+            # Закрыть старый браузер если он есть
+            if browser:
+                try:
+                    await browser.__aexit__(None, None, None)
+                except:
+                    pass
+            
+            browser = await AsyncCamoufox(**config.BROWSER_OPTIONS).__aenter__()
+            logger.info("Новый браузер успешно инициализирован")
+        except Exception as e:
+            logger.error(f"Не удалось инициализировать браузер: {e}")
+            browser = None
+            raise HTTPException(503, f"Не удалось инициализировать браузер: {e}")
+    
+    return browser
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Инициализация и корректное закрытие Camoufox."""
     global browser
     try:
         browser = await AsyncCamoufox(**config.BROWSER_OPTIONS).__aenter__()
-        logger.info("Camoufox-браузер инициализирован")
+        logger.info("Camoufox-браузер инициализирован при старте")
     except Exception as exc:
-        logger.error("Не удалось запустить Camoufox: %s", exc)
+        logger.error("Не удалось запустить Camoufox при старте: %s", exc)
+        browser = None
 
     yield
 
     if browser:
-        await browser.__aexit__(None, None, None)
-        logger.info("Camoufox-браузер закрыт")
+        try:
+            await browser.__aexit__(None, None, None)
+            logger.info("Camoufox-браузер закрыт")
+        except Exception as e:
+            logger.error(f"Ошибка при закрытии браузера: {e}")
 
 
 app = FastAPI(
@@ -58,7 +100,6 @@ app = FastAPI(
 )
 
 
-# Подключение Scalar документации
 @app.get("/docs", include_in_schema=False)
 async def scalar_html():
     """Генерация документации API с помощью Scalar."""
@@ -71,26 +112,31 @@ async def scalar_html():
 @app.get("/health")
 async def health() -> dict[str, str]:
     """Проверка состояния сервиса."""
-    return {"status": "ok", "service": "camoufox-server", "browser_ready": str(browser is not None)}
+    browser_ready = await is_browser_alive()
+    return {
+        "status": "ok", 
+        "service": "camoufox-server", 
+        "browser_ready": str(browser_ready)
+    }
 
 
 @app.post("/fetch-html", response_model=HTMLResponse)
 async def fetch_html(req: URLRequest):
     """Получение HTML-контента страницы."""
-    global browser
-    if browser is None:
-        raise HTTPException(503, "Браузер не инициализирован")
-
+    
+    # Гарантируем наличие живого браузера
+    current_browser = await ensure_browser()
+    
     page = None
     try:
         logger.info(f"⏩ HTML-запрос: {req.url}")
 
-        page = await browser.new_page()
+        page = await current_browser.new_page()
 
         if not await safe_goto(page, req.url):
             raise HTTPException(400, "Не удалось загрузить страницу")
 
-        # Дополнительное ожидание (используем wait_time из запроса)
+        # Дополнительное ожидание
         await page.wait_for_timeout(req.wait_time * 1000)
 
         # Получение данных
@@ -121,26 +167,22 @@ async def fetch_html(req: URLRequest):
 @app.post("/fetch-screenshot")
 async def fetch_screenshot(req: URLRequest):
     """Получение скриншота страницы."""
-    global browser
-    if browser is None:
-        raise HTTPException(503, "Браузер не инициализирован")
+    
+    # Гарантируем наличие живого браузера
+    current_browser = await ensure_browser()
 
     page = None
     try:
         logger.info(f"⏩ Screenshot-запрос: {req.url}")
 
-        page = await browser.new_page()
-
-        # Установка viewport для консистентных скриншотов
+        page = await current_browser.new_page()
         await page.set_viewport_size({"width": 1920, "height": 1080})
 
         if not await safe_goto(page, req.url):
             raise HTTPException(400, "Не удалось загрузить страницу")
 
-        # Дополнительное ожидание (используем wait_time из запроса)
         await page.wait_for_timeout(req.wait_time * 1000)
 
-        # Получение скриншота
         screenshot = await page.screenshot(
             full_page=True,
             type="png"
@@ -148,7 +190,6 @@ async def fetch_screenshot(req: URLRequest):
 
         logger.info(f"✅ Скриншот получен ({len(screenshot)} байт)")
 
-        # Возврат как бинарные данные PNG
         return Response(
             content=screenshot,
             media_type="image/png",
@@ -171,9 +212,8 @@ async def fetch_screenshot(req: URLRequest):
 @app.get("/browser-info")
 async def browser_info():
     """Получение информации о браузере."""
-    global browser
-    if not browser:
-        return {"browser_ready": False, "error": "Браузер не инициализирован"}
+    if not await is_browser_alive():
+        return {"browser_ready": False, "error": "Браузер не инициализирован или недоступен"}
 
     try:
         version = await browser.version()
@@ -191,12 +231,15 @@ async def browser_info():
 
 @app.post("/restart-browser")
 async def restart_browser():
-    """Перезапуск браузера."""
+    """Принудительный перезапуск браузера."""
     global browser
     try:
         # Закрытие старого браузера
         if browser:
-            await browser.__aexit__(None, None, None)
+            try:
+                await browser.__aexit__(None, None, None)
+            except:
+                pass
 
         # Инициализация нового браузера
         browser = await AsyncCamoufox(**config.BROWSER_OPTIONS).__aenter__()

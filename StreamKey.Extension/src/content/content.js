@@ -11,6 +11,7 @@ const CONFIG = {
         url: "https://t.me/streamkey"
     },
     minResolution: 1080,
+    apiUrl: "https://service.streamkey.ru"
 };
 
 const QualityMenuEnhancer = {
@@ -164,7 +165,6 @@ const QualityMenuEnhancer = {
 const ActiveChannelsEnhancer = {
     observer: null,
     updateInterval: null,
-    apiUrl: 'https://your-api.com/get-channels',
     channelData: [],
 
     init() {
@@ -178,12 +178,11 @@ const ActiveChannelsEnhancer = {
 
     async fetchAndUpdateChannels() {
         try {
-            const response = await fetch(this.apiUrl);
+            const response = await fetch(CONFIG.apiUrl);
             if (!response.ok) {
                 throw new Error(`API request failed with status ${response.status}`);
             }
-            const data = await response.json();
-            this.channelData = data;
+            this.channelData = await response.json();
             this.replaceChannels();
             console.log("Channels updated successfully from API.");
         } catch (error) {
