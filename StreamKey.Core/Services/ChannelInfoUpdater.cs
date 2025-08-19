@@ -30,12 +30,13 @@ public class ChannelInfoUpdater(
                 var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
 
                 var channels = await channelRepository.GetAll();
-                foreach (var channel in channels)
+
+                await Parallel.ForEachAsync(channels, stoppingToken, async (channel, _) =>
                 {
                     logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
                     
                     var fresh = await channelRepository.GetByName(channel.Name);
-                    if (fresh is null) continue;
+                    if (fresh is null) return;
                     
                     var info = await ParseChannelInfo(channel.Name);
                     fresh.Info = info;
@@ -46,7 +47,7 @@ public class ChannelInfoUpdater(
                     }
                     
                     await channelRepository.Update(fresh);
-                }
+                });
             }
             catch (Exception e)
             {

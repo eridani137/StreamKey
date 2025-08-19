@@ -178,7 +178,7 @@ const ActiveChannelsEnhancer = {
 
     async fetchAndUpdateChannels() {
         try {
-            const response = await fetch(CONFIG.apiUrl);
+            const response = await fetch(CONFIG.apiUrl + "/channels");
             if (!response.ok) {
                 throw new Error(`API request failed with status ${response.status}`);
             }
