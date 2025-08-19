@@ -18,11 +18,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             
             entity.OwnsOne(c => c.Info, info =>
             {
-                info.Property(i => i.Title).HasMaxLength(50);
-                info.Property(i => i.Thumb).HasMaxLength(200);
-                info.Property(i => i.Viewers).HasMaxLength(50);
+                info.Property(i => i.Title).HasMaxLength(1000);
+                info.Property(i => i.Thumb).HasMaxLength(1000);
+                info.Property(i => i.Viewers).HasMaxLength(1000);
                 info.Property(i => i.Description).HasMaxLength(1000);
-                info.Property(i => i.Category).HasMaxLength(100);
+                info.Property(i => i.Category).HasMaxLength(1000);
             });
         });
     }

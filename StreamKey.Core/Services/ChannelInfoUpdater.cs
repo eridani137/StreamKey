@@ -12,8 +12,7 @@ namespace StreamKey.Core.Services;
 
 public class ChannelInfoUpdater(
     ILogger<ChannelInfoUpdater> logger,
-    IServiceProvider serviceProvider,
-    IChannelService channelService)
+    IServiceProvider serviceProvider)
     : BackgroundService
 {
     private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(5);
@@ -28,6 +27,7 @@ public class ChannelInfoUpdater(
             {
                 await using var scope = serviceProvider.CreateAsyncScope();
                 var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
+                var channelService = scope.ServiceProvider.GetRequiredService<IChannelService>();
 
                 var channels = await channelRepository.GetAll();
                 foreach (var channel in channels)
