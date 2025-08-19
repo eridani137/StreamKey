@@ -30,24 +30,7 @@ public class ChannelInfoUpdater(
                 var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
 
                 var channels = await channelRepository.GetAll();
-
-                await Parallel.ForEachAsync(channels, stoppingToken, async (channel, _) =>
-                {
-                    logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
-                    
-                    var fresh = await channelRepository.GetByName(channel.Name);
-                    if (fresh is null) return;
-                    
-                    var info = await ParseChannelInfo(channel.Name);
-                    fresh.Info = info;
-                    
-                    if (fresh.Info is not null)
-                    {
-                        fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
-                    }
-                    
-                    await channelRepository.Update(fresh);
-                });
+                await Parallel.ForEachAsync(channels, stoppingToken, Body);
             }
             catch (Exception e)
             {
@@ -60,10 +43,38 @@ public class ChannelInfoUpdater(
         }
     }
 
+    private async ValueTask Body(ChannelEntity channel, CancellationToken _)
+    {
+        try
+        {
+            logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
+
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
+
+            var fresh = await channelRepository.GetByName(channel.Name);
+            if (fresh is null) return;
+
+            var info = await ParseChannelInfo(channel.Name);
+            fresh.Info = info;
+
+            if (fresh.Info is not null)
+            {
+                fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+
+            await channelRepository.Update(fresh);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при обновлении информации канала");
+        }
+    }
+
     private async Task<ChannelInfo?> ParseChannelInfo(string name)
     {
         const string baseXpath = "//div[@class='channel-info-content']";
-        
+
         var channelUrl = $"{ApplicationConstants.TwitchUrl}/{name}";
         var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 30));
 
@@ -91,12 +102,13 @@ public class ChannelInfoUpdater(
         var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']");
         var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
 
-        if (string.IsNullOrEmpty(avatarUrl) || 
-            string.IsNullOrEmpty(channelTitle) || 
+        if (string.IsNullOrEmpty(avatarUrl) ||
+            string.IsNullOrEmpty(channelTitle) ||
             string.IsNullOrEmpty(viewers) ||
             string.IsNullOrEmpty(description))
         {
-            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} is null or empty", avatarUrl, channelTitle, viewers, description);
+            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} is null or empty", avatarUrl,
+                channelTitle, viewers, description);
             return null;
         }
 

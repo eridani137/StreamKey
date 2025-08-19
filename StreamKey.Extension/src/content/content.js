@@ -183,6 +183,7 @@ const ActiveChannelsEnhancer = {
                 throw new Error(`API request failed with status ${response.status}`);
             }
             this.channelData = await response.json();
+            console.log(this.channelData);
             this.replaceChannels();
             console.log("Channels updated successfully from API.");
         } catch (error) {
