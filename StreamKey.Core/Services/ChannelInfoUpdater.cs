@@ -13,7 +13,7 @@ namespace StreamKey.Core.Services;
 public class ChannelInfoUpdater(
     ILogger<ChannelInfoUpdater> logger,
     IServiceProvider serviceProvider,
-    ICamoufoxService camoufox)
+    IChannelService channelService)
     : BackgroundService
 {
     private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(5);
@@ -34,15 +34,7 @@ public class ChannelInfoUpdater(
                 {
                     try
                     {
-                        logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
-
-                        var fresh = await channelRepository.GetByName(channel.Name);
-                        if (fresh is null) return;
-
-                        var info = await ParseChannelInfo(channel.Name);
-                        fresh.Info = info;
-
-                        await channelRepository.Update(fresh);
+                        await channelService.UpdateChannelInfo(channel);
                     }
                     catch (Exception e)
                     {
@@ -59,58 +51,5 @@ public class ChannelInfoUpdater(
                 await Task.Delay(UpdateInterval, stoppingToken);
             }
         }
-    }
-
-    private async Task<ChannelInfo?> ParseChannelInfo(string name)
-    {
-        const string baseXpath = "//div[@class='channel-info-content']";
-
-        var channelUrl = $"{ApplicationConstants.TwitchUrl}/{name}";
-        var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 30));
-
-        if (response is null)
-        {
-            logger.LogWarning("response is null: {ChannelUrl}", channelUrl);
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(response.Html))
-        {
-            logger.LogWarning("Html is null: {ChannelUrl}", channelUrl);
-            return null;
-        }
-
-        var parse = response.Html.GetParse();
-        if (parse is null)
-        {
-            logger.LogWarning("Parse is null: {ChannelUrl}", channelUrl);
-            return null;
-        }
-
-        var avatarUrl = parse.GetAttributeValue($"{baseXpath}//img[contains(@class,'tw-image-avatar')]", "src");
-        var channelTitle = parse.GetInnerText($"{baseXpath}//h1[contains(@class,'tw-title')]");
-        var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']");
-        var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
-        var category = parse.GetInnerText($"{baseXpath}");
-
-        if (string.IsNullOrEmpty(avatarUrl) ||
-            string.IsNullOrEmpty(channelTitle) ||
-            string.IsNullOrEmpty(viewers) ||
-            string.IsNullOrEmpty(description) ||
-            string.IsNullOrEmpty(category))
-        {
-            logger.LogWarning("{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} or {Category} is null or empty", 
-                avatarUrl, channelTitle, viewers, description, category);
-            return null;
-        }
-
-        return new ChannelInfo()
-        {
-            Thumb = avatarUrl,
-            Title = channelTitle,
-            Viewers = viewers,
-            Description = description,
-            Category = category
-        };
     }
 }
