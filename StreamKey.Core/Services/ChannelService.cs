@@ -95,7 +95,7 @@ public class ChannelService(
         const string baseXpath = "//div[@class='channel-info-content']";
 
         var channelUrl = $"{ApplicationConstants.TwitchUrl}/{name}";
-        var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 30));
+        var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 60));
 
         if (response is null)
         {
@@ -120,7 +120,7 @@ public class ChannelService(
         var channelTitle = parse.GetInnerText($"{baseXpath}//h1[contains(@class,'tw-title')]");
         var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']");
         var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
-        var category = parse.GetInnerText($"{baseXpath}");
+        var category = parse.GetInnerText($"{baseXpath}//a[@data-a-target='stream-game-link']");
 
         if (string.IsNullOrEmpty(avatarUrl) ||
             string.IsNullOrEmpty(channelTitle) ||
