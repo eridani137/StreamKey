@@ -39,8 +39,8 @@ async def is_browser_alive() -> bool:
         return False
     
     try:
-        # Попытка получить версию как простая проверка живости
-        await browser.version()
+        # Используем более простую проверку - попытка получить контексты
+        _ = browser.contexts
         return True
     except Exception as e:
         logger.warning(f"Браузер недоступен: {e}")
@@ -58,8 +58,10 @@ async def ensure_browser() -> AsyncCamoufox:
             if browser:
                 try:
                     await browser.__aexit__(None, None, None)
-                except:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Ошибка при закрытии старого браузера: {e}")
+                finally:
+                    browser = None
             
             browser = await AsyncCamoufox(**config.BROWSER_OPTIONS).__aenter__()
             logger.info("Новый браузер успешно инициализирован")
@@ -216,14 +218,28 @@ async def browser_info():
         return {"browser_ready": False, "error": "Браузер не инициализирован или недоступен"}
 
     try:
-        version = await browser.version()
-        user_agent = await browser.user_agent()
+        # Получаем информацию более безопасным способом
+        contexts_count = len(browser.contexts) if hasattr(browser, 'contexts') else 0
+        
+        # Пытаемся получить версию, но не критично если не получится
+        version = "unknown"
+        user_agent = "unknown"
+        
+        try:
+            version = await browser.version()
+        except:
+            pass
+            
+        try:
+            user_agent = await browser.user_agent()
+        except:
+            pass
 
         return {
             "browser_ready": True,
             "version": version,
             "user_agent": user_agent,
-            "contexts_count": len(browser.contexts)
+            "contexts_count": contexts_count
         }
     except Exception as e:
         return {"browser_ready": False, "error": str(e)}
@@ -238,8 +254,10 @@ async def restart_browser():
         if browser:
             try:
                 await browser.__aexit__(None, None, None)
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"Ошибка при закрытии старого браузера: {e}")
+            finally:
+                browser = None
 
         # Инициализация нового браузера
         browser = await AsyncCamoufox(**config.BROWSER_OPTIONS).__aenter__()
