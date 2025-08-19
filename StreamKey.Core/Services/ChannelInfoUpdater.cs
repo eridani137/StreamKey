@@ -66,6 +66,12 @@ public class ChannelInfoUpdater(
         var channelUrl = $"{ApplicationConstants.TwitchUrl}/{name}";
         var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 30));
 
+        if (response is null)
+        {
+            logger.LogWarning("response is null: {ChannelUrl}", channelUrl);
+            return null;
+        }
+
         if (string.IsNullOrEmpty(response.Html))
         {
             logger.LogWarning("Html is null: {ChannelUrl}", channelUrl);

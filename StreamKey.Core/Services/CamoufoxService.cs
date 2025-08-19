@@ -7,7 +7,7 @@ namespace StreamKey.Core.Services;
 
 public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger) : ICamoufoxService
 {
-    public async Task<CamoufoxHtmlResponse> GetPageHtml(CamoufoxRequest request)
+    public async Task<CamoufoxHtmlResponse?> GetPageHtml(CamoufoxRequest request)
     {
         try
         {
@@ -23,11 +23,11 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
         catch (Exception e)
         {
             logger.LogError(e, "Ошибка получения HTML для URL: {Url}", request.Url);
-            throw;
+            return null;
         }
     }
 
-    public async Task<byte[]> GetPageScreenshot(CamoufoxRequest request)
+    public async Task<byte[]?> GetPageScreenshot(CamoufoxRequest request)
     {
         try
         {
@@ -42,7 +42,7 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
         catch (Exception ex)
         {
             logger.LogError(ex, "Ошибка получения скриншота для URL: {Url}", request.Url);
-            throw;
+            return null;
         }
     }
 }
