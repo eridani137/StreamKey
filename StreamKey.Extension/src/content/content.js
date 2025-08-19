@@ -163,18 +163,13 @@ const QualityMenuEnhancer = {
 };
 
 const ActiveChannelsEnhancer = {
-    observer: null,
     updateInterval: null,
     channelData: [],
+    isDataReady: false,
 
     init() {
-        setTimeout(() => {
-            this.fetchAndUpdateChannels();
-        }, 5000);
-
+        this.fetchAndUpdateChannels();
         this.updateInterval = setInterval(() => this.fetchAndUpdateChannels(), 60000);
-
-        // this.startObserver();
     },
 
     async fetchAndUpdateChannels() {
@@ -184,12 +179,54 @@ const ActiveChannelsEnhancer = {
                 throw new Error(`API request failed with status ${response.status}`);
             }
             this.channelData = await response.json();
-            console.log(this.channelData);
-            this.replaceChannels();
+            this.isDataReady = true;
+            await this.waitForChannelsAndReplace();
             console.log("Channels updated successfully from API.");
         } catch (error) {
             console.error("Failed to fetch or update channels:", error);
         }
+    },
+
+    async waitForChannelsAndReplace() {
+        if (!this.isDataReady) return;
+
+        const activeChannelsSection = await this.waitForElement('div[aria-label="Активные каналы"]');
+        if (!activeChannelsSection) {
+            console.log('Active channels section not found after waiting');
+            return;
+        }
+
+        const channelCards = await this.waitForElement('[data-test-selector="recommended-channel"]', 5000, true);
+        if (!channelCards || channelCards.length === 0) {
+            console.log('Channel cards not found after waiting');
+            return;
+        }
+
+        console.log(`Found ${channelCards.length} channel cards, replacing...`);
+        this.replaceChannels();
+    },
+
+    waitForElement(selector, timeout = 10000, multiple = false) {
+        return new Promise((resolve) => {
+            const startTime = Date.now();
+
+            const checkElement = () => {
+                const elements = multiple ?
+                    document.querySelectorAll(selector) :
+                    document.querySelector(selector);
+
+                if (multiple ? elements.length > 0 : elements) {
+                    resolve(elements);
+                } else if (Date.now() - startTime < timeout) {
+                    setTimeout(checkElement, 100);
+                } else {
+                    console.log(`Timeout waiting for element: ${selector}`);
+                    resolve(null);
+                }
+            };
+
+            checkElement();
+        });
     },
 
     replaceChannels() {
@@ -246,24 +283,7 @@ const ActiveChannelsEnhancer = {
         });
     },
 
-    startObserver() {
-        if (this.observer) return;
-
-        this.observer = new MutationObserver(() => {
-            this.replaceChannels();
-        })
-
-        this.observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    },
-
     destroy() {
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
-        }
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
             this.updateInterval = null;
