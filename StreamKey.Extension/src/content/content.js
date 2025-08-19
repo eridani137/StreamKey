@@ -233,41 +233,17 @@ const ActiveChannelsEnhancer = {
                     }
                 }
 
+                const categoryElement = source.querySelector('[data-a-target="side-nav-game-title"] p');
+                if (categoryElement && channel.info.category) {
+                    categoryElement.textContent = channel.info.category;
+                    categoryElement.setAttribute('title', channel.info.category);
+                }
+
                 if (channel.channelName) {
                     source.setAttribute('href', `/${channel.channelName}`);
                 }
             }
         });
-
-
-        // const channelCards = document.querySelectorAll('[data-test-selector="recommended-channel"]');
-        // console.log(channelCards);
-        // channelCards.forEach((card, index) => {
-        //     if (index < this.channelData.length) {
-        //         const channelInfo = this.channelData[index];
-        //
-        //         const titleElement = card.querySelector('[data-a-target="side-nav-title"]');
-        //         if (titleElement && channelInfo.info.title) {
-        //             titleElement.textContent = channelInfo.info.title;
-        //             titleElement.setAttribute('title', channelInfo.info.title);
-        //         }
-        //
-        //         const avatarElement = card.querySelector('.tw-image-avatar');
-        //         if (avatarElement && channelInfo.info.thumb) {
-        //             avatarElement.src = channelInfo.info.thumb;
-        //         }
-        //
-        //         const linkElement = card.querySelector('.side-nav-card__link');
-        //         if (linkElement && channelInfo.channelName) {
-        //             linkElement.href = `/${channelInfo.channelName}`;
-        //         }
-        //
-        //         if (channelInfo.channelName) {
-        //             card.setAttribute('data-a-id', `recommended-channel-${index}`);
-        //             linkElement.setAttribute('href', `/${channelInfo.channelName}`);
-        //         }
-        //     }
-        // });
     },
 
     startObserver() {
