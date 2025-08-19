@@ -16,7 +16,7 @@ public class ChannelInfoUpdater(
     ICamoufoxService camoufox)
     : BackgroundService
 {
-    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(5);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -30,7 +30,30 @@ public class ChannelInfoUpdater(
                 var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
 
                 var channels = await channelRepository.GetAll();
-                await Parallel.ForEachAsync(channels, stoppingToken, Body);
+                foreach (var channel in channels)
+                {
+                    try
+                    {
+                        logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
+
+                        var fresh = await channelRepository.GetByName(channel.Name);
+                        if (fresh is null) return;
+
+                        var info = await ParseChannelInfo(channel.Name);
+                        fresh.Info = info;
+
+                        if (fresh.Info is not null)
+                        {
+                            fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
+                        }
+
+                        await channelRepository.Update(fresh);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, "Ошибка при обновлении информации канала {@Channel}", channel);
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -40,34 +63,6 @@ public class ChannelInfoUpdater(
             {
                 await Task.Delay(UpdateInterval, stoppingToken);
             }
-        }
-    }
-
-    private async ValueTask Body(ChannelEntity channel, CancellationToken _)
-    {
-        try
-        {
-            logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
-
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
-
-            var fresh = await channelRepository.GetByName(channel.Name);
-            if (fresh is null) return;
-
-            var info = await ParseChannelInfo(channel.Name);
-            fresh.Info = info;
-
-            if (fresh.Info is not null)
-            {
-                fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
-            }
-
-            await channelRepository.Update(fresh);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Ошибка при обновлении информации канала");
         }
     }
 
