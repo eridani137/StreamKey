@@ -1,7 +1,7 @@
 const CONFIG = {
     styleName: "custom-radio",
     badgeName: "custom-radio-badge",
-    selectors: {
+    quality_menu_selectors: {
         menuContainer: "div[data-a-target='player-settings-menu']",
         radioItems: "div[role='menuitemradio']",
         radioLabel: "label.ScRadioLabel-sc-1pxozg3-0"
@@ -10,7 +10,7 @@ const CONFIG = {
         text: "Stream Key",
         url: "https://t.me/streamkey"
     },
-    minResolution: 1080
+    minResolution: 1080,
 };
 
 const QualityMenuEnhancer = {
@@ -56,11 +56,11 @@ const QualityMenuEnhancer = {
 
     getResolutionElements() {
         const radioItems = document.querySelectorAll(
-            `${CONFIG.selectors.menuContainer} ${CONFIG.selectors.radioItems}`
+            `${CONFIG.quality_menu_selectors.menuContainer} ${CONFIG.quality_menu_selectors.radioItems}`
         );
 
         return Array.from(radioItems)
-            .map(radio => radio.querySelector(CONFIG.selectors.radioLabel))
+            .map(radio => radio.querySelector(CONFIG.quality_menu_selectors.radioLabel))
             .filter(label => {
                 if (!label) return false;
                 const text = label.textContent || "";
@@ -161,4 +161,116 @@ const QualityMenuEnhancer = {
     }
 };
 
+const ActiveChannelsEnhancer = {
+    observer: null,
+    updateInterval: null,
+    apiUrl: 'https://your-api.com/get-channels',
+    channelData: [],
+
+    init() {
+        this.fetchAndUpdateChannels();
+
+        const twoMinutes = 2 * 60 * 1000;
+        this.updateInterval = setInterval(() => this.fetchAndUpdateChannels(), twoMinutes);
+
+        this.startObserver();
+    },
+
+    async fetchAndUpdateChannels() {
+        try {
+            const response = await fetch(this.apiUrl);
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            this.channelData = data;
+            this.replaceChannels();
+            console.log("Channels updated successfully from API.");
+        } catch (error) {
+            console.error("Failed to fetch or update channels:", error);
+        }
+    },
+
+    createChannelElement(channel) {
+        const card = document.createElement('div');
+        card.className = 'Layout-sc-1xcs6mc-0 AoXTY side-nav-card';
+        card.innerHTML = `
+            <a data-a-id="recommended-channel-${channel.position}" data-test-selector="recommended-channel" class="ScCoreLink-sc-16kq0mq-0 fytYW InjectLayout-sc-1i43xsx-0 cnzybN side-nav-card__link tw-link" href="/${channel.channelName}">
+                <div class="Layout-sc-1xcs6mc-0 kErOMx side-nav-card__avatar">
+                    <div class="ScAvatar-sc-144b42z-0 dLsNfm tw-avatar">
+                        <img class="InjectLayout-sc-1i43xsx-0 fAYJcN tw-image tw-image-avatar" alt="${channel.info.title}" src="${channel.info.thumb}">
+                    </div>
+                </div>
+                <div class="Layout-sc-1xcs6mc-0 bLlihH">
+                    <div class="Layout-sc-1xcs6mc-0 dJfBsr">
+                        <div data-a-target="side-nav-card-metadata" class="Layout-sc-1xcs6mc-0 ffUuNa">
+                            <div class="Layout-sc-1xcs6mc-0 kvrzxX side-nav-card__title">
+                                <p title="${channel.info.title}" data-a-target="side-nav-title" class="CoreText-sc-1txzju1-0 dTdgXA InjectLayout-sc-1i43xsx-0 hnBAak">${channel.info.title}</p>
+                            </div>
+                            <div class="Layout-sc-1xcs6mc-0 dWQoKW side-nav-card__metadata" data-a-target="side-nav-game-title">
+                                <p dir="auto" title="${channel.info.description || ''}" class="CoreText-sc-1txzju1-0 iMyVXK">${channel.info.description || ''}</p>
+                            </div>
+                        </div>
+                        <div class="Layout-sc-1xcs6mc-0 cXMAQb side-nav-card__live-status" data-a-target="side-nav-live-status">
+                            <div class="Layout-sc-1xcs6mc-0 kvrzxX">
+                                <div class="ScChannelStatusIndicator-sc-bjn067-0 fJwlvq tw-channel-status-indicator"></div>
+                                <div class="Layout-sc-1xcs6mc-0 dqfEBK">
+                                    <span aria-hidden="true" class="CoreText-sc-1txzju1-0 fYAAA-D">${channel.info.viewers}</span>
+                                    <p class="CoreText-sc-1txzju1-0 cWFBTs InjectLayout-sc-1i43xsx-0 cdydzE">${channel.info.viewers} зрителя</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        `;
+        return card;
+    },
+
+    replaceChannels() {
+        if (!this.channelData || this.channelData.length === 0) {
+            return;
+        }
+
+        const activeChannelsSection = document.querySelector('div[aria-label="Активные каналы"]');
+        if (!activeChannelsSection) {
+            return;
+        }
+
+        const existingChannelElements = activeChannelsSection.querySelectorAll('.side-nav-card');
+
+        this.channelData.forEach(channel => {
+            if (existingChannelElements[channel.position]) {
+                const newElement = this.createChannelElement(channel);
+                existingChannelElements[channel.position].replaceWith(newElement);
+            }
+        });
+    },
+
+    startObserver() {
+        if (this.observer) return;
+
+        this.observer = new MutationObserver(() => {
+            this.replaceChannels();
+        })
+
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    },
+
+    destroy() {
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+    }
+};
+
 QualityMenuEnhancer.init();
+ActiveChannelsEnhancer.init();

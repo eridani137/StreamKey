@@ -34,16 +34,18 @@ public class ChannelInfoUpdater(
                 {
                     logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
                     
-                    var info = await ParseChannelInfo(channel.Name);
-                    if (info is null) continue;
-
                     var fresh = await channelRepository.GetByName(channel.Name);
                     if (fresh is null) continue;
                     
+                    var info = await ParseChannelInfo(channel.Name);
                     fresh.Info = info;
-                    fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
+                    
+                    if (fresh.Info is not null)
+                    {
+                        fresh.Info.UpdatedAt = DateTimeOffset.UtcNow;
+                    }
+                    
                     await channelRepository.Update(fresh);
-                    logger.LogInformation("Канал {ChannelName} обновлен: {@ChannelInfo}", fresh.Name, info);
                 }
             }
             catch (Exception e)
