@@ -29,7 +29,7 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
 
     public Task<List<ChannelEntity>> GetAll()
     {
-        return GetCachedData(GetCacheKey(), Repository.GetAll, TimeSpan.FromDays(7));
+        return GetCachedData(GetCacheKey(), Repository.GetAll);
     }
 
     public Task<bool> HasEntity(string channelName)

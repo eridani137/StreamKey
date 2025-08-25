@@ -44,7 +44,10 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
     {
         var result = await cache.GetOrCreateAsync(cacheKey, entry =>
         {
-            entry.SetAbsoluteExpiration(absoluteExpiration ?? TimeSpan.FromMinutes(5));
+            if (absoluteExpiration is not null)
+            {
+                entry.SetAbsoluteExpiration((TimeSpan)absoluteExpiration);
+            }
             return dataLoader();
         });
     
@@ -58,7 +61,10 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
     {
         var result = await cache.GetOrCreateAsync(cacheKey, entry =>
         {
-            entry.SetAbsoluteExpiration(absoluteExpiration ?? TimeSpan.FromMinutes(5));
+            if (absoluteExpiration is not null)
+            {
+                entry.SetAbsoluteExpiration((TimeSpan)absoluteExpiration);
+            }
             return dataLoader();
         });
     
