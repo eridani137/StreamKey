@@ -166,10 +166,64 @@ const ActiveChannelsEnhancer = {
     updateInterval: null,
     channelData: [],
     isDataReady: false,
+    tooltipObserver: null,
 
     init() {
+        this.setupTooltipHandler();
         this.fetchAndUpdateChannels();
         this.updateInterval = setInterval(() => this.fetchAndUpdateChannels(), 60000);
+    },
+
+    setupTooltipHandler() {
+        this.tooltipObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 &&
+                        (node.matches('.tw-dialog-layer, .ReactModal__Overlay') ||
+                            node.querySelector('.online-side-nav-channel-tooltip__body'))) {
+                        this.updateTooltipContent(node);
+                    }
+                });
+            });
+        });
+
+        this.tooltipObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    },
+
+    updateTooltipContent(tooltipNode) {
+        const tooltipBody = tooltipNode.querySelector('.online-side-nav-channel-tooltip__body p');
+        if (!tooltipBody || !this.channelData.length) return;
+
+        const hoveredChannel = this.findHoveredChannel();
+        if (hoveredChannel && hoveredChannel.info.description) {
+            tooltipBody.textContent = hoveredChannel.info.description;
+        }
+    },
+
+    findHoveredChannel() {
+        const channelLinks = document.querySelectorAll('[data-test-selector="recommended-channel"]');
+        for (let i = 0; i < channelLinks.length; i++) {
+            const link = channelLinks[i];
+            if (link.matches(':hover')) {
+                return this.channelData.find(channel => channel.position === i);
+            }
+        }
+        return null;
+    },
+
+    closeAllTooltips() {
+        const modalOverlays = document.querySelectorAll('.ReactModal__Overlay, .tw-dialog-layer');
+        modalOverlays.forEach(overlay => {
+            overlay.style.display = 'none';
+            overlay.remove();
+        });
+
+        document.querySelectorAll('.side-nav-card__link').forEach(link => {
+            link.dispatchEvent(new Event('mouseleave'));
+        });
     },
 
     async fetchAndUpdateChannels() {
@@ -234,6 +288,8 @@ const ActiveChannelsEnhancer = {
             return;
         }
 
+        this.closeAllTooltips();
+
         const activeChannelsSection = document.querySelector('div[aria-label="Активные каналы"]');
         if (!activeChannelsSection) {
             return;
@@ -277,10 +333,55 @@ const ActiveChannelsEnhancer = {
                 }
 
                 if (channel.channelName) {
-                    source.setAttribute('href', `/${channel.channelName}`);
+                    const linkElement = source.querySelector('.side-nav-card__link') || source;
+                    linkElement.setAttribute('href', `/${channel.channelName}`);
+                    linkElement.href = `/${channel.channelName}`;
+
+                    linkElement.setAttribute('data-a-id', `recommended-channel-${channel.position}`);
+
+                    this.forceUpdateReactComponent(linkElement);
+
+                    this.reassignClickHandlers(linkElement);
                 }
             }
         });
+    },
+
+    reassignClickHandlers(linkElement) {
+        const newElement = linkElement.cloneNode(true);
+        linkElement.parentNode.replaceChild(newElement, linkElement);
+
+        newElement.addEventListener('click', function(e) {
+            if (e.target.closest('.online-side-nav-channel-tooltip__body')) {
+                return;
+            }
+
+            const currentHref = this.getAttribute('href') || this.href;
+            if (currentHref && currentHref !== 'javascript:void(0)') {
+                console.log('Transitioning to:', currentHref);
+                return true;
+            }
+
+            e.preventDefault();
+        }, true);
+    },
+
+    forceUpdateReactComponent(element) {
+        try {
+            const reactKey = Object.keys(element).find(key =>
+                key.startsWith('__reactInternalInstance') ||
+                key.startsWith('__reactFiber')
+            );
+
+            if (reactKey) {
+                const fiberNode = element[reactKey];
+                if (fiberNode && fiberNode.stateNode && fiberNode.stateNode.forceUpdate) {
+                    fiberNode.stateNode.forceUpdate();
+                }
+            }
+        } catch (error) {
+            console.log('Could not force update React component:', error);
+        }
     },
 
     destroy() {
