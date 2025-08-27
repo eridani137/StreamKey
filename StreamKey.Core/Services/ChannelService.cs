@@ -38,8 +38,6 @@ public class ChannelService(
         };
 
         await channelRepository.Create(channel);
-        
-        await UpdateChannelInfo(channel);
 
         return Result.Success(channel);
     }
