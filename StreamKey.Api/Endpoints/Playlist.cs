@@ -16,13 +16,13 @@ public class Playlist : ICarterModule
         var group = app.MapGroup("/playlist")
             .WithTags("Работа с плейлистами");
 
-        group.MapGet("", (
+        group.MapGet("", async (
                     HttpContext context,
                     IUsherService usherService,
                     IMemoryCache cache,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                Task.FromResult(GetPlaylist(context, usherService, false, cache, settings, logger)))
+                await GetPlaylist(context, usherService, false, cache, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
@@ -30,13 +30,13 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status500InternalServerError)
             .WithName("Получить плейлист");
 
-        group.MapGet("/server", (
+        group.MapGet("/server", async (
                     HttpContext context,
                     IUsherService usherService,
                     IMemoryCache cache,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                Task.FromResult(GetPlaylist(context, usherService, true, cache, settings, logger)))
+                await GetPlaylist(context, usherService, true, cache, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
