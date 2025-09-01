@@ -41,14 +41,12 @@ public class ChannelInfoUpdater(
                         logger.LogError(e, "Ошибка при обновлении информации канала {@Channel}", channel);
                     }
                 }
+                
+                await Task.Delay(UpdateInterval, stoppingToken);
             }
             catch (Exception e)
             {
                 logger.LogError(e, "Ошибка обновления информации о канале");
-            }
-            finally
-            {
-                await Task.Delay(UpdateInterval, stoppingToken);
             }
         }
     }

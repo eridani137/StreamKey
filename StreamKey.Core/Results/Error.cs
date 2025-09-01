@@ -15,6 +15,9 @@ public record Error(ErrorCode Code, string Message, int StatusCode)
         new(ErrorCode.ChannelNotFound, "Канал не найден", 404);
     public static Error ChannelPositionIsBusy =>
         new(ErrorCode.ChannelPositionIsBusy, "Позиция уже занята", 409);
+
+    public static Error ServerTokenNotFound =>
+        new(ErrorCode.ServerTokenNotFound, "Токен не был получен", 404);
     
 
     public override string ToString()

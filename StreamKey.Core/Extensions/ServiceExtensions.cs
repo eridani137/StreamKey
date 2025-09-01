@@ -13,6 +13,8 @@ public static class ServiceExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IUsherService, UsherService>();
+        services.AddScoped<ITwitchService, TwitchService>();
+        
         services.AddScoped<IChannelService, ChannelService>();
         
         services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);

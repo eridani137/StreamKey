@@ -1,7 +1,9 @@
 using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
+using StreamKey.Core.DTOs.TwitchGraphQL;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Infrastructure.Abstractions;
@@ -9,12 +11,38 @@ using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
-public class UsherService(IHttpClientFactory clientFactory, ISettingsStorage settings) : IUsherService
+public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitchService, ISettingsStorage settings, IMemoryCache cache) : IUsherService
 {
     public async Task<Result<string>> GetPlaylist(string username, string query)
     {
         var url = $"api/channel/hls/{username}.m3u8{query}";
 
+        return await GetPlaylist(url);
+    }
+
+    public async Task<Result<string>> GetServerPlaylist(string username)
+    {
+        if (!cache.TryGetValue(username, out PlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        {
+            tokenResponse = await twitchService.GetAccessToken(username);
+            if (tokenResponse is not null)
+            {
+                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(5));
+            }
+        }
+
+        if (tokenResponse is null)
+        {
+            return Result.Failure<string>(Error.ServerTokenNotFound);
+        }
+        
+        var url = $"api/channel/hls/{username}.m3u8?client_id={ApplicationConstants.ClientId}&token={tokenResponse.Data!.StreamPlaybackAccessToken!.Value}&sig={tokenResponse.Data.StreamPlaybackAccessToken.Signature}&allow_source=true";
+
+        return await GetPlaylist(url);
+    }
+
+    private async Task<Result<string>> GetPlaylist(string url)
+    {
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);

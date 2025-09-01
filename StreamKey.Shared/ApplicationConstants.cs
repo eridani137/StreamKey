@@ -6,13 +6,16 @@ public static class ApplicationConstants
     
     public const string LoggingPlaylists = "LoggingPlaylists";
     public const string RemoveAds = "RemoveAds";
+
+    public const string ServerToken = "ServerToken";
     
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     public const int MaxRequestsPerMinute = 100;
     public const int TimeWindowSeconds = 60;
     public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
     public const string TwitchUrl = "https://www.twitch.tv";
-    private const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
+    public static readonly Uri QqlUrl = new("https://gql.twitch.tv/gql");
+    public const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
     
     public static Dictionary<string, string> Headers { get; } = new()
     {
