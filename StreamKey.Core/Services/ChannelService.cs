@@ -42,9 +42,9 @@ public class ChannelService(
         return Result.Success(channel);
     }
 
-    public async Task<Result<ChannelEntity>> RemoveChannel(string channelName)
+    public async Task<Result<ChannelEntity>> RemoveChannel(int position)
     {
-        var channel = await channelRepository.GetByName(channelName);
+        var channel = await channelRepository.GetByPosition(position);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);

@@ -5,7 +5,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "regexSubstitution": "https://service.streamkey.ru/playlist/?\\1"
+        "regexSubstitution": "https://service.streamkey.ru/playlist/server/?\\1"
       }
     },
     "condition": {

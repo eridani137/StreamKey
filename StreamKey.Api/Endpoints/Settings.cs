@@ -11,6 +11,7 @@ public class Settings : ICarterModule
             .WithTags("Управление настройками")
             .RequireAuthorization();
 
-        group.MapGet("", (ISettingsStorage settings) => Task.FromResult(Results.Ok(settings.GetAllKeysAsync())));
+        group.MapGet("", (ISettingsStorage settings) => Task.FromResult(Results.Ok(settings.GetAllKeysAsync())))
+            .WithName("Получить ключи");
     }
 }

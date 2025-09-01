@@ -40,6 +40,11 @@ public class ChannelRepository(ApplicationDbContext context)
         return await GetSet().FirstOrDefaultAsync(c => c.Name == channelName);
     }
 
+    public async Task<ChannelEntity?> GetByPosition(int position)
+    {
+        return await GetSet().FirstOrDefaultAsync(c => c.Position == position);
+    }
+
     public async Task<bool> HasInPosition(int position)
     {
         return await GetSet().AnyAsync(c => c.Position == position);

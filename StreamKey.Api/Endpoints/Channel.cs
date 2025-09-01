@@ -24,7 +24,8 @@ public class Channel : ICarterModule
                     return Results.Ok(mapped);
                 })
             .Produces<List<ChannelDto>>()
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithName("Получить онлайн каналы");
 
         group.MapPost("",
                 async (ChannelDto dto, IChannelService service) =>
@@ -39,12 +40,13 @@ public class Channel : ICarterModule
                     return Results.Ok(result.Value);
                 })
             .AddEndpointFilter<ValidationFilter<ChannelDto>>()
-            .Produces<ChannelDto>();
+            .Produces<ChannelDto>()
+            .WithName("Добавить канал");
 
-        group.MapDelete("/{channelName}",
-                async (string channelName, IChannelService service) =>
+        group.MapDelete("/{position:int}",
+                async (int position, IChannelService service) =>
                 {
-                    var result = await service.RemoveChannel(channelName);
+                    var result = await service.RemoveChannel(position);
 
                     if (!result.IsSuccess)
                     {
@@ -53,7 +55,8 @@ public class Channel : ICarterModule
 
                     return Results.Ok(result.Value);
                 })
-            .Produces<ChannelDto>();
+            .Produces<ChannelDto>()
+            .WithName("Удалить канал");
 
         group.MapPut("",
             async (ChannelDto dto, IChannelService service) =>
@@ -67,6 +70,7 @@ public class Channel : ICarterModule
                 
                 return Results.Ok(result.Value.Map());
             })
-            .Produces<ChannelDto>();
+            .Produces<ChannelDto>()
+            .WithName("Обновить канал");
     }
 }
