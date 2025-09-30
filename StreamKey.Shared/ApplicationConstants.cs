@@ -3,11 +3,10 @@ namespace StreamKey.Shared;
 public static class ApplicationConstants
 {
     public const string UsherClientName = "UsherClient";
+    public const string ServerClientName = "ServerClient";
     
     public const string LoggingPlaylists = "LoggingPlaylists";
     public const string RemoveAds = "RemoveAds";
-
-    public const string ServerToken = "ServerToken";
     
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     public const int MaxRequestsPerMinute = 100;

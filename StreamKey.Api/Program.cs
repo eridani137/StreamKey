@@ -48,6 +48,21 @@ builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client)
     .AddHttpMessageHandler<FilterNotFoundHandler>()
     .AddStandardResilienceHandler();
 
+builder.Services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client) =>
+    {
+        client.BaseAddress = ApplicationConstants.QqlUrl;
+        client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
+        
+        foreach (var header in ApplicationConstants.Headers)
+        {
+            client.DefaultRequestHeaders.Add(header.Key, header.Value);
+        }
+
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    })
+    .AddHttpMessageHandler<FilterNotFoundHandler>()
+    .AddStandardResilienceHandler();
+
 ConfigureCors.Configure(builder);
 ConfigureJwt.Configure(builder);
 
@@ -64,8 +79,6 @@ var app = builder.Build();
 
 app.MapOpenApi();
 app.MapScalarApiReference();
-
-// await app.ApplyMigrations();
 
 app.UseCors(ConfigureCors.ProductionCorsPolicyName);
 
