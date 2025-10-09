@@ -27,7 +27,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
-        using var client = clientFactory.CreateClient();
+        using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, request);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
         var accessTokenResponse = await JsonSerializer.DeserializeAsync<PlaybackAccessTokenResponse>(contentStream);
