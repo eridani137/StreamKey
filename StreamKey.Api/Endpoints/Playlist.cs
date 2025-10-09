@@ -22,7 +22,7 @@ public class Playlist : ICarterModule
                     IMemoryCache cache,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetPlaylist(context, usherService, false, cache, settings, logger))
+                await GetPlaylist(context, usherService, true, cache, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
@@ -30,19 +30,19 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status500InternalServerError)
             .WithName("Получить плейлист");
 
-        group.MapGet("/server", async (
-                    HttpContext context,
-                    IUsherService usherService,
-                    IMemoryCache cache,
-                    ISettingsStorage settings,
-                    ILogger<Playlist> logger) =>
-                await GetPlaylist(context, usherService, true, cache, settings, logger))
-            .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status429TooManyRequests)
-            .Produces(StatusCodes.Status500InternalServerError)
-            .WithName("Получить серверный плейлист");
+        // group.MapGet("/server", async (
+        //             HttpContext context,
+        //             IUsherService usherService,
+        //             IMemoryCache cache,
+        //             ISettingsStorage settings,
+        //             ILogger<Playlist> logger) =>
+        //         await GetPlaylist(context, usherService, true, cache, settings, logger))
+        //     .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
+        //     .Produces(StatusCodes.Status400BadRequest)
+        //     .Produces(StatusCodes.Status404NotFound)
+        //     .Produces(StatusCodes.Status429TooManyRequests)
+        //     .Produces(StatusCodes.Status500InternalServerError)
+        //     .WithName("Получить серверный плейлист");
     }
 
     private static async Task<IResult> GetPlaylist(
@@ -59,10 +59,10 @@ public class Playlist : ICarterModule
         {
             var (statusCode, channelName, ip, rateLimit) = await RateLimit(context, cache, logger);
 
-            logger.LogInformation(
-                isServerPlaylist
-                    ? "Получение серверного стрима: {Channel} [{Calls}]"
-                    : "Получение стрима: {Channel} [{Calls}]", channelName, rateLimit);
+            // logger.LogInformation(
+            //     isServerPlaylist
+            //         ? "Получение серверного стрима: {Channel} [{Calls}]"
+            //         : "Получение стрима: {Channel} [{Calls}]", channelName, rateLimit);
 
             var result =
                 isServerPlaylist
