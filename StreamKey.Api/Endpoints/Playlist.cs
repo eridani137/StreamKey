@@ -29,20 +29,6 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
             .WithName("Получить плейлист");
-
-        // group.MapGet("/server", async (
-        //             HttpContext context,
-        //             IUsherService usherService,
-        //             IMemoryCache cache,
-        //             ISettingsStorage settings,
-        //             ILogger<Playlist> logger) =>
-        //         await GetPlaylist(context, usherService, true, cache, settings, logger))
-        //     .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
-        //     .Produces(StatusCodes.Status400BadRequest)
-        //     .Produces(StatusCodes.Status404NotFound)
-        //     .Produces(StatusCodes.Status429TooManyRequests)
-        //     .Produces(StatusCodes.Status500InternalServerError)
-        //     .WithName("Получить серверный плейлист");
     }
 
     private static async Task<IResult> GetPlaylist(
