@@ -29,19 +29,6 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
             .WithName("Получить плейлист");
-        
-        group.MapGet("/test", async (
-                    HttpContext context,
-                    IUsherService usherService,
-                    IMemoryCache cache,
-                    ISettingsStorage settings,
-                    ILogger<Playlist> logger) =>
-                await GetPlaylist(context, usherService, false, cache, settings, logger))
-            .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status429TooManyRequests)
-            .Produces(StatusCodes.Status500InternalServerError);
     }
 
     private static async Task<IResult> GetPlaylist(
@@ -101,8 +88,7 @@ public class Playlist : ICarterModule
         }
     }
 
-    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> RateLimit(HttpContext context,
-        IMemoryCache cache, ILogger<Playlist> logger)
+    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> RateLimit(HttpContext context, IMemoryCache cache, ILogger<Playlist> logger)
     {
         var queryString = context.Request.QueryString.ToString();
 
