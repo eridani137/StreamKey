@@ -1,3 +1,4 @@
+using System.Text;
 using Carter;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
@@ -29,6 +30,25 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
             .WithName("Получить плейлист");
+
+        group.MapGet("/test", async (HttpContext context) =>
+        {
+            var uploads = Path.Combine(Directory.GetCurrentDirectory(), "files");
+            Directory.CreateDirectory(uploads);
+            
+            var fileName = Path.GetRandomFileName();
+            var filePath = Path.Combine(uploads, fileName);
+            
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                const string text = "Hello World";
+                var bytes = Encoding.UTF8.GetBytes(text);
+                await stream.WriteAsync(bytes);
+            }
+            
+            var url = $"{context.Request.Scheme}://{context.Request.Host}/files/{fileName}";
+            return Results.Ok(url);
+        });
     }
 
     private static async Task<IResult> GetPlaylist(

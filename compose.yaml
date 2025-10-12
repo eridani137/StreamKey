@@ -19,6 +19,7 @@
         condition: service_started
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
+      - files:/app/files
     networks:
       - internal
   
@@ -82,6 +83,7 @@
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - files:/app/files
     depends_on:
       - streamkey-api
     networks:
@@ -92,5 +94,6 @@ networks:
     driver: bridge
 
 volumes:
+  files:
   db-data:
   seq-data:
