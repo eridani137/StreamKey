@@ -27,7 +27,7 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
             tokenResponse = await twitchService.GetAccessToken(username);
             if (tokenResponse is not null)
             {
-                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
+                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(3));
             }
         }
 
