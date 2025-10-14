@@ -71,10 +71,10 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
         
             var content = await response.Content.ReadAsStringAsync();
 
-            if (await settings.GetBoolSettingAsync(ApplicationConstants.RemoveAds, true))
-            {
-                content = await RemoveAds(content);
-            }
+            // if (await settings.GetBoolSettingAsync(ApplicationConstants.RemoveAds, true))
+            // {
+            //     content = await RemoveAds(content);
+            // }
             
             return Result.Success(content);
         }
