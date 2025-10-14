@@ -70,11 +70,6 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
             }
         
             var content = await response.Content.ReadAsStringAsync();
-
-            // if (await settings.GetBoolSettingAsync(ApplicationConstants.RemoveAds, true))
-            // {
-            //     content = await RemoveAds(content);
-            // }
             
             return Result.Success(content);
         }
@@ -86,32 +81,5 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
         {
             return Result.Failure<string>(Error.UnexpectedError);
         }
-    }
-
-    private async Task<string> RemoveAds(string content)
-    {
-        var masterPlaylist = MasterPlaylist.LoadFromText(content);
-        
-        var mediaStream = masterPlaylist.Streams.FirstOrDefault(s => s.Video is "1080p60" or "1080p");
-        if (mediaStream is null) return content;
-        
-        using var client = clientFactory.CreateClient(ApplicationConstants.CleanClientName);
-        var response = await client.GetAsync(mediaStream.Uri);
-
-        var mediaPlaylist = await response.Content.ReadAsStringAsync();
-        mediaPlaylist = mediaPlaylist.RemoveAds();
-        
-        var uploads = Path.Combine(Directory.GetCurrentDirectory(), "files");
-
-        var fileName = Guid.CreateVersion7().ToString("N");
-        var filePath = Path.Combine(uploads, fileName);
-
-        await using var stream = new FileStream(filePath, FileMode.Create);
-        var bytes = Encoding.UTF8.GetBytes(mediaPlaylist);
-        await stream.WriteAsync(bytes);
-
-        mediaStream.Uri = $"https://service.streamkey.ru/files/{fileName}";
-
-        return masterPlaylist.ToString();
     }
 }

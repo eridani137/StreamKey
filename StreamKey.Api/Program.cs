@@ -35,6 +35,12 @@ builder.Services.AddIdentity();
 
 builder.Services.AddTransient<FilterNotFoundHandler>();
 
+var section = builder.Configuration.GetSection("Authorization");
+if (section.Exists() && !string.IsNullOrEmpty(section.Value))
+{
+    ApplicationConstants.Headers.Add("Authorization", section.Value);
+}
+
 builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client) =>
     {
         client.BaseAddress = ApplicationConstants.UsherUrl;
@@ -53,20 +59,6 @@ builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client)
 builder.Services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client) =>
     {
         client.BaseAddress = ApplicationConstants.QqlUrl;
-        client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
-
-        foreach (var header in ApplicationConstants.Headers)
-        {
-            client.DefaultRequestHeaders.Add(header.Key, header.Value);
-        }
-
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    })
-    .AddHttpMessageHandler<FilterNotFoundHandler>()
-    .AddStandardResilienceHandler();
-
-builder.Services.AddHttpClient(ApplicationConstants.CleanClientName, (_, client) =>
-    {
         client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
 
         foreach (var header in ApplicationConstants.Headers)
