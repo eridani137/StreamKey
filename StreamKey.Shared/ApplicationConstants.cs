@@ -23,6 +23,7 @@ public static class ApplicationConstants
         { "Accept-Language", "en-US" },
         { "Client-ID", ClientId },
         { "Origin", TwitchUrl },
+        { "x-device-id", Extensions.GenerateDeviceId() },
         { "sec-ch-ua", """Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138""" },
         { "sec-ch-ua-mobile", "?0" },
         { "sec-ch-ua-platform", """Windows""" },
