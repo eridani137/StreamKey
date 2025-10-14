@@ -15,13 +15,14 @@ public static class ApplicationConstants
     public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
     public const string TwitchUrl = "https://www.twitch.tv";
     public static readonly Uri QqlUrl = new("https://gql.twitch.tv/gql");
-    public const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
+    public const string ClientId = "adza691ggr0kr2j4hgerejmlugvtyd";
     
     public static Dictionary<string, string> Headers { get; } = new()
     {
         { "Accept", "*/*" },
         { "Accept-Language", "en-US" },
         { "Client-ID", ClientId },
+        { "x-device-id", Extensions.GenerateDeviceId() },
         { "Origin", TwitchUrl },
         { "sec-ch-ua", """Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138""" },
         { "sec-ch-ua-mobile", "?0" },
