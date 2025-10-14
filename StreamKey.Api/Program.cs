@@ -10,6 +10,8 @@ using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared;
 
+var uploads = Path.Combine(Directory.GetCurrentDirectory(), "files");
+Directory.CreateDirectory(uploads);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +39,7 @@ builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client)
     {
         client.BaseAddress = ApplicationConstants.UsherUrl;
         client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
-        
+
         foreach (var header in ApplicationConstants.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);
@@ -52,7 +54,21 @@ builder.Services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client
     {
         client.BaseAddress = ApplicationConstants.QqlUrl;
         client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
-        
+
+        foreach (var header in ApplicationConstants.Headers)
+        {
+            client.DefaultRequestHeaders.Add(header.Key, header.Value);
+        }
+
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    })
+    .AddHttpMessageHandler<FilterNotFoundHandler>()
+    .AddStandardResilienceHandler();
+
+builder.Services.AddHttpClient(ApplicationConstants.CleanClientName, (_, client) =>
+    {
+        client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
+
         foreach (var header in ApplicationConstants.Headers)
         {
             client.DefaultRequestHeaders.Add(header.Key, header.Value);

@@ -4,6 +4,7 @@ public static class ApplicationConstants
 {
     public const string UsherClientName = "UsherClient";
     public const string ServerClientName = "ServerClient";
+    public const string CleanClientName = "CleanClient";
     
     public const string LoggingPlaylists = "LoggingPlaylists";
     public const string RemoveAds = "RemoveAds";

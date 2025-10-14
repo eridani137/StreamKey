@@ -95,6 +95,9 @@ public static partial class PlaylistExtensions
 
                 // Добавляем контентный сегмент
                 AddLineToResult(line);
+                
+                if (segmentInfo.Uri != null) AddLineToResult(segmentInfo.Uri);
+                
                 UpdateCurrentTime(segmentInfo.Duration);
                 continue;
             }
@@ -176,6 +179,7 @@ public static partial class PlaylistExtensions
         if (!line.StartsWith("#EXT-X-DATERANGE")) return false;
 
         return line.Contains("CLASS=\"twitch-stitched-ad\"", StringComparison.OrdinalIgnoreCase) ||
+               line.Contains("CLASS=\"twitch-ads\"", StringComparison.OrdinalIgnoreCase) ||
                line.Contains("ID=\"stitched-ad-", StringComparison.OrdinalIgnoreCase) ||
                line.Contains("X-TV-TWITCH-AD-", StringComparison.OrdinalIgnoreCase) ||
                TwitchAdAttribute().IsMatch(line);
