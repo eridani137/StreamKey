@@ -10,6 +10,8 @@
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
+      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
+      - TWITCH_SECRET=${TWITCH_SECRET}
     env_file:
       - .env
     depends_on:
@@ -19,7 +21,6 @@
         condition: service_started
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
-      - files:/app/files
     networks:
       - internal
   
@@ -83,7 +84,6 @@
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - files:/app/files
     depends_on:
       - streamkey-api
     networks:
@@ -94,6 +94,5 @@ networks:
     driver: bridge
 
 volumes:
-  files:
   db-data:
   seq-data:
