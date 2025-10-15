@@ -132,7 +132,7 @@ const QualityMenuEnhancer = {
         return labels.length > 0;
     },
 
-    async startObserver() {
+    startObserver() {
         if (this.observer) return;
 
         this.observer = new MutationObserver(() => this.applyEnhancements());
