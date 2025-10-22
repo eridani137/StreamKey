@@ -60,6 +60,7 @@ public class UsherService(
         query["player_backend"] = "mediaplayer";
         query["playlist_include_framerate"] = "true";
         query["reassignments_supported"] = "true";
+        query["supported_codecs"] = "av1,h265,h264";
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
