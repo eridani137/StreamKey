@@ -4,6 +4,7 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
 using StreamKey.Core.Mappers;
+using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -15,12 +16,32 @@ public class Channel : ICarterModule
             .WithTags("Работа с каналами")
             .RequireAuthorization();
 
+        group.MapGet("/refresh",
+                async (ILogger<Channel> logger, IChannelRepository repository, IChannelService service) =>
+                {
+                    var channels = await repository.GetAll();
+                    foreach (var channel in channels)
+                    {
+                        try
+                        {
+                            await service.UpdateChannelInfo(channel);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "Ошибка при обновлении информации канала {@Channel}", channel);
+                        }
+                    }
+                })
+            .Produces(StatusCodes.Status200OK)
+            .RequireAuthorization()
+            .WithName("Запуск обновления каналов");
+
         group.MapGet("",
                 async (IChannelService service) =>
                 {
                     var channels = await service.GetChannels();
                     var mapped = channels.Map();
-                    
+
                     return Results.Ok(mapped);
                 })
             .Produces<List<ChannelDto>>()
@@ -59,17 +80,17 @@ public class Channel : ICarterModule
             .WithName("Удалить канал");
 
         group.MapPut("",
-            async (ChannelDto dto, IChannelService service) =>
-            {
-                var result = await service.UpdateChannel(dto);
-
-                if (!result.IsSuccess)
+                async (ChannelDto dto, IChannelService service) =>
                 {
-                    return Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
-                }
-                
-                return Results.Ok(result.Value.Map());
-            })
+                    var result = await service.UpdateChannel(dto);
+
+                    if (!result.IsSuccess)
+                    {
+                        return Results.Problem(detail: result.Error.Message, statusCode: result.Error.StatusCode);
+                    }
+
+                    return Results.Ok(result.Value.Map());
+                })
             .Produces<ChannelDto>()
             .WithName("Обновить канал");
     }
