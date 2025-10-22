@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Web;
 using M3U8Parser;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
@@ -13,7 +14,11 @@ using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
-public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitchService, ISettingsStorage settings, IMemoryCache cache) : IUsherService
+public class UsherService(
+    IHttpClientFactory clientFactory,
+    ITwitchService twitchService,
+    ISettingsStorage settings,
+    IMemoryCache cache) : IUsherService
 {
     public async Task<Result<string>> GetPlaylist(string username, string query)
     {
@@ -37,8 +42,27 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
         {
             return Result.Failure<string>(Error.ServerTokenNotFound);
         }
-        
-        var url = $"api/channel/hls/{username}.m3u8?client_id={ApplicationConstants.ClientId}&token={tokenResponse.Data!.StreamPlaybackAccessToken!.Value}&sig={tokenResponse.Data.StreamPlaybackAccessToken.Signature}&allow_source=true";
+
+        var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
+        {
+            Path = $"api/channel/hls/{username}.m3u8"
+        };
+
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["client_id"] = ApplicationConstants.ClientId;
+        query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
+        query["sig"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature;
+        query["allow_source"] = "true";
+        query["fast_bread"] = "true";
+        query["include_unavailable"] = "true";
+        query["multigroup_video"] = "false";
+        query["platform"] = "web";
+        query["player_backend"] = "mediaplayer";
+        query["playlist_include_framerate"] = "true";
+        query["reassignments_supported"] = "true";
+
+        uriBuilder.Query = query.ToString();
+        var url = uriBuilder.ToString();
 
         return await GetPlaylist(url);
     }
@@ -54,7 +78,7 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
             {
                 return Result.Failure<string>(Error.StreamNotFound);
             }
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
@@ -66,11 +90,13 @@ public class UsherService(IHttpClientFactory clientFactory, ITwitchService twitc
                         obj.Remove("url");
                     }
                 }
-                return Result.Failure<string>(Error.PlaylistNotReceived(array.ToString(Formatting.None), (int)response.StatusCode));
+
+                return Result.Failure<string>(Error.PlaylistNotReceived(array.ToString(Formatting.None),
+                    (int)response.StatusCode));
             }
-        
+
             var content = await response.Content.ReadAsStringAsync();
-            
+
             return Result.Success(content);
         }
         catch (TaskCanceledException)
