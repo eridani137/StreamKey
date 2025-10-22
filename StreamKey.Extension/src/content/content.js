@@ -326,23 +326,20 @@ const ActiveChannelsEnhancer = {
 
         let updated = false;
 
-        let divs = [];
 
-        const items = this.channelData.reverse();
+        const items = this.channelData
+        .sort((a, b) => a.position - b.position)
+        .reverse();
+        
         for (it of items) {
 
             const firstItem = itemsPane.firstChild;
             const div = this.createChannelItem(it, firstItem.className, firstItem.style.cssText);
 
-            divs.push({ [it.position]: div });
+            firstItem.parentNode.insertBefore(div, firstItem);
 
             updated = true;
         }
-
-        const data = divs.sort((a,b) => a.position - b.position);
-        const html = data.length > 0 ? Object.values(data[0]).join('<br/>'): '';
-
-        firstItem.parentNode.insertBefore(html, firstItem);
 
         if (updated) {
             console.log("Channels updated successfully from API.");
