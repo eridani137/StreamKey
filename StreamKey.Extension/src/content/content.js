@@ -322,19 +322,20 @@ const ActiveChannelsEnhancer = {
             itemsPane = get_itemsPane();
         }
 
-        const q = '.streamkey-channel-item';
-
-        document.querySelectorAll(q).forEach(item => {
-            item.remove();
-        });
+        document.querySelectorAll('.streamkey-channel-item').forEach(item => item.remove());
 
         let updated = false;
 
-        const items = this.channelData.reverse();
+
+        const items = this.channelData
+        .sort((a, b) => a.position - b.position)
+        .reverse();
+        
         for (it of items) {
 
             const firstItem = itemsPane.firstChild;
             const div = this.createChannelItem(it, firstItem.className, firstItem.style.cssText);
+
             firstItem.parentNode.insertBefore(div, firstItem);
 
             updated = true;
