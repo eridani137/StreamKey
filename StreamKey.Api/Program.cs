@@ -35,10 +35,16 @@ builder.Services.AddIdentity();
 
 builder.Services.AddTransient<FilterNotFoundHandler>();
 
-var section = builder.Configuration.GetSection("Authorization");
-if (section.Exists() && !string.IsNullOrEmpty(section.Value))
+var authorization = builder.Configuration.GetSection("Authorization");
+if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
 {
-    ApplicationConstants.Headers.Add("Authorization", section.Value);
+    ApplicationConstants.Headers.Add("Authorization", authorization.Value);
+}
+
+var deviceId = builder.Configuration.GetSection("DeviceId");
+if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
+{
+    ApplicationConstants.Headers.Add("x-device-id", deviceId.Value);
 }
 
 builder.Services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client) =>

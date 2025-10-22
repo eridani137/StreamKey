@@ -10,8 +10,6 @@
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
-      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
-      - TWITCH_SECRET=${TWITCH_SECRET}
     env_file:
       - .env
     depends_on:
