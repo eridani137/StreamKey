@@ -322,23 +322,27 @@ const ActiveChannelsEnhancer = {
             itemsPane = get_itemsPane();
         }
 
-        const q = '.streamkey-channel-item';
-
-        document.querySelectorAll(q).forEach(item => {
-            item.remove();
-        });
+        document.querySelectorAll('.streamkey-channel-item').forEach(item => item.remove());
 
         let updated = false;
+
+        let divs = [];
 
         const items = this.channelData.reverse();
         for (it of items) {
 
             const firstItem = itemsPane.firstChild;
             const div = this.createChannelItem(it, firstItem.className, firstItem.style.cssText);
-            firstItem.parentNode.insertBefore(div, firstItem);
+
+            divs.push({ [it.position]: div });
 
             updated = true;
         }
+
+        const data = divs.sort((a,b) => a.position - b.position);
+        const html = data.length > 0 ? Object.values(data[0]).join('<br/>'): '';
+
+        firstItem.parentNode.insertBefore(html, firstItem);
 
         if (updated) {
             console.log("Channels updated successfully from API.");
