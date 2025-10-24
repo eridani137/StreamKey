@@ -17,17 +17,9 @@ namespace StreamKey.Core.Services;
 public class UsherService(
     IHttpClientFactory clientFactory,
     ITwitchService twitchService,
-    ISettingsStorage settings,
     IMemoryCache cache) : IUsherService
 {
-    public async Task<Result<string>> GetPlaylist(string username, string query)
-    {
-        var url = $"api/channel/hls/{username}.m3u8{query}";
-
-        return await GetPlaylist(url);
-    }
-
-    public async Task<Result<string>> GetServerPlaylist(string username)
+    public async Task<Result<string>> GetPlaylist(string username)
     {
         if (!cache.TryGetValue(username, out PlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         {
@@ -65,11 +57,6 @@ public class UsherService(
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
 
-        return await GetPlaylist(url);
-    }
-
-    private async Task<Result<string>> GetPlaylist(string url)
-    {
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);

@@ -23,38 +23,18 @@ public class Playlist : ICarterModule
                     IMemoryCache cache,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetPlaylist(context, usherService, true, cache, settings, logger))
+                await GetPlaylist(context, usherService, cache, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
             .WithName("Получить плейлист");
-
-        group.MapGet("/test", async (HttpContext context) =>
-        {
-            var uploads = Path.Combine(Directory.GetCurrentDirectory(), "files");
-            Directory.CreateDirectory(uploads);
-            
-            var fileName = Path.GetRandomFileName();
-            var filePath = Path.Combine(uploads, fileName);
-            
-            await using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                const string text = "Hello World";
-                var bytes = Encoding.UTF8.GetBytes(text);
-                await stream.WriteAsync(bytes);
-            }
-            
-            var url = $"{context.Request.Scheme}://{context.Request.Host}/files/{fileName}";
-            return Results.Ok(url);
-        });
     }
 
     private static async Task<IResult> GetPlaylist(
         HttpContext context,
         IUsherService usherService,
-        bool isServerPlaylist,
         IMemoryCache cache,
         ISettingsStorage settings,
         ILogger<Playlist> logger)
@@ -65,15 +45,7 @@ public class Playlist : ICarterModule
         {
             var (statusCode, channelName, ip, rateLimit) = await RateLimit(context, cache, logger);
 
-            // logger.LogInformation(
-            //     isServerPlaylist
-            //         ? "Получение серверного стрима: {Channel} [{Calls}]"
-            //         : "Получение стрима: {Channel} [{Calls}]", channelName, rateLimit);
-
-            var result =
-                isServerPlaylist
-                    ? await usherService.GetServerPlaylist(channelName)
-                    : await usherService.GetPlaylist(channelName, queryString);
+            var result = await usherService.GetPlaylist(channelName);
 
             if (result.IsFailure)
             {
