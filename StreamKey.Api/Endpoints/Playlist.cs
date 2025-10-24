@@ -43,7 +43,7 @@ public class Playlist : ICarterModule
 
         try
         {
-            var (statusCode, channelName, ip, rateLimit) = await RateLimit(context, cache, logger);
+            var (statusCode, channelName, ip, rateLimit) = await Preprocessing(context, cache, logger);
 
             var result = await usherService.GetPlaylist(channelName);
 
@@ -80,7 +80,7 @@ public class Playlist : ICarterModule
         }
     }
 
-    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> RateLimit(HttpContext context, IMemoryCache cache, ILogger<Playlist> logger)
+    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> Preprocessing(HttpContext context, IMemoryCache cache, ILogger<Playlist> logger)
     {
         var queryString = context.Request.QueryString.ToString();
 
