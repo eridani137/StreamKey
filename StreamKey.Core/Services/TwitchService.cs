@@ -9,13 +9,12 @@ namespace StreamKey.Core.Services;
 
 public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchService> logger) : ITwitchService
 {
-    public async Task<PlaybackAccessTokenResponse?> GetAccessToken(string username)
+    public async Task<PlaybackAccessTokenResponse?> GetStreamAccessToken(string username)
     {
         var request = new PlaybackAccessTokenRequest
         {
             OperationName = "PlaybackAccessToken_Template",
-            Query =
-                "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
+            Query = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
             Variables = new Variables
             {
                 IsLive = true,
@@ -27,6 +26,40 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
+        using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
+        using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, request);
+        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        var accessTokenResponse = await JsonSerializer.DeserializeAsync<PlaybackAccessTokenResponse>(contentStream);
+
+        if (accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
+            accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+            logger.LogError("Ошибка получения [Signature, Value] JSON: {JSON}", jsonString);
+
+            return null;
+        }
+
+        return accessTokenResponse;
+    }
+
+    public async Task<PlaybackAccessTokenResponse?> GetVodAccessToken(string vodId)
+    {
+        var request = new PlaybackAccessTokenRequest
+        {
+            OperationName = "PlaybackAccessToken_Template",
+            Query = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
+            Variables = new Variables
+            {
+                IsLive = false,
+                Login = "",
+                IsVod = true,
+                VodId = vodId,
+                PlayerType = "site",
+                Platform = "web"
+            }
+        };
+        
         using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, request);
         await using var contentStream = await response.Content.ReadAsStreamAsync();

@@ -23,29 +23,42 @@ public class Playlist : ICarterModule
                     IMemoryCache cache,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetPlaylist(context, usherService, cache, settings, logger))
+                await GetStreamPlaylist(context, usherService, cache, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
-            .WithName("Получить плейлист");
+            .WithName("Получить плейлист стрима");
+
+        group.MapGet("/vod", async (
+                    HttpContext context,
+                    IUsherService usherService,
+                    IMemoryCache cache,
+                    ISettingsStorage settings,
+                    ILogger<Playlist> logger) =>
+                await GetVodPlaylist(context, usherService, cache, settings, logger))
+            .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status429TooManyRequests)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .WithName("Получить плейлист записи");
+        ;
     }
 
-    private static async Task<IResult> GetPlaylist(
+    private static async Task<IResult> GetStreamPlaylist(
         HttpContext context,
         IUsherService usherService,
         IMemoryCache cache,
         ISettingsStorage settings,
         ILogger<Playlist> logger)
     {
-        var queryString = context.Request.QueryString.ToString();
-
         try
         {
             var (statusCode, channelName, ip, rateLimit) = await Preprocessing(context, cache, logger);
 
-            var result = await usherService.GetPlaylist(channelName);
+            var result = await usherService.GetStreamPlaylist(channelName);
 
             if (result.IsFailure)
             {
@@ -75,12 +88,62 @@ public class Playlist : ICarterModule
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Query: {Query}", queryString);
+            logger.LogError(e, "Query: {Query}", context.Request.QueryString.ToString());
             return Results.InternalServerError();
         }
     }
 
-    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> Preprocessing(HttpContext context, IMemoryCache cache, ILogger<Playlist> logger)
+    private static async Task<IResult> GetVodPlaylist(
+        HttpContext context,
+        IUsherService usherService,
+        IMemoryCache cache,
+        ISettingsStorage settings,
+        ILogger<Playlist> logger)
+    {
+        try
+        {
+            if (!context.Request.Query.TryGetValue("vod_id", out var vodId))
+            {
+                return Results.BadRequest("vod_id is not found");
+            }
+            
+            var result = await usherService.GetVodPlaylist(vodId.ToString());
+            
+            if (result.IsFailure)
+            {
+                switch (result.Error.Code)
+                {
+                    case ErrorCode.StreamNotFound:
+                        return Results.NotFound(result.Error.Message);
+                    case ErrorCode.PlaylistNotReceived:
+                        logger.LogWarning("{VodId}: {Error}", vodId.ToString(), result.Error.Message);
+                        return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
+                    case ErrorCode.None:
+                    case ErrorCode.NullValue:
+                    case ErrorCode.UnexpectedError:
+                    case ErrorCode.Timeout:
+                    default:
+                        logger.LogWarning("{Error}: {VodId}", result.Error.Message, vodId.ToString());
+                        return Results.InternalServerError(result.Error.Message);
+                }
+            }
+            
+            if (await settings.GetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false))
+            {
+                logger.LogInformation("{Playlist}", result.Value);
+            }
+            
+            return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Query: {Query}", context.Request.QueryString.ToString());
+            return Results.InternalServerError();
+        }
+    }
+
+    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> Preprocessing(
+        HttpContext context, IMemoryCache cache, ILogger<Playlist> logger)
     {
         var queryString = context.Request.QueryString.ToString();
 

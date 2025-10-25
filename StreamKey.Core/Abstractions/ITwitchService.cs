@@ -4,5 +4,6 @@ namespace StreamKey.Core.Abstractions;
 
 public interface ITwitchService
 {
-    Task<PlaybackAccessTokenResponse?> GetAccessToken(string username);
+    Task<PlaybackAccessTokenResponse?> GetStreamAccessToken(string username);
+    Task<PlaybackAccessTokenResponse?> GetVodAccessToken(string username);
 }

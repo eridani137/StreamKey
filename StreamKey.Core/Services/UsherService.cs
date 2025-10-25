@@ -19,11 +19,11 @@ public class UsherService(
     ITwitchService twitchService,
     IMemoryCache cache) : IUsherService
 {
-    public async Task<Result<string>> GetPlaylist(string username)
+    public async Task<Result<string>> GetStreamPlaylist(string username)
     {
         if (!cache.TryGetValue(username, out PlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         {
-            tokenResponse = await twitchService.GetAccessToken(username);
+            tokenResponse = await twitchService.GetStreamAccessToken(username);
             if (tokenResponse is not null)
             {
                 cache.Set(username, tokenResponse, TimeSpan.FromMinutes(3));
@@ -57,6 +57,84 @@ public class UsherService(
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
 
+        try
+        {
+            using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+            var response = await client.GetAsync(url);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Result.Failure<string>(Error.StreamNotFound);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var array = JArray.Parse(errorContent);
+                foreach (var jToken in array)
+                {
+                    if (jToken is JObject obj)
+                    {
+                        obj.Remove("url");
+                    }
+                }
+
+                return Result.Failure<string>(Error.PlaylistNotReceived(array.ToString(Formatting.None),
+                    (int)response.StatusCode));
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            return Result.Success(content);
+        }
+        catch (TaskCanceledException)
+        {
+            return Result.Failure<string>(Error.Timeout);
+        }
+        catch (Exception)
+        {
+            return Result.Failure<string>(Error.UnexpectedError);
+        }
+    }
+
+    public async Task<Result<string>> GetVodPlaylist(string vodId)
+    {
+        if (!cache.TryGetValue(vodId, out PlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        {
+            tokenResponse = await twitchService.GetVodAccessToken(vodId);
+            if (tokenResponse is not null)
+            {
+                cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(3));
+            }
+        }
+
+        if (tokenResponse is null)
+        {
+            return Result.Failure<string>(Error.ServerTokenNotFound);
+        }
+        
+        var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
+        {
+            Path = $"vod/{vodId}.m3u8"
+        };
+        
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["client_id"] = ApplicationConstants.ClientId;
+        query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
+        query["sig"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature;
+        query["allow_source"] = "true";
+        query["enable_score"] = "true";
+        query["include_unavailable"] = "true";
+        query["multigroup_video"] = "false";
+        query["platform"] = "web";
+        query["player_backend"] = "mediaplayer";
+        query["playlist_include_framerate"] = "true";
+        query["reassignments_supported"] = "true";
+        query["supported_codecs"] = "av1,h265,h264";
+
+        uriBuilder.Query = query.ToString();
+        var url = uriBuilder.ToString();
+        
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
