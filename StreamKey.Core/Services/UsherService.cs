@@ -21,7 +21,7 @@ public class UsherService(
 {
     public async Task<Result<string>> GetStreamPlaylist(string username)
     {
-        if (!cache.TryGetValue(username, out PlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         {
             tokenResponse = await twitchService.GetStreamAccessToken(username);
             if (tokenResponse is not null)
@@ -99,7 +99,7 @@ public class UsherService(
 
     public async Task<Result<string>> GetVodPlaylist(string vodId)
     {
-        if (!cache.TryGetValue(vodId, out PlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         {
             tokenResponse = await twitchService.GetVodAccessToken(vodId);
             if (tokenResponse is not null)
@@ -120,8 +120,8 @@ public class UsherService(
         
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["client_id"] = ApplicationConstants.ClientId;
-        query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
-        query["sig"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature;
+        query["token"] = tokenResponse?.Data?.VideoPlaybackAccessToken?.Value;
+        query["sig"] = tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature;
         query["allow_source"] = "true";
         query["enable_score"] = "true";
         query["include_unavailable"] = "true";

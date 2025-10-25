@@ -9,7 +9,7 @@ namespace StreamKey.Core.Services;
 
 public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchService> logger) : ITwitchService
 {
-    public async Task<PlaybackAccessTokenResponse?> GetStreamAccessToken(string username)
+    public async Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username)
     {
         var request = new PlaybackAccessTokenRequest
         {
@@ -29,7 +29,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, request);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var accessTokenResponse = await JsonSerializer.DeserializeAsync<PlaybackAccessTokenResponse>(contentStream);
+        var accessTokenResponse = await JsonSerializer.DeserializeAsync<StreamPlaybackAccessTokenResponse>(contentStream);
 
         if (accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
@@ -43,7 +43,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         return accessTokenResponse;
     }
 
-    public async Task<PlaybackAccessTokenResponse?> GetVodAccessToken(string vodId)
+    public async Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string vodId)
     {
         var request = new PlaybackAccessTokenRequest
         {
@@ -63,10 +63,10 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, request);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var accessTokenResponse = await JsonSerializer.DeserializeAsync<PlaybackAccessTokenResponse>(contentStream);
+        var accessTokenResponse = await JsonSerializer.DeserializeAsync<VideoPlaybackAccessTokenResponse>(contentStream);
 
-        if (accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
-            accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
+        if (accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
+            accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Value is null)
         {
             var jsonString = await response.Content.ReadAsStringAsync();
             logger.LogError("Ошибка получения [Signature, Value] JSON: {JSON}", jsonString);
