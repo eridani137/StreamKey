@@ -172,6 +172,9 @@ const ActiveChannelsEnhancer = {
     channelData: [],
     isDataReady: false,
     tooltipObserver: null,
+    lastUpdateTime: 0,
+    minUpdateInterval: 5000,
+    pendingUpdate: null,
 
     init() {
         this.setupTooltipHandler();
@@ -220,19 +223,19 @@ const ActiveChannelsEnhancer = {
     },
 
     async fetchAndUpdateChannels() {
-
         const r = await fetch(CONFIG.apiUrl + "/channels")
-        .catch(err => {});
-        if (!r.ok) {
-            throw new Error(`API request failed with status ${r.status}`);
+            .catch(err => {});
+        if (!r || !r.ok) {
+            console.error(`API request failed with status ${r?.status}`);
+            return;
         }
 
         let error = null;
         const data = await r.json()
-        .catch(err => error = err);
+            .catch(err => error = err);
 
         if (error) {
-            return console.error("Failed to fetch or update channels:", err)
+            return console.error("Failed to fetch or update channels:", error);
         }
 
         this.channelData = data;
@@ -257,6 +260,28 @@ const ActiveChannelsEnhancer = {
         }
 
         console.log(`Found ${channelCards.length} channel cards, checking...`);
+        this.scheduleUpdate();
+    },
+
+    scheduleUpdate() {
+        const now = Date.now();
+        const timeSinceLastUpdate = now - this.lastUpdateTime;
+
+        if (timeSinceLastUpdate < this.minUpdateInterval) {
+            if (this.pendingUpdate) {
+                clearTimeout(this.pendingUpdate);
+            }
+
+            const remainingTime = this.minUpdateInterval - timeSinceLastUpdate;
+            this.pendingUpdate = setTimeout(() => {
+                this.updateChannels();
+                this.pendingUpdate = null;
+            }, remainingTime);
+
+            console.log(`Update scheduled in ${remainingTime}ms`);
+            return;
+        }
+
         this.updateChannels();
     },
 
@@ -284,7 +309,6 @@ const ActiveChannelsEnhancer = {
     },
 
     createChannelItem(item, cl, style) {
-
         const nickname = item.channelName;
         const avatar = item.info.thumb;
         const title = item.info.title;
@@ -300,10 +324,11 @@ const ActiveChannelsEnhancer = {
         <div><div class="Layout-sc-1xcs6mc-0 AoXTY side-nav-card"><a data-a-id="recommended-channel-0" data-test-selector="recommended-channel" aria-haspopup="dialog" class="ScCoreLink-sc-16kq0mq-0 fytYW InjectLayout-sc-1i43xsx-0 cnzybN side-nav-card__link tw-link" href="/${nickname}"><div class="Layout-sc-1xcs6mc-0 kErOMx side-nav-card__avatar"><div class="ScAvatar-sc-144b42z-0 dLsNfm tw-avatar"><img class="InjectLayout-sc-1i43xsx-0 fAYJcN tw-image tw-image-avatar" alt="" src="${avatar}" style="object-fit: cover;"></div></div><div class="Layout-sc-1xcs6mc-0 bLlihH"><div class="Layout-sc-1xcs6mc-0 dJfBsr"><div data-a-target="side-nav-card-metadata" class="Layout-sc-1xcs6mc-0 ffUuNa"><div class="Layout-sc-1xcs6mc-0 kvrzxX side-nav-card__title"><p title="${nickname}" data-a-target="side-nav-title" class="CoreText-sc-1txzju1-0 dTdgXA InjectLayout-sc-1i43xsx-0 hnBAak">${nickname}</p></div><div class="Layout-sc-1xcs6mc-0 dWQoKW side-nav-card__metadata" data-a-target="side-nav-game-title"><p dir="auto" title="${category}" class="CoreText-sc-1txzju1-0 iMyVXK">${category}</p></div></div><div class="Layout-sc-1xcs6mc-0 cXMAQb side-nav-card__live-status" data-a-target="side-nav-live-status"><div class="Layout-sc-1xcs6mc-0 kvrzxX"><div class="ScChannelStatusIndicator-sc-bjn067-0 fJwlvq tw-channel-status-indicator"></div><p class="CoreText-sc-1txzju1-0 cWFBTs InjectLayout-sc-1i43xsx-0 cdydzE">В эфире</p><div class="Layout-sc-1xcs6mc-0 dqfEBK"><span aria-hidden="true" class="CoreText-sc-1txzju1-0 fYAAA-D">${usersCount}</span><p class="CoreText-sc-1txzju1-0 cWFBTs InjectLayout-sc-1i43xsx-0 cdydzE">${usersCount} зрителей</p></div></div></div></div></div><div class="Layout-sc-1xcs6mc-0 dJfBsr"><div class="Layout-sc-1xcs6mc-0 side-nav-card__link__tooltip-arrow"><div class="ScSvgWrapper-sc-wkgzod-0 dKXial tw-svg"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M7.5 7.5 10 10l-2.5 2.5L9 14l4-4-4-4-1.5 1.5z"></path></svg></div><p class="CoreText-sc-1txzju1-0 cWFBTs InjectLayout-sc-1i43xsx-0 cdydzE">Используйте клавишу «Стрелка вправо», чтобы отобразить дополнительную информацию.</p></div></div></a></div></div>
         `;
 
-        return div
+        return div;
     },
 
     async updateChannels() {
+        this.lastUpdateTime = Date.now();
 
         if (!this.channelData || this.channelData.length === 0) {
             return;
@@ -318,7 +343,7 @@ const ActiveChannelsEnhancer = {
 
         let itemsPane = get_itemsPane();
         while (!itemsPane) {
-            sleep(250);
+            await sleep(250);
             itemsPane = get_itemsPane();
         }
 
@@ -326,13 +351,11 @@ const ActiveChannelsEnhancer = {
 
         let updated = false;
 
-
         const items = this.channelData
-        .sort((a, b) => a.position - b.position)
-        .reverse();
-        
-        for (it of items) {
+            .sort((a, b) => a.position - b.position)
+            .reverse();
 
+        for (const it of items) {
             const firstItem = itemsPane.firstChild;
             const div = this.createChannelItem(it, firstItem.className, firstItem.style.cssText);
 
@@ -350,6 +373,16 @@ const ActiveChannelsEnhancer = {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
             this.updateInterval = null;
+        }
+
+        if (this.pendingUpdate) {
+            clearTimeout(this.pendingUpdate);
+            this.pendingUpdate = null;
+        }
+
+        if (this.tooltipObserver) {
+            this.tooltipObserver.disconnect();
+            this.tooltipObserver = null;
         }
     }
 };
