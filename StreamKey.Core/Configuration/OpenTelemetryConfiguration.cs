@@ -24,13 +24,21 @@ public static class OpenTelemetryConfiguration
                 tracing
                     .AddAspNetCoreInstrumentation(options =>
                     {
-                        options.Filter = httpContext => !httpContext.Request.Path.StartsWithSegments("/channels");
+                        options.Filter = httpContext => 
+                            !httpContext.Request.Path.StartsWithSegments("/channels") &&
+                            !httpContext.Request.Path.StartsWithSegments("/playlist") &&
+                            !httpContext.Request.Path.StartsWithSegments("/playlist/vod");
                     })
                     .AddHttpClientInstrumentation(options =>
                     {
                         options.FilterHttpRequestMessage = (httpRequestMessage) => 
-                            !httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true;
-                        
+                        {
+                            var host = httpRequestMessage.RequestUri?.Host;
+                            return host != null && 
+                                   !host.Contains("usher.ttvnw.net") && 
+                                   !host.Contains("gql.twitch.tv");
+                        };
+    
                         options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
                         {
                             if (httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true)
@@ -38,7 +46,7 @@ public static class OpenTelemetryConfiguration
                                 activity.SetTag("service.context", "stream_check");
                             }
                         };
-                        
+    
                         options.EnrichWithHttpResponseMessage = (activity, httpResponseMessage) =>
                         {
                             if (httpResponseMessage.StatusCode == HttpStatusCode.NotFound && 
