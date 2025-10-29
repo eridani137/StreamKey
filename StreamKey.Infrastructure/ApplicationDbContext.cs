@@ -6,15 +6,14 @@ namespace StreamKey.Infrastructure;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
-    public DbSet<ChannelEntity> Channels { get; set; }
-    public DbSet<ViewStatisticEntity> ViewStatistic { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<ChannelEntity>(entity =>
         {
+            entity.ToTable("Channels");
+            
             entity.HasIndex(e => e.Name).IsUnique();
             
             entity.OwnsOne(c => c.Info, info =>
@@ -29,7 +28,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<ViewStatisticEntity>(entity =>
         {
+            entity.ToTable("ViewStatistics");
+            
             entity.HasIndex(e => e.Id).IsUnique();
+            
             entity.HasIndex(e => e.ChannelName);
             entity.HasIndex(e => e.UserId);
         });
