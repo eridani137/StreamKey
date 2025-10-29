@@ -2,7 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
 
-namespace StreamKey.Infrastructure.Repositories;
+namespace StreamKey.Infrastructure.Repositories.Cached;
 
 public class CachedChannelRepository(ChannelRepository repository, IMemoryCache cache)
     : BaseCachedRepository<ChannelEntity, ChannelRepository>(repository, cache), IChannelRepository

@@ -1,6 +1,6 @@
 namespace StreamKey.Core.Types;
 
-public class RateLimitInfo
+public class RateLimitData
 {
     public int Count { get; set; }
     public DateTime ExpiresAt { get; set; }

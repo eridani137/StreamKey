@@ -24,8 +24,6 @@ builder.Services.AddApplication();
 
 builder.Services.AddCarter();
 
-builder.Services.AddProblemDetails();
-
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 

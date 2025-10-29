@@ -25,5 +25,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 info.Property(i => i.Category).HasMaxLength(1000);
             });
         });
+
+        modelBuilder.Entity<ViewStatisticEntity>(entity =>
+        {
+            entity.HasIndex(e => e.Id).IsUnique();
+            entity.HasIndex(e => e.ChannelName);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.UserId);
+        });
     }
 }

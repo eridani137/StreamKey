@@ -4,9 +4,11 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
+using StreamKey.Core.Services;
 using StreamKey.Core.Types;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -20,10 +22,10 @@ public class Playlist : ICarterModule
         group.MapGet("", async (
                     HttpContext context,
                     IUsherService usherService,
-                    IMemoryCache cache,
+                    StatisticService statisticService,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetStreamPlaylist(context, usherService, cache, settings, logger))
+                await GetStreamPlaylist(context, usherService, statisticService, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
@@ -34,10 +36,9 @@ public class Playlist : ICarterModule
         group.MapGet("/vod", async (
                     HttpContext context,
                     IUsherService usherService,
-                    IMemoryCache cache,
                     ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetVodPlaylist(context, usherService, cache, settings, logger))
+                await GetVodPlaylist(context, usherService, settings, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
@@ -50,15 +51,24 @@ public class Playlist : ICarterModule
     private static async Task<IResult> GetStreamPlaylist(
         HttpContext context,
         IUsherService usherService,
-        IMemoryCache cache,
+        StatisticService statisticService,
         ISettingsStorage settings,
         ILogger<Playlist> logger)
     {
         try
         {
-            var (statusCode, channelName, ip, rateLimit) = await Preprocessing(context, cache, logger);
+            var request = ProcessRequest(context, logger);
+            if (request is null) return Results.BadRequest();
+            
+            statisticService.ViewStatisticQueue.Enqueue(new ViewStatisticEntity()
+            {
+                ChannelName = request.ChannelName,
+                Type = StatisticType.ViewStream,
+                UserIp = request.UserIp,
+                UserId = request.UserId
+            });
 
-            var result = await usherService.GetStreamPlaylist(channelName);
+            var result = await usherService.GetStreamPlaylist(request.ChannelName);
 
             if (result.IsFailure)
             {
@@ -67,14 +77,14 @@ public class Playlist : ICarterModule
                     case ErrorCode.StreamNotFound:
                         return Results.NotFound(result.Error.Message);
                     case ErrorCode.PlaylistNotReceived:
-                        logger.LogWarning("{Channel}: {Error}", channelName, result.Error.Message);
+                        logger.LogWarning("{Channel}: {Error}", request.ChannelName, result.Error.Message);
                         return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
                     case ErrorCode.None:
                     case ErrorCode.NullValue:
                     case ErrorCode.UnexpectedError:
                     case ErrorCode.Timeout:
                     default:
-                        logger.LogWarning("{Error}: {Channel}", result.Error.Message, channelName);
+                        logger.LogWarning("{Error}: {Channel}", result.Error.Message, request.ChannelName);
                         return Results.InternalServerError(result.Error.Message);
                 }
             }
@@ -96,7 +106,6 @@ public class Playlist : ICarterModule
     private static async Task<IResult> GetVodPlaylist(
         HttpContext context,
         IUsherService usherService,
-        IMemoryCache cache,
         ISettingsStorage settings,
         ILogger<Playlist> logger)
     {
@@ -106,6 +115,9 @@ public class Playlist : ICarterModule
             {
                 return Results.BadRequest("vod_id is not found");
             }
+            
+            var request = ProcessRequest(context, logger);
+            if (request is null) return Results.BadRequest();
             
             var result = await usherService.GetVodPlaylist(vodId.ToString());
             
@@ -142,72 +154,52 @@ public class Playlist : ICarterModule
         }
     }
 
-    private static Task<(int StatusCode, string ChannelName, string Ip, int RateLimit)> Preprocessing(
-        HttpContext context, IMemoryCache cache, ILogger<Playlist> logger)
+    private static RequestData? ProcessRequest(HttpContext context, ILogger<Playlist> logger)
     {
-        var queryString = context.Request.QueryString.ToString();
-
         if (!context.Request.Query.TryGetValue("token", out var tokenValue))
         {
-            return Task.FromResult((400, "", "", -1));
+            logger.LogError("Token отсутствует в запросе");
+            return null;
         }
-
+        
         var obj = JObject.Parse(tokenValue.ToString());
+        
         var channel = obj.SelectToken(".channel")?.ToString();
-        var ip = obj.SelectToken(".user_ip")?.ToString();
-
-        if (string.IsNullOrEmpty(channel) || string.IsNullOrEmpty(queryString))
+        var channelId = obj.SelectToken(".channel_id")?.ToObject<int>();
+        
+        var userIp = obj.SelectToken(".user_ip")?.ToString();
+        var userId = obj.SelectToken(".user_id")?.ToObject<int>();
+        
+        if (string.IsNullOrEmpty(channel))
         {
             logger.LogError("Не удалось получить channel: {Json}", obj.ToString());
-            return Task.FromResult((400, "", "", -1));
+            return null;
+        }
+        
+        if (channelId is null or 0)
+        {
+            logger.LogError("Не удалось получить channel_id: {Json}", obj.ToString());
+            return null;
         }
 
-        if (string.IsNullOrEmpty(ip))
+        if (string.IsNullOrEmpty(userIp))
         {
             logger.LogError("Не удалось получить IP: {Json}", obj.ToString());
-            return Task.FromResult((400, channel, "", -1));
+            return null;
         }
-
-        var now = DateTime.UtcNow;
-        if (!cache.TryGetValue<RateLimitInfo>(ip, out var rateLimit) || rateLimit == null)
+        
+        if (userId is null or 0)
         {
-            rateLimit = new RateLimitInfo
-            {
-                Count = 1,
-                ExpiresAt = now.AddSeconds(ApplicationConstants.TimeWindowSeconds),
-                IsBanned = false
-            };
-
-            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
+            logger.LogError("Не удалось получить user_id: {Json}", obj.ToString());
+            return null;
         }
-        else if (rateLimit.IsBanned)
+
+        return new RequestData()
         {
-            logger.LogWarning("[{Channel}] IP {IP} находится в бане", channel, ip);
-            return Task.FromResult((429, channel, ip, rateLimit.Count));
-        }
-        else if (rateLimit.ExpiresAt <= now)
-        {
-            rateLimit.Count = 1;
-            rateLimit.ExpiresAt = now.AddSeconds(ApplicationConstants.TimeWindowSeconds);
-            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
-        }
-        else if (rateLimit.Count >= ApplicationConstants.MaxRequestsPerMinute)
-        {
-            logger.LogWarning("[{Channel}] IP {IP} превысил лимит, бан на 5 минут", channel, ip);
-
-            rateLimit.IsBanned = true;
-            rateLimit.ExpiresAt = now.AddMinutes(5);
-
-            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
-
-            return Task.FromResult((429, channel, ip, rateLimit.Count));
-        }
-        else
-        {
-            rateLimit.Count++;
-            cache.Set(ip, rateLimit, rateLimit.ExpiresAt);
-        }
-
-        return Task.FromResult((200, channel, ip, rateLimit.Count));
+            ChannelName = channel,
+            ChannelId = channelId.Value,
+            UserIp = userIp,
+            UserId = userId.Value
+        };
     }
 }

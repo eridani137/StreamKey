@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
+using StreamKey.Infrastructure.Repositories.Cached;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Extensions;
@@ -19,6 +20,8 @@ public static class ServiceExtensions
 
         services.AddScoped<ChannelRepository>();
         services.AddScoped<IChannelRepository, CachedChannelRepository>();
+
+        services.AddScoped<StatisticRepository>();
 
         services.AddMemoryCache();
 

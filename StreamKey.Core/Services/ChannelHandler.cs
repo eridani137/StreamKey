@@ -1,17 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ParserExtension;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs;
 using StreamKey.Infrastructure.Abstractions;
-using StreamKey.Shared;
-using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
 
-public class ChannelInfoUpdater(
-    ILogger<ChannelInfoUpdater> logger,
+public class ChannelHandler(
+    ILogger<ChannelHandler> logger,
     IServiceProvider serviceProvider)
     : BackgroundService
 {

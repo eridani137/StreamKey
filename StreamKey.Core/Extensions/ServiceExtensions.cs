@@ -24,7 +24,10 @@ public static class ServiceExtensions
 
         services.AddScoped<IJwtService, JwtService>();
 
-        services.AddHostedService<ChannelInfoUpdater>();
+        services.AddSingleton<StatisticService>();
+
+        services.AddHostedService<ChannelHandler>();
+        services.AddHostedService<StatisticHandler>();
         
         return services;
     }
