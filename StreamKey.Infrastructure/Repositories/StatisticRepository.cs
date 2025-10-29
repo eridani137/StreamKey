@@ -10,7 +10,7 @@ public class StatisticRepository(ApplicationDbContext context)
     public async Task<List<ChannelViewStatistic>> GetTop10ViewedChannelsAsync()
     {
         return await GetSet()
-            .GroupBy(v => new { v.ChannelId, v.ChannelName })
+            .GroupBy(v => new { v.ChannelName })
             .Select(g => new ChannelViewStatistic
             {
                 ChannelName = g.Key.ChannelName,

@@ -6,8 +6,6 @@ public class ViewStatisticEntity : BaseIntEntity
     public string UserIp { get; set; } = string.Empty;
     public string ChannelName { get; set; } = string.Empty;
     
-    public int ChannelId { get; set; }
-    
     public StatisticType Type { get; set; }
     
     public DateTime DateTime { get; set; } = DateTime.UtcNow;

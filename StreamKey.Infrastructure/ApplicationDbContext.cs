@@ -31,7 +31,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasIndex(e => e.Id).IsUnique();
             entity.HasIndex(e => e.ChannelName);
-            entity.HasIndex(e => e.ChannelId);
             entity.HasIndex(e => e.UserId);
         });
     }
