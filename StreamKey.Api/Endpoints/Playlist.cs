@@ -116,8 +116,8 @@ public class Playlist : ICarterModule
                 return Results.BadRequest("vod_id is not found");
             }
             
-            var request = ProcessRequest(context, logger);
-            if (request is null) return Results.BadRequest();
+            // var request = ProcessRequest(context, logger);
+            // if (request is null) return Results.BadRequest();
             
             var result = await usherService.GetVodPlaylist(vodId.ToString());
             
@@ -168,7 +168,7 @@ public class Playlist : ICarterModule
         var channelId = obj.SelectToken(".channel_id")?.ToObject<int>();
         
         var userIp = obj.SelectToken(".user_ip")?.ToString();
-        var userId = obj.SelectToken(".user_id")?.ToString();
+        var userId = obj.SelectToken(".user_id")?.ToString() ?? "anonymous";
         
         if (string.IsNullOrEmpty(channel))
         {
@@ -185,12 +185,6 @@ public class Playlist : ICarterModule
         if (string.IsNullOrEmpty(userIp))
         {
             logger.LogError("Не удалось получить IP: {Json}", obj.ToString());
-            return null;
-        }
-        
-        if (string.IsNullOrEmpty(userId))
-        {
-            logger.LogError("Не удалось получить user_id: {Json}", obj.ToString());
             return null;
         }
 
