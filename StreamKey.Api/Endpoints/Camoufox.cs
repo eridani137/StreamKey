@@ -20,7 +20,7 @@ public class Camoufox : ICarterModule
                     return Results.Ok(result);
                 })
             .Produces<CamoufoxHtmlResponse>()
-            .WithTags("Получить HTML");
+            .WithDescription("Получить HTML");
 
         group.MapPost("/screenshot",
                 async ([FromBody] CamoufoxRequest dto, ICamoufoxService service) =>
@@ -31,6 +31,6 @@ public class Camoufox : ICarterModule
                         : Results.File(screenshot, "image/png");
                 })
             .Produces(StatusCodes.Status200OK)
-            .WithTags("Получить скриншот");
+            .WithDescription("Получить скриншот");
     }
 }

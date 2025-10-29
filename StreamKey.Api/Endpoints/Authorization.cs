@@ -50,6 +50,6 @@ public class Authorization : ICarterModule
                     return Results.Ok(token);
                 })
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
-            .WithTags("Авторизация");
+            .WithDescription("Авторизация");
     }
 }
