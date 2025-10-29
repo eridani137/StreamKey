@@ -168,7 +168,7 @@ public class Playlist : ICarterModule
         var channelId = obj.SelectToken(".channel_id")?.ToObject<int>();
         
         var userIp = obj.SelectToken(".user_ip")?.ToString();
-        var userId = obj.SelectToken(".user_id")?.ToObject<int>();
+        var userId = obj.SelectToken(".user_id")?.ToString();
         
         if (string.IsNullOrEmpty(channel))
         {
@@ -188,7 +188,7 @@ public class Playlist : ICarterModule
             return null;
         }
         
-        if (userId is null or 0)
+        if (string.IsNullOrEmpty(userId))
         {
             logger.LogError("Не удалось получить user_id: {Json}", obj.ToString());
             return null;
@@ -199,7 +199,7 @@ public class Playlist : ICarterModule
             ChannelName = channel,
             ChannelId = channelId.Value,
             UserIp = userIp,
-            UserId = userId.Value
+            UserId = userId
         };
     }
 }
