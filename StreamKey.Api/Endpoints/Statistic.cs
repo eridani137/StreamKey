@@ -12,6 +12,6 @@ public class Statistic : ICarterModule
 
         group.MapGet("/channels",
                 async (StatisticRepository repository) => Results.Json(await repository.GetTop10ViewedChannelsAsync()))
-            .WithName("Топ 10 каналов");
+            .WithTags("Топ 10 каналов");
     }
 }

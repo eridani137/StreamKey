@@ -31,7 +31,7 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
-            .WithName("Получить плейлист стрима");
+            .WithTags("Получить плейлист стрима");
 
         group.MapGet("/vod", async (
                     HttpContext context,
@@ -44,8 +44,7 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
-            .WithName("Получить плейлист записи");
-        ;
+            .WithTags("Получить плейлист записи");
     }
 
     private static async Task<IResult> GetStreamPlaylist(
