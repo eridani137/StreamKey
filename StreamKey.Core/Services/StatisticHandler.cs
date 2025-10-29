@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
 
 namespace StreamKey.Core.Services;
@@ -9,29 +8,63 @@ namespace StreamKey.Core.Services;
 public class StatisticHandler(
     StatisticService statisticService,
     IServiceProvider serviceProvider,
-    ILogger<ChannelHandler> logger)
-    : IHostedService
+    ILogger<StatisticHandler> logger)
+    : IHostedService, IDisposable
 {
     private static readonly TimeSpan SaveInterval = TimeSpan.FromMinutes(1);
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    private Task? _executingTask;
+    private CancellationTokenSource _stoppingCts = null!;
+
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-        
         logger.LogInformation("Сервис статистики запущен");
 
-        while (!cancellationToken.IsCancellationRequested)
+        _stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+        _executingTask = Task.Run(async () =>
         {
-            await Task.Delay(SaveInterval, cancellationToken);
-            
-            await SaveStatistic();
-        }
+            await Task.Delay(TimeSpan.FromSeconds(5), _stoppingCts.Token);
+
+            while (!_stoppingCts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(SaveInterval, _stoppingCts.Token);
+                    await SaveStatistic();
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Ошибка в основном цикле сервиса статистики");
+                }
+            }
+        }, _stoppingCts.Token);
+
+        return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await SaveStatistic();
-        
+
+        if (_executingTask == null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _stoppingCts.CancelAsync();
+        }
+        finally
+        {
+            await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
+        }
+
         logger.LogInformation("Сервис статистики остановлен");
     }
 
@@ -43,28 +76,37 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<StatisticRepository>();
 
             var processed = 0;
-            
+
             while (statisticService.ViewStatisticQueue.TryDequeue(out var data))
             {
                 try
                 {
                     await repository.Add(data);
-
                     processed++;
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Ошибка при добавление статистической записи");
+                    logger.LogError(e, "Ошибка при добавлении статистической записи");
                 }
             }
 
             await repository.Save();
-            
-            logger.LogInformation("Сохранено {RecordsProcessedCount} статистических записей", processed);
+
+            if (processed > 0)
+            {
+                logger.LogInformation("Сохранено {RecordsProcessedCount} статистических записей", processed);
+            }
         }
         catch (Exception e)
         {
             logger.LogError(e, "Ошибка при сохранении статистики");
         }
+    }
+
+    public void Dispose()
+    {
+        _stoppingCts?.Cancel();
+        _executingTask?.Dispose();
+        _stoppingCts?.Dispose();
     }
 }
