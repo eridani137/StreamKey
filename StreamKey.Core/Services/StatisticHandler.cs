@@ -7,44 +7,64 @@ using StreamKey.Infrastructure.Repositories;
 namespace StreamKey.Core.Services;
 
 public class StatisticHandler(
-    StatisticService service,
+    StatisticService statisticService,
     IServiceProvider serviceProvider,
     ILogger<ChannelHandler> logger)
-    : BackgroundService
+    : IHostedService
 {
     private static readonly TimeSpan SaveInterval = TimeSpan.FromMinutes(1);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+        
+        logger.LogInformation("Сервис статистики запущен");
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            try
-            {
-                await using var scope = serviceProvider.CreateAsyncScope();
-                var repository = scope.ServiceProvider.GetRequiredService<StatisticRepository>();
-                
-                while (service.ViewStatisticQueue.TryDequeue(out var data))
-                {
-                    try
-                    {
-                        await repository.Add(data);
-                    }
-                    catch (Exception e)
-                    {
-                        logger.LogError(e, "Ошибка при добавление статистической записи");
-                    }
-                }
+            await Task.Delay(SaveInterval, cancellationToken);
+            
+            await SaveStatistic();
+        }
+    }
 
-                await repository.Save();
-                
-                await Task.Delay(SaveInterval, stoppingToken);
-            }
-            catch (Exception e)
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await SaveStatistic();
+        
+        logger.LogInformation("Сервис статистики остановлен");
+    }
+
+    private async Task SaveStatistic()
+    {
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var repository = scope.ServiceProvider.GetRequiredService<StatisticRepository>();
+
+            var processed = 0;
+            
+            while (statisticService.ViewStatisticQueue.TryDequeue(out var data))
             {
-                logger.LogError(e, "Ошибка при сохранении статистики");
+                try
+                {
+                    await repository.Add(data);
+
+                    processed++;
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Ошибка при добавление статистической записи");
+                }
             }
+
+            await repository.Save();
+            
+            logger.LogInformation("Сохранено {RecordsProcessedCount} статистических записей", processed);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при сохранении статистики");
         }
     }
 }
