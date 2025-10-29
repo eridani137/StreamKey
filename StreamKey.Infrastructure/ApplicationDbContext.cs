@@ -7,6 +7,7 @@ namespace StreamKey.Infrastructure;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<ChannelEntity> Channels { get; set; }
+    public DbSet<ViewStatisticEntity> ViewStatistic { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
