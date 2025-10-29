@@ -94,7 +94,7 @@ public class StatisticHandler(
 
             if (processed > 0)
             {
-                logger.LogInformation("Сохранено {RecordsProcessedCount} статистических записей", processed);
+                logger.LogInformation("Сохранено {RecordsProcessedCount} статистических записей просмотров", processed);
             }
         }
         catch (Exception e)
