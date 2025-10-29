@@ -22,7 +22,10 @@ public static class OpenTelemetryConfiguration
             .WithTracing(tracing =>
             {
                 tracing
-                    .AddAspNetCoreInstrumentation()
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.Filter = httpContext => !httpContext.Request.Path.StartsWithSegments("/channels");
+                    })
                     .AddHttpClientInstrumentation(options =>
                     {
                         options.FilterHttpRequestMessage = (httpRequestMessage) => 
