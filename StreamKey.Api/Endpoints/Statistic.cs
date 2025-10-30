@@ -17,7 +17,8 @@ public class Statistic : ICarterModule
             .WithDescription("Топ 10 каналов")
             .RequireAuthorization();
 
-        var activityGroup = app.MapGroup("/activity");
+        var activityGroup = app.MapGroup("/activity")
+            .WithTags("Текущий онлайн");
 
         activityGroup.MapPost("/update",
                 (ActivityRequest activityRequest, StatisticService statisticService) =>

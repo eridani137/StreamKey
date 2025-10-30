@@ -109,7 +109,7 @@ const QualityMenuEnhancer = {
         }
 
         const text = label.textContent || "";
-        if (text.includes("1080")) {
+        if (text.includes("1080") || text.includes("1440")) {
             const next = label.nextElementSibling;
             if (!(next && next.classList.contains(CONFIG.badgeName))) {
                 const badge = this.createBadge();
