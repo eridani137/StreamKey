@@ -1,3 +1,3 @@
 namespace StreamKey.Core.DTOs;
 
-public record ActivityRequest(Guid SessionId, string UserId);
+public record ActivityRequest(string SessionId, string UserId);
