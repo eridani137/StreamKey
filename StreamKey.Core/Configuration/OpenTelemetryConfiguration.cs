@@ -25,6 +25,7 @@ public static class OpenTelemetryConfiguration
                     .AddAspNetCoreInstrumentation(options =>
                     {
                         options.Filter = httpContext => 
+                            !httpContext.Request.Path.StartsWithSegments("/activity/update") &&
                             !httpContext.Request.Path.StartsWithSegments("/channels") &&
                             !httpContext.Request.Path.StartsWithSegments("/playlist") &&
                             !httpContext.Request.Path.StartsWithSegments("/playlist/vod");
