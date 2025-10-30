@@ -19,12 +19,10 @@ public class Statistic : ICarterModule
         var activityGroup = app.MapGroup("/activity");
 
         activityGroup.MapPost("/update",
-                async (ActivityRequest activityRequest, ILogger<Statistic> logger) =>
+                (ActivityRequest activityRequest, ILogger<Statistic> logger) =>
                 {
-                    if (Guid.TryParse(activityRequest.SessionId, out var sessionId)) return Results.BadRequest();
+                    logger.LogInformation("{SessionId}, {UserId}", activityRequest.SessionId.ToString("N"), activityRequest.UserId);
 
-                    logger.LogInformation("{SessionId}, {UserId}", sessionId.ToString("N"), activityRequest.UserId);
-                    
                     return Results.Ok();
                 })
             .WithDescription("Обновление активности пользователя");

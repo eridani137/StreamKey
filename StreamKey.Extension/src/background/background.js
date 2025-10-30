@@ -2,17 +2,17 @@ const api = typeof browser !== 'undefined' ? browser : chrome;
 
 function generateSessionId() {
     const timestamp = Date.now();
-    const timestampHex = timestamp.toString(16).padStart(12, '0');
-    const version = '7';
-    const randA = Math.floor(Math.random() * 0x1000).toString(16).padStart(3, '0');
-    const randB1 = (Math.floor(Math.random() * 0x4000) | 0x8000).toString(16);
-    const randB2 = Math.floor(Math.random() * 0x1000000000000).toString(16).padStart(12, '0');
+    const tsHex = timestamp.toString(16).padStart(12, '0');
+    let rand = '';
+    for (let i = 0; i < 19; i++) {
+        rand += Math.floor(Math.random() * 16).toString(16);
+    }
     return [
-        timestampHex.substring(0, 8),
-        timestampHex.substring(8, 12) + version + randA.substring(0, 3),
-        randB1 + randA.substring(3, 3) + randB2.substring(0, 3),
-        randB2.substring(3, 7) + randB2.substring(7, 11),
-        randB2.substring(11, 12) + Math.floor(Math.random() * 0x100000000000).toString(16).padStart(11, '0')
+        tsHex.substring(0, 8),                // 8 символов времени
+        tsHex.substring(8, 12),               // 4 символа времени
+        '7' + rand.substring(0, 3),           // версия 7 + часть рандома
+        (parseInt(rand.substring(3, 4), 16) & 0x3 | 0x8).toString(16) + rand.substring(4, 7), // вариант 10xx + 3 символа
+        rand.substring(7, 19)                 // оставшиеся 12 символов
     ].join('-');
 }
 
