@@ -1,4 +1,5 @@
 using Carter;
+using StreamKey.Core.DTOs;
 using StreamKey.Infrastructure.Repositories;
 
 namespace StreamKey.Api.Endpoints;
@@ -12,6 +13,16 @@ public class Statistic : ICarterModule
 
         group.MapGet("/channels",
                 async (StatisticRepository repository) => Results.Json(await repository.GetTop10ViewedChannelsAsync()))
-            .WithDescription("Топ 10 каналов");
+            .WithDescription("Топ 10 каналов")
+            .RequireAuthorization();
+
+        var activityGroup = app.MapGroup("/activity");
+
+        activityGroup.MapPost("/update",
+                (ActivityRequest activityRequest, ILogger<Statistic> logger) =>
+                {
+                    logger.LogInformation("{@Activity}", activityRequest);
+                })
+            .WithDescription("Обновление активности пользователя");
     }
 }

@@ -223,7 +223,8 @@ const ActiveChannelsEnhancer = {
 
     async fetchAndUpdateChannels() {
         const r = await fetch(CONFIG.apiUrl + "/channels")
-            .catch(err => {});
+            .catch(err => {
+            });
         if (!r || !r.ok) {
             console.error(`API request failed with status ${r?.status}`);
             return;
@@ -393,9 +394,21 @@ setInterval(() => {
 
 function updateActivity() {
     api.storage.local.get(['sessionId'], (result) => {
-        if (result.sessionId) {
-            // console.log('sessionId', result.sessionId);
-            // console.log('id', localStorage.getItem('local_copy_unique_id'));
+        const userId = localStorage.getItem('local_copy_unique_id');
+        if (result.sessionId && userId) {
+            fetch(`${CONFIG.apiUrl}/activity/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sessionId: result.sessionId,
+                    userId: userId
+                })
+            })
+                .then(res => res.json())
+                .then(data => console.log(data))
+                .catch(err => console.error(err));
         }
     });
 }
