@@ -11,18 +11,20 @@ public class StatisticHandler(
     ILogger<StatisticHandler> logger)
     : IHostedService, IDisposable
 {
-    private static readonly TimeSpan SaveInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan SaveStatisticInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan UserOfflineTimeout = TimeSpan.FromMinutes(1);
 
-    private Task? _executingTask;
+    private Task? _savingStatisticTask;
+    private Task? _removeOfflineUsers;
     private CancellationTokenSource _stoppingCts = null!;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Сервис статистики запущен");
-
         _stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        _executingTask = Task.Run(async () =>
+        _savingStatisticTask = Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(5), _stoppingCts.Token);
 
@@ -30,7 +32,7 @@ public class StatisticHandler(
             {
                 try
                 {
-                    await Task.Delay(SaveInterval, _stoppingCts.Token);
+                    await Task.Delay(SaveStatisticInterval, _stoppingCts.Token);
                     await SaveStatistic();
                 }
                 catch (OperationCanceledException)
@@ -39,7 +41,29 @@ public class StatisticHandler(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Ошибка в основном цикле сервиса статистики");
+                    logger.LogError(ex, "Ошибка в основном цикле сохранения статистики");
+                }
+            }
+        }, _stoppingCts.Token);
+
+        _removeOfflineUsers = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5), _stoppingCts.Token);
+
+            while (!_stoppingCts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(RemoveOfflineUsersInterval, _stoppingCts.Token);
+                    await RemoveOfflineUsers();
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Ошибка в основном цикле с оффлайн пользователей");
                 }
             }
         }, _stoppingCts.Token);
@@ -51,22 +75,25 @@ public class StatisticHandler(
     {
         await SaveStatistic();
 
-        if (_executingTask == null)
-        {
-            return;
-        }
+        await _stoppingCts.CancelAsync();
 
         try
         {
-            await _stoppingCts.CancelAsync();
+            if (_savingStatisticTask is not null && _removeOfflineUsers is not null)
+            {
+                await Task.WhenAll(_savingStatisticTask, _removeOfflineUsers)
+                    .WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+            }
         }
-        finally
+        catch (OperationCanceledException) { }
+        catch (TimeoutException)
         {
-            await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
+            logger.LogWarning("Превышен таймаут при остановке фоновых задач");
         }
 
         logger.LogInformation("Сервис статистики остановлен");
     }
+
 
     private async Task SaveStatistic()
     {
@@ -103,10 +130,33 @@ public class StatisticHandler(
         }
     }
 
+    private async Task RemoveOfflineUsers()
+    {
+        try
+        {
+            var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
+
+            var offlineUsersIds = statisticService.OnlineUsers
+                .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
+                .Select(s => s.Key)
+                .ToList();
+
+            foreach (var offlineUserId in offlineUsersIds)
+            {
+                statisticService.OnlineUsers.TryRemove(offlineUserId, out _);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при удалении оффлайн пользователей");
+        }
+    }
+
     public void Dispose()
     {
-        _stoppingCts?.Cancel();
-        _executingTask?.Dispose();
-        _stoppingCts?.Dispose();
+        _stoppingCts.Cancel();
+        _savingStatisticTask?.Dispose();
+        _removeOfflineUsers?.Dispose();
+        _stoppingCts.Dispose();
     }
 }

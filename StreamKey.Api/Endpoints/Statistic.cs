@@ -1,5 +1,6 @@
 using Carter;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
 
 namespace StreamKey.Api.Endpoints;
@@ -19,12 +20,19 @@ public class Statistic : ICarterModule
         var activityGroup = app.MapGroup("/activity");
 
         activityGroup.MapPost("/update",
-                (ActivityRequest activityRequest, ILogger<Statistic> logger) =>
+                (ActivityRequest activityRequest, StatisticService statisticService) =>
                 {
-                    logger.LogInformation("{SessionId}, {UserId}", activityRequest.SessionId.ToString("N"), activityRequest.UserId);
+                    statisticService.UpdateUserActivity(activityRequest);
 
                     return Results.Ok();
                 })
             .WithDescription("Обновление активности пользователя");
+
+        activityGroup.MapGet("",
+                (StatisticService statisticService) =>
+                    Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count)))
+            .WithDescription("Получить количество онлайн пользователей")
+            .RequireAuthorization()
+            .Produces<ActivityResponse>();
     }
 }
