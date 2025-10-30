@@ -21,7 +21,7 @@ public class Statistic : ICarterModule
         activityGroup.MapPost("/update",
                 (ActivityRequest activityRequest, ILogger<Statistic> logger) =>
                 {
-                    logger.LogInformation("{@Activity}", activityRequest);
+                    logger.LogInformation("{SessionId}, {UserId}", activityRequest.SessionId, activityRequest.UserId);
                 })
             .WithDescription("Обновление активности пользователя");
     }
