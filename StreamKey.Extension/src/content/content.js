@@ -14,10 +14,9 @@ const CONFIG = {
     apiUrl: "https://service.streamkey.ru"
 };
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const api = typeof browser !== 'undefined' ? browser : chrome;
 
-const getElByXpath = (p, parent = document) =>
-    document.evaluate(p, parent, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const QualityMenuEnhancer = {
     observer: null,
@@ -343,7 +342,7 @@ const ActiveChannelsEnhancer = {
 
         let itemsPane = get_itemsPane();
         while (!itemsPane) {
-            await sleep(250);
+            await sleep(500);
             itemsPane = get_itemsPane();
         }
 
@@ -386,6 +385,20 @@ const ActiveChannelsEnhancer = {
         }
     }
 };
+
+updateActivity();
+setInterval(() => {
+    updateActivity();
+}, 10000);
+
+function updateActivity() {
+    api.storage.local.get(['sessionId'], (result) => {
+        if (result.sessionId) {
+            // console.log('sessionId', result.sessionId);
+            // console.log('id', localStorage.getItem('local_copy_unique_id'));
+        }
+    });
+}
 
 QualityMenuEnhancer.init();
 ActiveChannelsEnhancer.init();
