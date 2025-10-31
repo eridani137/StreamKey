@@ -7,17 +7,20 @@ namespace StreamKey.Infrastructure.Repositories;
 public class ViewStatisticRepository(ApplicationDbContext context)
     : BaseRepository<ViewStatisticEntity>(context)
 {
-    public async Task<List<ChannelViewStatistic>> GetTop10ViewedChannelsAsync()
+    public async Task<List<ChannelViewStatistic>> GetTopViewedChannelsAsync(int hours, int count)
     {
+        var cutoffTime = DateTime.UtcNow.AddHours(-hours);
+        
         return await GetSet()
-            .GroupBy(v => new { v.ChannelName })
+            .Where(v => v.DateTime >= cutoffTime)
+            .GroupBy(v => v.ChannelName)
             .Select(g => new ChannelViewStatistic
             {
-                ChannelName = g.Key.ChannelName,
+                ChannelName = g.Key,
                 ViewCount = g.Count()
             })
             .OrderByDescending(x => x.ViewCount)
-            .Take(10)
+            .Take(count)
             .ToListAsync();
     }
 }
