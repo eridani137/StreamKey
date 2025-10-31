@@ -35,5 +35,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(e => e.ChannelName);
             entity.HasIndex(e => e.UserId);
         });
+
+        modelBuilder.Entity<UserSessionEntity>(entity =>
+        {
+            entity.ToTable("UserSessions");
+            
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.SessionId);
+            entity.HasIndex(e => e.StartedAt);
+            entity.HasIndex(e => e.UpdatedAt);
+        });
     }
 }

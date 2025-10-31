@@ -9,7 +9,7 @@ public class StatisticService
 {
     public ConcurrentQueue<ViewStatisticEntity> ViewStatisticQueue { get; } = new();
 
-    public readonly ConcurrentDictionary<string, UserSession> OnlineUsers = new();
+    public readonly ConcurrentDictionary<string, UserSessionEntity> OnlineUsers = new();
 
     public void UpdateUserActivity(ActivityRequest activityRequest)
     {
@@ -17,10 +17,12 @@ public class StatisticService
     
         var session = OnlineUsers.GetOrAdd(
             activityRequest.UserId, 
-            _ => new UserSession 
+            _ => new UserSessionEntity 
             { 
                 StartedAt = currentTime,
-                UpdatedAt = currentTime 
+                UpdatedAt = currentTime,
+                UserId = activityRequest.UserId,
+                SessionId  = activityRequest.SessionId,
             }
         );
         

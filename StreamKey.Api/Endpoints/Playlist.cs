@@ -62,7 +62,6 @@ public class Playlist : ICarterModule
             statisticService.ViewStatisticQueue.Enqueue(new ViewStatisticEntity()
             {
                 ChannelName = request.ChannelName,
-                Type = StatisticType.ViewStream,
                 UserIp = request.UserIp,
                 UserId = request.UserId
             });

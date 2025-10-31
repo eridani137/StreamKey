@@ -13,7 +13,7 @@ public class Statistic : ICarterModule
             .WithTags("Статистические данные");
 
         group.MapGet("/channels",
-                async (StatisticRepository repository) => Results.Json(await repository.GetTop10ViewedChannelsAsync()))
+                async (ViewStatisticRepository repository) => Results.Json(await repository.GetTop10ViewedChannelsAsync()))
             .WithDescription("Топ 10 каналов")
             .RequireAuthorization();
 

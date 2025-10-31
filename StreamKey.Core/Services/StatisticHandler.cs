@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StreamKey.Infrastructure.Repositories;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
 
@@ -100,7 +101,7 @@ public class StatisticHandler(
         try
         {
             await using var scope = serviceProvider.CreateAsyncScope();
-            var repository = scope.ServiceProvider.GetRequiredService<StatisticRepository>();
+            var repository = scope.ServiceProvider.GetRequiredService<ViewStatisticRepository>();
 
             var processed = 0;
 
@@ -134,6 +135,11 @@ public class StatisticHandler(
     {
         try
         {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
+            
+            var processed = 0;
+            
             var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
 
             var offlineUsersIds = statisticService.OnlineUsers
@@ -143,7 +149,18 @@ public class StatisticHandler(
 
             foreach (var offlineUserId in offlineUsersIds)
             {
-                statisticService.OnlineUsers.TryRemove(offlineUserId, out _);
+                if (statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser))
+                {
+                    await repository.Add(offlineUser);
+                    processed++;
+                }
+            }
+            
+            await repository.Save();
+
+            if (processed > 0)
+            {
+                logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
             }
         }
         catch (Exception e)

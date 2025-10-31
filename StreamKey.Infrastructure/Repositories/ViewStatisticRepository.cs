@@ -4,7 +4,7 @@ using StreamKey.Shared.Types;
 
 namespace StreamKey.Infrastructure.Repositories;
 
-public class StatisticRepository(ApplicationDbContext context)
+public class ViewStatisticRepository(ApplicationDbContext context)
     : BaseRepository<ViewStatisticEntity>(context)
 {
     public async Task<List<ChannelViewStatistic>> GetTop10ViewedChannelsAsync()
