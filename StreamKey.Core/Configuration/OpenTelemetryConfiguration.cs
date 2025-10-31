@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using OpenTelemetry.Exporter;
@@ -24,7 +25,16 @@ public static class OpenTelemetryConfiguration
                 tracing
                     .AddAspNetCoreInstrumentation(options =>
                     {
+                        var excludedPaths =
+                            builder.Configuration.GetSection("OpenTelemetry:ExcludedPaths").Get<string[]>() ?? [];
+
                         options.Filter = httpContext => 
+                        {
+                            var path = httpContext.Request.Path.Value ?? string.Empty;
+                            return !excludedPaths.Any(excludedPath => path.StartsWith(excludedPath));
+                        };
+                        
+                        options.Filter = httpContext =>
                             !httpContext.Request.Path.StartsWithSegments("/openapi/v1.json") &&
                             !httpContext.Request.Path.StartsWithSegments("/activity/update") &&
                             !httpContext.Request.Path.StartsWithSegments("/channels") &&
@@ -33,14 +43,14 @@ public static class OpenTelemetryConfiguration
                     })
                     .AddHttpClientInstrumentation(options =>
                     {
-                        options.FilterHttpRequestMessage = (httpRequestMessage) => 
+                        options.FilterHttpRequestMessage = (httpRequestMessage) =>
                         {
                             var host = httpRequestMessage.RequestUri?.Host;
-                            return host != null && 
-                                   !host.Contains("usher.ttvnw.net") && 
+                            return host != null &&
+                                   !host.Contains("usher.ttvnw.net") &&
                                    !host.Contains("gql.twitch.tv");
                         };
-    
+
                         options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
                         {
                             if (httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true)
@@ -48,10 +58,10 @@ public static class OpenTelemetryConfiguration
                                 activity.SetTag("service.context", "stream_check");
                             }
                         };
-    
+
                         options.EnrichWithHttpResponseMessage = (activity, httpResponseMessage) =>
                         {
-                            if (httpResponseMessage.StatusCode == HttpStatusCode.NotFound && 
+                            if (httpResponseMessage.StatusCode == HttpStatusCode.NotFound &&
                                 activity.GetTagItem("service.context")?.ToString() == "stream_check")
                             {
                                 activity.SetTag("expected_error", "true");
@@ -67,17 +77,18 @@ public static class OpenTelemetryConfiguration
                         options.Protocol = OtlpExportProtocol.HttpProtobuf;
                     });
             })
-        .WithMetrics(metrics =>
-        {
-            metrics.AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation()
-                .AddProcessInstrumentation()
-                .AddOtlpExporter(o =>
-                {
-                    o.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/metrics");;
-                    o.Protocol = OtlpExportProtocol.HttpProtobuf;
-                });
-        });
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddProcessInstrumentation()
+                    .AddOtlpExporter(o =>
+                    {
+                        o.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/metrics");
+                        ;
+                        o.Protocol = OtlpExportProtocol.HttpProtobuf;
+                    });
+            });
     }
 }
