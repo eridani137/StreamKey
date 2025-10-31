@@ -11,7 +11,7 @@ public class Camoufox : ICarterModule
     {
         var group = app.MapGroup("camoufox")
             .RequireAuthorization()
-            .WithSummary("Camoufox");
+            .WithTags("Camoufox");
 
         group.MapPost("/html",
                 async ([FromBody] CamoufoxRequest dto, ICamoufoxService service) =>

@@ -12,7 +12,7 @@ public class Authorization : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/auth")
-            .WithSummary("Аутентификация");
+            .WithTags("Аутентификация");
 
         group.MapPost("/login",
                 async (

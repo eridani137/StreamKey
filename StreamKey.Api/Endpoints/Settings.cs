@@ -8,7 +8,7 @@ public class Settings : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/settings")
-            .WithSummary("Управление настройками")
+            .WithTags("Управление настройками")
             .RequireAuthorization();
 
         group.MapGet("", (ISettingsStorage settings) => Task.FromResult(Results.Ok(settings.GetAllKeysAsync())))

@@ -13,7 +13,7 @@ public class Channel : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/channels")
-            .WithSummary("Работа с каналами")
+            .WithTags("Работа с каналами")
             .RequireAuthorization();
 
         group.MapGet("/refresh",

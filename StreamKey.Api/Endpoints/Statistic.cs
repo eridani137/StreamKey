@@ -10,7 +10,7 @@ public class Statistic : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/statistic")
-            .WithSummary("Статистические данные");
+            .WithTags("Статистические данные");
 
         group.MapGet("/channels",
                 async (int hours, int count, ViewStatisticRepository repository) =>
@@ -33,7 +33,7 @@ public class Statistic : ICarterModule
             .RequireAuthorization();
 
         var activityGroup = app.MapGroup("/activity")
-            .WithSummary("Активность");
+            .WithTags("Активность");
 
         activityGroup.MapPost("/update",
                 (ActivityRequest activityRequest, StatisticService statisticService) =>
