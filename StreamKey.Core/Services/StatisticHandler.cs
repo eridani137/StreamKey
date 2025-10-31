@@ -56,7 +56,7 @@ public class StatisticHandler(
                 try
                 {
                     await Task.Delay(RemoveOfflineUsersInterval, _stoppingCts.Token);
-                    await RemoveOfflineUsers();
+                    await RemoveOfflineUsers(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -75,6 +75,7 @@ public class StatisticHandler(
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await SaveStatistic();
+        await RemoveOfflineUsers(true);
 
         await _stoppingCts.CancelAsync();
 
@@ -131,47 +132,60 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveOfflineUsers()
+    private async Task RemoveOfflineUsers(bool shutdown)
     {
         try
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
-            
-            var processed = 0;
-            
-            var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
-            var minimumSessionDuration = TimeSpan.FromSeconds(45);
 
-            var offlineUsersIds = statisticService.OnlineUsers
-                .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
-                .Select(s => s.Key)
-                .ToList();
-
-            foreach (var offlineUserId in offlineUsersIds)
+            List<string> userIds;
+            if (!shutdown)
             {
-                if (statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser))
-                {
-                    var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
-                
-                    if (sessionDuration >= minimumSessionDuration)
-                    {
-                        await repository.Add(offlineUser);
-                        processed++;
-                    }
-                }
+                var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
+                userIds = statisticService.OnlineUsers
+                    .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
+                    .Select(s => s.Key)
+                    .ToList();
+            }
+            else
+            {
+                userIds = statisticService.OnlineUsers.Keys.ToList();
             }
             
-            await repository.Save();
-
-            if (processed > 0)
-            {
-                logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
-            }
+            await RemoveAndSaveUserSessions(userIds, repository);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Ошибка при удалении оффлайн пользователей");
+        }
+    }
+
+    private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository)
+    {
+        var minimumSessionDuration = TimeSpan.FromSeconds(45);
+        
+        var processed = 0;
+        
+        foreach (var offlineUserId in userIds)
+        {
+            if (statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser))
+            {
+                var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
+                
+                if (sessionDuration >= minimumSessionDuration)
+                {
+                    await repository.Add(offlineUser);
+                    processed++;
+                }
+            }
+        }
+        
+        await repository.Save();
+        
+        if (processed > 0)
+        {
+            logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
         }
     }
 
