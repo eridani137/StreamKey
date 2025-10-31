@@ -11,7 +11,7 @@ public class Camoufox : ICarterModule
     {
         var group = app.MapGroup("camoufox")
             .RequireAuthorization()
-            .WithTags("Camoufox");
+            .WithSummary("Camoufox");
 
         group.MapPost("/html",
                 async ([FromBody] CamoufoxRequest dto, ICamoufoxService service) =>
@@ -20,7 +20,7 @@ public class Camoufox : ICarterModule
                     return Results.Ok(result);
                 })
             .Produces<CamoufoxHtmlResponse>()
-            .WithDescription("Получить HTML");
+            .WithSummary("Получить HTML");
 
         group.MapPost("/screenshot",
                 async ([FromBody] CamoufoxRequest dto, ICamoufoxService service) =>
@@ -31,6 +31,6 @@ public class Camoufox : ICarterModule
                         : Results.File(screenshot, "image/png");
                 })
             .Produces(StatusCodes.Status200OK)
-            .WithDescription("Получить скриншот");
+            .WithSummary("Получить скриншот");
     }
 }

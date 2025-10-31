@@ -17,7 +17,7 @@ public class Playlist : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/playlist")
-            .WithTags("Работа с плейлистами");
+            .WithSummary("Работа с плейлистами");
 
         group.MapGet("", async (
                     HttpContext context,
@@ -31,7 +31,7 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
-            .WithDescription("Получить плейлист стрима");
+            .WithSummary("Получить плейлист стрима");
 
         group.MapGet("/vod", async (
                     HttpContext context,
@@ -44,7 +44,7 @@ public class Playlist : ICarterModule
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
-            .WithDescription("Получить плейлист записи");
+            .WithSummary("Получить плейлист записи");
     }
 
     private static async Task<IResult> GetStreamPlaylist(

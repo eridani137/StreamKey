@@ -10,7 +10,7 @@ public class Statistic : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/statistic")
-            .WithTags("Статистические данные");
+            .WithSummary("Статистические данные");
 
         group.MapGet("/channels",
                 async (int hours, int count, ViewStatisticRepository repository) =>
@@ -19,7 +19,7 @@ public class Statistic : ICarterModule
                     
                     return Results.Json(await repository.GetTopViewedChannelsAsync(hours, count));
                 })
-            .WithDescription("Топ 10 каналов")
+            .WithSummary("Топ каналов")
             .RequireAuthorization();
         
         group.MapGet("/sessions/time-spent",
@@ -29,11 +29,11 @@ public class Statistic : ICarterModule
 
                 return Results.Ok(await repository.GetAverageTimeSpent(hours));
             })
-            .WithDescription("Time Spent сессий пользователей")
+            .WithSummary("Time Spent")
             .RequireAuthorization();
 
         var activityGroup = app.MapGroup("/activity")
-            .WithTags("Текущий онлайн");
+            .WithSummary("Активность");
 
         activityGroup.MapPost("/update",
                 (ActivityRequest activityRequest, StatisticService statisticService) =>
@@ -42,12 +42,12 @@ public class Statistic : ICarterModule
 
                     return Results.Ok();
                 })
-            .WithDescription("Обновление активности пользователя");
+            .WithSummary("Обновление активности пользователя");
 
         activityGroup.MapGet("",
                 (StatisticService statisticService) =>
                     Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count)))
-            .WithDescription("Получить количество онлайн пользователей")
+            .WithSummary("Получить число онлайн пользователей")
             .RequireAuthorization()
             .Produces<ActivityResponse>();
     }

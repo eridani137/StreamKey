@@ -13,7 +13,7 @@ public class Channel : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/channels")
-            .WithTags("Работа с каналами")
+            .WithSummary("Работа с каналами")
             .RequireAuthorization();
 
         group.MapGet("/refresh",
@@ -34,7 +34,7 @@ public class Channel : ICarterModule
                 })
             .Produces(StatusCodes.Status200OK)
             .RequireAuthorization()
-            .WithDescription("Запуск обновления каналов");
+            .WithSummary("Запуск обновления каналов");
 
         group.MapGet("",
                 async (IChannelService service) =>
@@ -46,7 +46,7 @@ public class Channel : ICarterModule
                 })
             .Produces<List<ChannelDto>>()
             .AllowAnonymous()
-            .WithDescription("Получить онлайн каналы");
+            .WithSummary("Получить онлайн каналы");
 
         group.MapPost("",
                 async (ChannelDto dto, IChannelService service) =>
@@ -62,7 +62,7 @@ public class Channel : ICarterModule
                 })
             .AddEndpointFilter<ValidationFilter<ChannelDto>>()
             .Produces<ChannelDto>()
-            .WithDescription("Добавить канал");
+            .WithSummary("Добавить канал");
 
         group.MapDelete("/{position:int}",
                 async (int position, IChannelService service) =>
@@ -77,7 +77,7 @@ public class Channel : ICarterModule
                     return Results.Ok(result.Value);
                 })
             .Produces<ChannelDto>()
-            .WithDescription("Удалить канал");
+            .WithSummary("Удалить канал");
 
         group.MapPut("",
                 async (ChannelDto dto, IChannelService service) =>
@@ -92,6 +92,6 @@ public class Channel : ICarterModule
                     return Results.Ok(result.Value.Map());
                 })
             .Produces<ChannelDto>()
-            .WithDescription("Обновить канал");
+            .WithSummary("Обновить канал");
     }
 }
