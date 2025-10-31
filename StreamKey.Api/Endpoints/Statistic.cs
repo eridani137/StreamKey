@@ -21,6 +21,16 @@ public class Statistic : ICarterModule
                 })
             .WithDescription("Топ 10 каналов")
             .RequireAuthorization();
+        
+        group.MapGet("/sessions/time-spent",
+            async (int hours, UserSessionRepository repository) =>
+            {
+                if (hours <= 0) return Results.BadRequest("Часы должны быть больше 0");
+
+                return Results.Ok(await repository.GetAverageTimeSpent(hours));
+            })
+            .WithDescription("Time Spent сессий пользователей")
+            .RequireAuthorization();
 
         var activityGroup = app.MapGroup("/activity")
             .WithTags("Текущий онлайн");
