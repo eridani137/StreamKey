@@ -69,8 +69,8 @@ public static class OpenTelemetryConfiguration
                             }
                         };
                     })
-                    .AddEntityFrameworkCoreInstrumentation()
-                    .AddNpgsql()
+                    // .AddEntityFrameworkCoreInstrumentation()
+                    // .AddNpgsql()
                     .AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/traces");
