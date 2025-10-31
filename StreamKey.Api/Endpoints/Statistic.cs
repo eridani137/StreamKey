@@ -17,10 +17,7 @@ public class Statistic : ICarterModule
             .WithDescription("Топ 10 каналов")
             .RequireAuthorization();
 
-        var activityGroup = app.MapGroup("/activity")
-            .WithTags("Текущий онлайн");
-
-        activityGroup.MapPost("/update",
+        group.MapPost("/activity/update",
                 (ActivityRequest activityRequest, StatisticService statisticService) =>
                 {
                     statisticService.UpdateUserActivity(activityRequest);
@@ -29,7 +26,7 @@ public class Statistic : ICarterModule
                 })
             .WithDescription("Обновление активности пользователя");
 
-        activityGroup.MapGet("",
+        group.MapGet("/activity",
                 (StatisticService statisticService) =>
                     Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count)))
             .WithDescription("Получить количество онлайн пользователей")
