@@ -17,9 +17,16 @@ public class StatisticService
     
         var session = OnlineUsers.GetOrAdd(
             activityRequest.UserId, 
-            _ => new UserSession { UpdatedAt = currentTime }
+            _ => new UserSession 
+            { 
+                StartedAt = currentTime,
+                UpdatedAt = currentTime 
+            }
         );
-    
+        
+        var elapsedSinceLastUpdate = currentTime - session.UpdatedAt;
+        session.AccumulatedTime += elapsedSinceLastUpdate;
+        
         session.UpdatedAt = currentTime;
     }
 }

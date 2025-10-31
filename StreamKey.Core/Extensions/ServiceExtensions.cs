@@ -88,7 +88,8 @@ public static class ServiceExtensions
         {
             client.BaseAddress = new Uri("http://camoufox:8080");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        });
+        })
+        .AddStandardResilienceHandler();
 
         return services;
     }

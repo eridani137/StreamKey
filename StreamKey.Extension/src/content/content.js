@@ -390,7 +390,7 @@ const ActiveChannelsEnhancer = {
 updateActivity();
 setInterval(() => {
     updateActivity();
-}, 10000);
+}, 45000);
 
 function updateActivity() {
     api.storage.local.get(['sessionId'], (result) => {
