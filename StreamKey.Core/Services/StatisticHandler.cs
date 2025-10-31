@@ -141,6 +141,7 @@ public class StatisticHandler(
             var processed = 0;
             
             var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
+            var minimumSessionDuration = TimeSpan.FromSeconds(45);
 
             var offlineUsersIds = statisticService.OnlineUsers
                 .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
@@ -151,8 +152,13 @@ public class StatisticHandler(
             {
                 if (statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser))
                 {
-                    await repository.Add(offlineUser);
-                    processed++;
+                    var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
+                
+                    if (sessionDuration >= minimumSessionDuration)
+                    {
+                        await repository.Add(offlineUser);
+                        processed++;
+                    }
                 }
             }
             
