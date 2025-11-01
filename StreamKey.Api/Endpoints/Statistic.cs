@@ -43,14 +43,14 @@ public class Statistic : ICarterModule
             .Produces<ActivityResponse>();
 
         group.MapGet("/dau",
-                async (DateTimeOffset startDate, UserSessionRepository repository) =>
+                async (DateOnly startDate, UserSessionRepository repository) =>
                     Results.Ok(await repository.GetUsersPerDayStatistic(startDate)))
             .WithSummary("Уникальные пользователи за день")
             .RequireAuthorization()
             .Produces<UsersPerTimeStatistic>();
 
         group.MapGet("/mau",
-                async (DateTimeOffset startDate, UserSessionRepository repository) =>
+                async (DateOnly startDate, UserSessionRepository repository) =>
                     Results.Ok(await repository.GetUsersPerMonthStatistic(startDate)))
             .WithSummary("Уникальные пользователи за месяц")
             .RequireAuthorization()

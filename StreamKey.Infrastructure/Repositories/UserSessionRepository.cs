@@ -7,14 +7,16 @@ namespace StreamKey.Infrastructure.Repositories;
 public class UserSessionRepository(ApplicationDbContext context)
     : BaseRepository<UserSessionEntity>(context)
 {
-    public async Task<UsersPerTimeStatistic> GetUsersPerMonthStatistic(DateTimeOffset date)
+    public async Task<UsersPerTimeStatistic> GetUsersPerMonthStatistic(DateOnly date)
     {
-        var startOfMonth = new DateTimeOffset(date.Year, date.Month, 1, 0, 0, 0, date.Offset);
+        var firstDayOfMonth = new DateOnly(date.Year, date.Month, 1);
+        var firstDayOfNextMonth = firstDayOfMonth.AddMonths(1);
     
-        var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
+        var startOfMonth = new DateTimeOffset(firstDayOfMonth.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var startOfNextMonth = new DateTimeOffset(firstDayOfNextMonth.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
         var uniqueUsers = await GetSet()
-            .Where(us => us.StartedAt >= startOfMonth && us.StartedAt <= endOfMonth)
+            .Where(us => us.StartedAt >= startOfMonth && us.StartedAt < startOfNextMonth)
             .Select(us => us.UserId)
             .Distinct()
             .ToListAsync();
@@ -25,12 +27,13 @@ public class UserSessionRepository(ApplicationDbContext context)
         };
     }
     
-    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateTimeOffset date)
+    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateOnly date)
     {
-        var targetDate = date.Date;
-    
+        var startOfDay = new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var endOfDay = new DateTimeOffset(date.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
+
         var uniqueUsers = await GetSet()
-            .Where(us => us.StartedAt.Date == targetDate)
+            .Where(us => us.StartedAt.Date >= startOfDay.Date && us.StartedAt.Date <= endOfDay.Date)
             .Select(us => us.UserId)
             .Distinct()
             .ToListAsync();

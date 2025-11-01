@@ -1,8 +1,10 @@
+using System.ComponentModel;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
+using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
 using StreamKey.Infrastructure.Extensions;
 
@@ -35,6 +37,8 @@ builder.Services.AddHttpClients();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
 
 var app = builder.Build();
 
