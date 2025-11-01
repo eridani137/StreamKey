@@ -21,6 +21,7 @@ public class Channel : ICarterModule
                 {
                     logger.LogInformation("Channel {ChannelName} clicked, User: {UserId}", dto.ChannelName, dto.UserId);
                 })
+            .AllowAnonymous()
             .WithSummary("Клик на канал");
 
         group.MapGet("/refresh",
@@ -40,9 +41,19 @@ public class Channel : ICarterModule
                     }
                 })
             .Produces(StatusCodes.Status200OK)
-            .RequireAuthorization()
             .WithSummary("Запуск обновления каналов");
 
+        group.MapGet("/all",
+            async (IChannelService service) =>
+            {
+                var channels = await service.GetChannels();
+                var mapped = channels.MapAll();
+
+                return Results.Ok(mapped);
+            })
+            .Produces<List<ChannelDto>>()
+            .WithSummary("Получить все добавленные каналы");
+        
         group.MapGet("",
                 async (IChannelService service) =>
                 {

@@ -320,7 +320,12 @@ const ActiveChannelsEnhancer = {
         div.ariaLabel = 'false';
         div.style.cssText = style;
 
-        div.addEventListener('click', function () {
+        div.addEventListener('click', function (event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+            event.stopPropagation && event.stopPropagation();
+
             api.storage.local.get(['sessionId'], (result) => {
                 const userId = localStorage.getItem('local_copy_unique_id');
                 if (result.sessionId && userId) {

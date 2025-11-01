@@ -14,4 +14,9 @@ public static class ChannelMapper
     {
         return channels.Where(c => c.Info is not null).Select(Map).ToList();
     }
+    
+    public static List<ChannelDto> MapAll(this IEnumerable<ChannelEntity> channels)
+    {
+        return channels.Select(Map).ToList();
+    }
 }
