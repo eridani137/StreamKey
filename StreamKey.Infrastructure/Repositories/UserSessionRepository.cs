@@ -7,16 +7,34 @@ namespace StreamKey.Infrastructure.Repositories;
 public class UserSessionRepository(ApplicationDbContext context)
     : BaseRepository<UserSessionEntity>(context)
 {
-    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateTimeOffset startDate, int hours)
+    public async Task<UsersPerTimeStatistic> GetUsersPerMonthStatistic(DateTimeOffset date)
     {
-        var endDate = startDate.AddHours(hours);
+        var startOfMonth = new DateTimeOffset(date.Year, date.Month, 1, 0, 0, 0, date.Offset);
     
+        var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
+
         var uniqueUsers = await GetSet()
-            .Where(us => us.StartedAt >= startDate && us.StartedAt < endDate)
+            .Where(us => us.StartedAt >= startOfMonth && us.StartedAt <= endOfMonth)
             .Select(us => us.UserId)
             .Distinct()
             .ToListAsync();
+
+        return new UsersPerTimeStatistic
+        {
+            UniqueUsersCount = uniqueUsers.Count
+        };
+    }
     
+    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateTimeOffset date)
+    {
+        var targetDate = date.Date;
+    
+        var uniqueUsers = await GetSet()
+            .Where(us => us.StartedAt.Date == targetDate)
+            .Select(us => us.UserId)
+            .Distinct()
+            .ToListAsync();
+
         return new UsersPerTimeStatistic
         {
             UniqueUsersCount = uniqueUsers.Count
