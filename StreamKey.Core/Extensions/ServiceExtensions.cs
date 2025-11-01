@@ -19,11 +19,11 @@ public static class ServiceExtensions
     {
         services.AddScoped<IUsherService, UsherService>();
         services.AddScoped<ITwitchService, TwitchService>();
-        
+
         services.AddScoped<IChannelService, ChannelService>();
-        
+
         services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
-        
+
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddSingleton<ICamoufoxService, CamoufoxService>();
 
@@ -33,7 +33,7 @@ public static class ServiceExtensions
 
         services.AddHostedService<ChannelHandler>();
         services.AddHostedService<StatisticHandler>();
-        
+
         return services;
     }
 
@@ -44,7 +44,7 @@ public static class ServiceExtensions
         {
             ApplicationConstants.Headers.Add("Authorization", authorization.Value);
         }
-        
+
         var deviceId = builder.Configuration.GetSection("DeviceId");
         if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
         {
@@ -66,9 +66,9 @@ public static class ServiceExtensions
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
-            .AddHttpMessageHandler<FilterNotFoundHandler>()
-            .AddStandardResilienceHandler();
-        
+            .AddHttpMessageHandler<FilterNotFoundHandler>();
+        //.AddStandardResilienceHandler();
+
         services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client) =>
             {
                 client.BaseAddress = ApplicationConstants.QqlUrl;
@@ -81,8 +81,8 @@ public static class ServiceExtensions
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
-            .AddHttpMessageHandler<FilterNotFoundHandler>()
-            .AddStandardResilienceHandler();
+            .AddHttpMessageHandler<FilterNotFoundHandler>();
+        //.AddStandardResilienceHandler();
 
         services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
         {
@@ -92,4 +92,4 @@ public static class ServiceExtensions
 
         return services;
     }
-} 
+}
