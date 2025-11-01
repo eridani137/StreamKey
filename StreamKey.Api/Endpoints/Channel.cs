@@ -16,6 +16,13 @@ public class Channel : ICarterModule
             .WithTags("Работа с каналами")
             .RequireAuthorization();
 
+        group.MapPost("/click",
+                async (ClickChannelDto dto, ILogger<Channel> logger) =>
+                {
+                    logger.LogInformation("Channel {ChannelName} clicked, User: {UserId}", dto.ChannelName, dto.UserId);
+                })
+            .WithSummary("Клик на канал");
+
         group.MapGet("/refresh",
                 async (ILogger<Channel> logger, IChannelRepository repository, IChannelService service) =>
                 {
