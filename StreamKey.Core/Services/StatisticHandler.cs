@@ -213,7 +213,7 @@ public class StatisticHandler(
         try
         {
             await using var scope = serviceProvider.CreateAsyncScope();
-            var repository = scope.ServiceProvider.GetRequiredService<ChannelActivityRepository>();
+            var repository = scope.ServiceProvider.GetRequiredService<ChannelClickRepository>();
 
             var processed = 0;
 

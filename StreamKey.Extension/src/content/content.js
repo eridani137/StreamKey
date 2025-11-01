@@ -343,8 +343,13 @@ const ActiveChannelsEnhancer = {
                             if (!res.ok) throw new Error('Сервер вернул ошибку: ' + res.status);
                             return res.text().then(text => text ? JSON.parse(text) : {});
                         })
-                        .then(data => console.log(data))
-                        .catch(err => console.error(err));
+                        .then(_ => {
+                            window.location.href = `/${nickname}`;
+                        })
+                        .catch(err => {
+                            console.error(err)
+                            window.location.href = `/${nickname}`;
+                        });
                 }
             });
         });

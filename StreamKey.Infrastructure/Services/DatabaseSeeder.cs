@@ -9,8 +9,7 @@ namespace StreamKey.Infrastructure.Services;
 public class DatabaseSeeder(
     UserManager<ApplicationUser> userManager,
     ILogger<DatabaseSeeder> logger,
-    ISettingsStorage settings,
-    IChannelRepository channelRepository
+    ISettingsStorage settings
 ) : IDatabaseSeeder
 {
     public async Task Seed()
@@ -38,14 +37,5 @@ public class DatabaseSeeder(
         
         await settings.SetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false);
         await settings.SetBoolSettingAsync(ApplicationConstants.RemoveAds, true);
-
-        // if (!await channelRepository.HasEntity("snejjinka"))
-        // {
-        //     await channelRepository.Create(new ChannelEntity()
-        //     {
-        //         Name = "snejjinka",
-        //         Position = 0
-        //     });
-        // } // TODO
     }
 }

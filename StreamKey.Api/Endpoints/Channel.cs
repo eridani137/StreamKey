@@ -19,19 +19,6 @@ public class Channel : ICarterModule
             .WithTags("Работа с каналами")
             .RequireAuthorization();
 
-        group.MapPost("/click",
-                (ClickChannelDto dto, StatisticService service) =>
-                {
-                    service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
-                    {
-                        ChannelName = dto.ChannelName,
-                        UserId = dto.UserId,
-                        DateTime = DateTime.UtcNow
-                    });
-                })
-            .AllowAnonymous()
-            .WithSummary("Клик на канал");
-
         group.MapGet("/refresh",
                 async (ILogger<Channel> logger, IChannelRepository repository, IChannelService service) =>
                 {
