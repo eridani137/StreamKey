@@ -3,6 +3,7 @@ using StreamKey.Core.DTOs;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Entities;
+using StreamKey.Shared.Types;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -40,7 +41,8 @@ public class Statistic : ICarterModule
 
                     return Results.Ok(await repository.GetChannelClicksCount(channelName, hours));
                 })
-            .WithSummary("");
+            .Produces<ChannelClicksStatistic>()
+            .WithSummary("Получение числа кликов на канал");
 
         var activityGroup = app.MapGroup("/activity")
             .WithTags("Активность");
