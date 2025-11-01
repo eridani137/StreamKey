@@ -23,6 +23,7 @@ public static class ServiceExtensions
 
         services.AddScoped<ViewStatisticRepository>();
         services.AddScoped<UserSessionRepository>();
+        services.AddScoped<ChannelActivityRepository>();
 
         services.AddMemoryCache();
 

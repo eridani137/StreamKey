@@ -12,12 +12,14 @@ public class StatisticHandler(
     ILogger<StatisticHandler> logger)
     : IHostedService, IDisposable
 {
-    private static readonly TimeSpan SaveStatisticInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan SaveViewStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan UserOfflineTimeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan SaveClickChannelStatisticInterval = TimeSpan.FromMinutes(1);
 
-    private Task? _savingStatisticTask;
+    private Task? _savingViewStatistic;
     private Task? _removeOfflineUsers;
+    private Task? _savingChannelClick;
     private CancellationTokenSource _stoppingCts = null!;
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -25,16 +27,14 @@ public class StatisticHandler(
         logger.LogInformation("Сервис статистики запущен");
         _stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        _savingStatisticTask = Task.Run(async () =>
+        _savingViewStatistic = Task.Run(async () =>
         {
-            await Task.Delay(TimeSpan.FromSeconds(5), _stoppingCts.Token);
-
             while (!_stoppingCts.Token.IsCancellationRequested)
             {
                 try
                 {
-                    await Task.Delay(SaveStatisticInterval, _stoppingCts.Token);
-                    await SaveStatistic();
+                    await Task.Delay(SaveViewStatisticInterval, _stoppingCts.Token);
+                    await SaveViewStatistic();
                 }
                 catch (OperationCanceledException)
                 {
@@ -49,8 +49,6 @@ public class StatisticHandler(
 
         _removeOfflineUsers = Task.Run(async () =>
         {
-            await Task.Delay(TimeSpan.FromSeconds(5), _stoppingCts.Token);
-
             while (!_stoppingCts.Token.IsCancellationRequested)
             {
                 try
@@ -64,7 +62,27 @@ public class StatisticHandler(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Ошибка в основном цикле с оффлайн пользователей");
+                    logger.LogError(ex, "Ошибка в цикле удаления оффлайн пользователей");
+                }
+            }
+        }, _stoppingCts.Token);
+
+        _savingChannelClick = Task.Run(async () =>
+        {
+            while (!_stoppingCts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(SaveClickChannelStatisticInterval, _stoppingCts.Token);
+                    await SaveChannelClickStatistic();
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Ошибка в цикле сохранения кликов на каналы");
                 }
             }
         }, _stoppingCts.Token);
@@ -74,16 +92,17 @@ public class StatisticHandler(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await SaveStatistic();
+        await SaveViewStatistic();
         await RemoveOfflineUsers(true);
+        await SaveChannelClickStatistic();
 
         await _stoppingCts.CancelAsync();
 
         try
         {
-            if (_savingStatisticTask is not null && _removeOfflineUsers is not null)
+            if (_savingViewStatistic is not null && _removeOfflineUsers is not null && _savingChannelClick is not null)
             {
-                await Task.WhenAll(_savingStatisticTask, _removeOfflineUsers)
+                await Task.WhenAll(_savingViewStatistic, _removeOfflineUsers, _savingChannelClick)
                     .WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
             }
         }
@@ -97,7 +116,7 @@ public class StatisticHandler(
     }
 
 
-    private async Task SaveStatistic()
+    private async Task SaveViewStatistic()
     {
         try
         {
@@ -115,7 +134,7 @@ public class StatisticHandler(
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Ошибка при добавлении статистической записи");
+                    logger.LogError(e, "Ошибка при добавлении записи просмотра");
                 }
             }
 
@@ -123,12 +142,12 @@ public class StatisticHandler(
 
             if (processed > 0)
             {
-                logger.LogInformation("Сохранено {RecordsProcessedCount} статистических записей просмотров", processed);
+                logger.LogInformation("Сохранено {RecordsProcessedCount} записей просмотров", processed);
             }
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Ошибка при сохранении статистики");
+            logger.LogError(e, "Ошибка при сохранении статистики просмотров");
         }
     }
 
@@ -189,11 +208,47 @@ public class StatisticHandler(
         }
     }
 
+    private async Task SaveChannelClickStatistic()
+    {
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var repository = scope.ServiceProvider.GetRequiredService<ChannelActivityRepository>();
+
+            var processed = 0;
+
+            while (statisticService.ChannelActivityQueue.TryDequeue(out var data))
+            {
+                try
+                {
+                    await repository.Add(data);
+                    processed++;
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Ошибка при добавлении записи клика на канал");
+                }
+            }
+            
+            await repository.Save();
+            
+            if (processed > 0)
+            {
+                logger.LogInformation("Сохранено {RecordsProcessedCount} записей кликов на каналы", processed);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при сохранении статистики кликов на каналы");
+        }
+    }
+
     public void Dispose()
     {
         _stoppingCts.Cancel();
-        _savingStatisticTask?.Dispose();
+        _savingViewStatistic?.Dispose();
         _removeOfflineUsers?.Dispose();
+        _savingChannelClick?.Dispose();
         _stoppingCts.Dispose();
     }
 }

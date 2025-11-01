@@ -10,6 +10,8 @@ public class StatisticService
     public ConcurrentQueue<ViewStatisticEntity> ViewStatisticQueue { get; } = new();
 
     public readonly ConcurrentDictionary<string, UserSessionEntity> OnlineUsers = new();
+    
+    public ConcurrentQueue<ClickChannelEntity> ChannelActivityQueue { get; } = new();
 
     public void UpdateUserActivity(ActivityRequest activityRequest)
     {

@@ -45,5 +45,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(e => e.StartedAt);
             entity.HasIndex(e => e.UpdatedAt);
         });
+
+        modelBuilder.Entity<ClickChannelEntity>(entity =>
+        {
+            entity.ToTable("ClickChannels");
+
+            entity.HasIndex(e => e.ChannelName);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.DateTime);
+        });
     }
 }

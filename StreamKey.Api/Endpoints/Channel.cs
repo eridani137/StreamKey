@@ -4,7 +4,10 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
 using StreamKey.Core.Mappers;
+using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Infrastructure.Repositories;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -17,9 +20,14 @@ public class Channel : ICarterModule
             .RequireAuthorization();
 
         group.MapPost("/click",
-                async (ClickChannelDto dto, ILogger<Channel> logger) =>
+                (ClickChannelDto dto, StatisticService service) =>
                 {
-                    logger.LogInformation("Channel {ChannelName} clicked, User: {UserId}", dto.ChannelName, dto.UserId);
+                    service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
+                    {
+                        ChannelName = dto.ChannelName,
+                        UserId = dto.UserId,
+                        DateTime = DateTime.UtcNow
+                    });
                 })
             .AllowAnonymous()
             .WithSummary("Клик на канал");
@@ -44,16 +52,16 @@ public class Channel : ICarterModule
             .WithSummary("Запуск обновления каналов");
 
         group.MapGet("/all",
-            async (IChannelService service) =>
-            {
-                var channels = await service.GetChannels();
-                var mapped = channels.MapAll();
+                async (IChannelService service) =>
+                {
+                    var channels = await service.GetChannels();
+                    var mapped = channels.MapAll();
 
-                return Results.Ok(mapped);
-            })
+                    return Results.Ok(mapped);
+                })
             .Produces<List<ChannelDto>>()
             .WithSummary("Получить все добавленные каналы");
-        
+
         group.MapGet("",
                 async (IChannelService service) =>
                 {
