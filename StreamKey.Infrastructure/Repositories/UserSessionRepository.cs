@@ -7,6 +7,22 @@ namespace StreamKey.Infrastructure.Repositories;
 public class UserSessionRepository(ApplicationDbContext context)
     : BaseRepository<UserSessionEntity>(context)
 {
+    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateTimeOffset startDate, int hours)
+    {
+        var endDate = startDate.AddHours(hours);
+    
+        var uniqueUsers = await GetSet()
+            .Where(us => us.StartedAt >= startDate && us.StartedAt < endDate)
+            .Select(us => us.UserId)
+            .Distinct()
+            .ToListAsync();
+    
+        return new UsersPerTimeStatistic
+        {
+            UniqueUsersCount = uniqueUsers.Count
+        };
+    }
+    
     public async Task<UserTimeSpentStats> GetAverageTimeSpent(int hours)
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-hours);

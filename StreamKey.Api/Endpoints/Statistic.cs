@@ -17,22 +17,43 @@ public class Statistic : ICarterModule
         group.MapGet("/channels",
                 async (int hours, int count, ViewStatisticRepository repository) =>
                 {
-                    if (hours <= 0 || count <= 0) return Results.BadRequest("Часов и количество записей должны быть больше 0");
-                    
+                    if (hours <= 0 || count <= 0)
+                        return Results.BadRequest("Часов и количество записей должны быть больше 0");
+
                     return Results.Json(await repository.GetTopViewedChannelsAsync(hours, count));
                 })
             .WithSummary("Топ каналов")
             .RequireAuthorization();
-        
-        group.MapGet("/sessions/time-spent",
-            async (int hours, UserSessionRepository repository) =>
-            {
-                if (hours <= 0) return Results.BadRequest("Часов должно быть больше 0");
 
-                return Results.Ok(await repository.GetAverageTimeSpent(hours));
-            })
+        group.MapGet("/sessions/time-spent",
+                async (int hours, UserSessionRepository repository) =>
+                {
+                    if (hours <= 0) return Results.BadRequest("Часов должно быть больше 0");
+
+                    return Results.Ok(await repository.GetAverageTimeSpent(hours));
+                })
             .WithSummary("Time Spent")
             .RequireAuthorization();
+
+        group.MapGet("/online",
+                (StatisticService statisticService) =>
+                    Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count)))
+            .WithSummary("Получить число онлайн пользователей")
+            .RequireAuthorization()
+            .Produces<ActivityResponse>();
+
+        group.MapGet("/dau",
+                async (DateTimeOffset startDate, int hours, UserSessionRepository repository) =>
+                    Results.Ok(await repository.GetUsersPerDayStatistic(startDate, hours)))
+            .WithSummary("Пользователи за день")
+            .RequireAuthorization()
+            .Produces<UsersPerTimeStatistic>();
+
+        group.MapGet("/mau",
+                (UserSessionRepository repository) => { })
+            .WithSummary("Пользователи за месяц")
+            .RequireAuthorization()
+            .Produces<UsersPerTimeStatistic>();
 
         group.MapGet("/channels/clicks",
                 async (string channelName, int hours, ChannelClickRepository repository) =>
@@ -56,13 +77,6 @@ public class Statistic : ICarterModule
                 })
             .WithSummary("Обновление активности пользователя");
 
-        activityGroup.MapGet("",
-                (StatisticService statisticService) =>
-                    Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count)))
-            .WithSummary("Получить число онлайн пользователей")
-            .RequireAuthorization()
-            .Produces<ActivityResponse>();
-        
         activityGroup.MapPost("/channel/click",
                 (ClickChannelDto dto, StatisticService service) =>
                 {
