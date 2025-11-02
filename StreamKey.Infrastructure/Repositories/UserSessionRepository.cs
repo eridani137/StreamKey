@@ -47,32 +47,33 @@ public class UserSessionRepository(ApplicationDbContext context)
     public async Task<UserTimeSpentStats> GetAverageTimeSpent(int hours)
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-hours);
-    
-        var sessions = await GetSet()
+        
+        var perUserSeconds = await GetSet()
             .Where(s => s.UpdatedAt >= cutoffTime)
-            .Select(s => new { s.UserId, s.AccumulatedTime })
-            .ToListAsync();
-    
-        if (sessions.Count == 0)
-        {
-            return new UserTimeSpentStats(TimeSpan.Zero, 0, TimeSpan.Zero);
-        }
-    
-        var userTotalTimes = sessions
             .GroupBy(s => s.UserId)
-            .Select(g => g.Sum(s => s.AccumulatedTime.TotalSeconds))
-            .ToList();
-    
-        var averageSeconds = userTotalTimes.Average();
-        var sortedTimes = userTotalTimes.OrderBy(t => t).ToList();
-        var medianSeconds = sortedTimes.Count % 2 == 0 
-            ? (sortedTimes[sortedTimes.Count / 2 - 1] + sortedTimes[sortedTimes.Count / 2]) / 2.0
-            : sortedTimes[sortedTimes.Count / 2];
-    
+            .Select(g => g.Sum(s => (double)s.AccumulatedTime.TotalSeconds))
+            .ToListAsync();
+        
+        if (perUserSeconds.Count == 0)
+        {
+            return new UserTimeSpentStats(TimeSpan.Zero, 0, TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero);
+        }
+        
+        perUserSeconds.Sort();
+        
+        var count = perUserSeconds.Count;
+        var average = perUserSeconds.Average();
+        var median = (count % 2 == 0)
+            ? (perUserSeconds[count / 2 - 1] + perUserSeconds[count / 2]) / 2.0
+            : perUserSeconds[count / 2];
+        var min = perUserSeconds[0];
+        var max = perUserSeconds[^1];
+
         return new UserTimeSpentStats(
-            TimeSpan.FromSeconds(averageSeconds), 
-            userTotalTimes.Count, 
-            TimeSpan.FromSeconds(medianSeconds)
-        );
+            TimeSpan.FromSeconds(average),
+            count,
+            TimeSpan.FromSeconds(median),
+            TimeSpan.FromSeconds(min),
+            TimeSpan.FromSeconds(max));
     }
 }
