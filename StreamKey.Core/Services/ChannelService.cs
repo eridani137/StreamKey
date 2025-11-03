@@ -120,15 +120,33 @@ public class ChannelService(
         var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
         var category = parse.GetInnerText($"{baseXpath}//a[@data-a-target='stream-game-link']");
 
-        if (string.IsNullOrEmpty(avatarUrl) ||
-            string.IsNullOrEmpty(channelTitle) ||
-            string.IsNullOrEmpty(viewers) ||
-            string.IsNullOrEmpty(description) ||
-            string.IsNullOrEmpty(category))
+        if (string.IsNullOrEmpty(avatarUrl))
         {
-            logger.LogWarning(
-                "{AvatarUrl} or {ChannelTitle} or {Viewers} or {Description} or {Category} is null or empty",
-                avatarUrl, channelTitle, viewers, description, category);
+            logger.LogWarning("AvatarUrl is null: {ChannelName}", name);
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(channelTitle))
+        {
+            logger.LogWarning("ChannelTitle is null: {ChannelName}", name);
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(viewers))
+        {
+            logger.LogWarning("Viewers is null: {ChannelName}", name);
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(description))
+        {
+            logger.LogWarning("Description is null: {ChannelName}", name);
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(category))
+        {
+            logger.LogWarning("Category is null: {ChannelName}", name);
             return null;
         }
 
