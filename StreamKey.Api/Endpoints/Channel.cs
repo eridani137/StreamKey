@@ -29,6 +29,7 @@ public class Channel : ICarterModule
                         DateTime = DateTime.UtcNow
                     });
                 })
+            .AllowAnonymous()
             .WithSummary("Клик на канал"); // TODO: move
 
         group.MapGet("/refresh",
