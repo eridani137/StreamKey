@@ -65,18 +65,6 @@ public class Statistic : ICarterModule
                 })
             .Produces<ChannelClicksStatistic>()
             .WithSummary("Получение числа кликов на канал");
-        
-        group.MapPost("/channels/click",
-                (ClickChannelDto dto, StatisticService service) =>
-                {
-                    service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
-                    {
-                        ChannelName = dto.ChannelName,
-                        UserId = dto.UserId,
-                        DateTime = DateTime.UtcNow
-                    });
-                })
-            .WithSummary("Клик на канал");
 
         var activityGroup = app.MapGroup("/activity")
             .WithTags("Активность");

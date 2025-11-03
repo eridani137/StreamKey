@@ -18,6 +18,18 @@ public class Channel : ICarterModule
         var group = app.MapGroup("/channels")
             .WithTags("Работа с каналами")
             .RequireAuthorization();
+        
+        group.MapPost("/click",
+                (ClickChannelDto dto, StatisticService service) =>
+                {
+                    service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
+                    {
+                        ChannelName = dto.ChannelName,
+                        UserId = dto.UserId,
+                        DateTime = DateTime.UtcNow
+                    });
+                })
+            .WithSummary("Клик на канал"); // TODO: move
 
         group.MapGet("/refresh",
                 async (ILogger<Channel> logger, IChannelRepository repository, IChannelService service) =>
