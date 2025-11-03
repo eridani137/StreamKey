@@ -42,6 +42,18 @@ TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/openapi/v1.json"))
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, proxy-revalidate";
+        context.Response.Headers.Pragma = "no-cache";
+        context.Response.Headers.Expires = "0";
+    }
+
+    await next();
+});
+
 app.MapOpenApi();
 app.MapScalarApiReference();
 
