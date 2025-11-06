@@ -37,7 +37,7 @@ public class UsherService(
 
         var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
         {
-            Path = $"api/channel/hls/{username}.m3u8"
+            Path = $"api/v2/channel/hls/{username}.m3u8"
         };
 
         var query = HttpUtility.ParseQueryString(string.Empty);
