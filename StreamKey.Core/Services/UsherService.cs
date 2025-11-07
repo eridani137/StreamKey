@@ -41,10 +41,11 @@ public class UsherService(
         };
 
         var query = HttpUtility.ParseQueryString(string.Empty);
-        query["client_id"] = ApplicationConstants.ClientId;
-        query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
         query["sig"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature;
+        
         query["allow_source"] = "true";
+        query["cdm"] = "wv";
+        query["enable_score"] = "true";
         query["fast_bread"] = "true";
         query["include_unavailable"] = "true";
         query["multigroup_video"] = "false";
@@ -53,6 +54,10 @@ public class UsherService(
         query["playlist_include_framerate"] = "true";
         query["reassignments_supported"] = "true";
         query["supported_codecs"] = "av1,h265,h264";
+        
+        query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
+        
+        query["transcode_mode"] = "cbr_v1";
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
