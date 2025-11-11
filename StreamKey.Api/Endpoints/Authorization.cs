@@ -42,14 +42,20 @@ public class Authorization : ICarterModule
                     {
                         return TypedResults.Problem(statusCode: StatusCodes.Status401Unauthorized);
                     }
-                    
+
                     await userManager.ResetAccessFailedCountAsync(user);
-                    
+
                     var token = jwtService.GenerateToken(user);
 
                     return Results.Ok(token);
                 })
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
             .WithSummary("Авторизация");
+
+        group.MapPost("/telegram/login",
+            (TelegramAuthDto dto) =>
+            {
+                return Results.Ok(dto);
+            });
     }
 }
