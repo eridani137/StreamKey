@@ -421,34 +421,41 @@ const ActiveChannelsEnhancer = {
     }
 };
 
-updateActivity();
-setInterval(() => {
-    updateActivity();
-}, 45000);
+const ActivityHandler = {
 
-function updateActivity() {
-    api.storage.local.get(['sessionId'], (result) => {
-        const userId = localStorage.getItem('local_copy_unique_id');
-        if (result.sessionId && userId) {
-            fetch(`${CONFIG.apiUrl}/activity/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sessionId: result.sessionId,
-                    userId: userId
+    init() {
+        this.updateActivity();
+
+        setInterval(() => {
+            this.updateActivity();
+        }, 45000);
+    },
+
+    updateActivity() {
+        api.storage.local.get(['sessionId'], (result) => {
+            const userId = localStorage.getItem('local_copy_unique_id');
+            if (result.sessionId && userId) {
+                fetch(`${CONFIG.apiUrl}/activity/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sessionId: result.sessionId,
+                        userId: userId
+                    })
                 })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Сервер вернул ошибку: ' + res.status);
-                    return res.text().then(text => text ? JSON.parse(text) : {});
-                })
-                .then(data => console.log(data))
-                .catch(err => console.error(err));
-        }
-    });
-}
+                    .then(res => {
+                        if (!res.ok) throw new Error('Сервер вернул ошибку: ' + res.status);
+                        return res.text().then(text => text ? JSON.parse(text) : {});
+                    })
+                    .then(data => console.log(data))
+                    .catch(err => console.error(err));
+            }
+        });
+    }
+};
 
 QualityMenuEnhancer.init();
 ActiveChannelsEnhancer.init();
+ActivityHandler.init();
