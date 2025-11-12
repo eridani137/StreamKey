@@ -84,7 +84,7 @@ public class Authorization : ICarterModule
 
                 var hash = Convert.ToHexStringLower(hashBytes);
 
-                if (hash.Equals(checkHash, StringComparison.OrdinalIgnoreCase))
+                if (!hash.Equals(checkHash, StringComparison.OrdinalIgnoreCase))
                 {
                     return Results.BadRequest("hash does not match");
                 }
