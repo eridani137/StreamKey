@@ -7,6 +7,7 @@ using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
 using StreamKey.Infrastructure.Extensions;
+using StreamKey.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,11 @@ Env.Load();
 
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder);
+
+if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string>() is { } token)
+{
+    ApplicationConstants.TelegramAuthorizationBotToken = token;
+}
 
 builder.Services.AddApplication();
 

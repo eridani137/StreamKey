@@ -456,47 +456,6 @@ const ActivityHandler = {
     }
 };
 
-const TelegramIntegration = {
-    addLoginWidget() {
-        const container = document.createElement('div');
-        container.style.position = "fixed";
-        container.style.top = "20px";
-        container.style.right = "20px";
-        container.style.zIndex = "999999";
-        container.style.background = "rgba(255, 255, 255, 0.9)";
-        container.style.padding = "6px 10px";
-        container.style.borderRadius = "10px";
-        container.style.boxShadow = "0 2px 6px rgba(0,0,0,0.15)";
-        document.body.appendChild(container);
-
-        container.innerHTML = `<div id="tg-login-wrap"></div>`;
-
-        const script = document.createElement('script');
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.async = true;
-        script.setAttribute("data-telegram-login", "eridaniauthbot");
-        script.setAttribute("data-size", "small");
-        script.setAttribute("data-request-access", "write");
-        script.setAttribute("data-onauth", "TelegramIntegration.onAuth");
-
-        document.getElementById("tg-login-wrap").appendChild(script);
-    },
-
-    async onAuth(user) {
-        console.log("Telegram user:", user);
-
-        const response = await fetch(`${CONFIG.apiUrl}/auth/telegram`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user)
-        });
-
-        const result = await response.json();
-        console.log("Server response:", result);
-    }
-};
-
 QualityMenuEnhancer.init();
 ActiveChannelsEnhancer.init();
 ActivityHandler.init();
-TelegramIntegration.addLoginWidget();

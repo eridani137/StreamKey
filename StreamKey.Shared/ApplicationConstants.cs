@@ -15,6 +15,7 @@ public static class ApplicationConstants
     public const string TwitchUrl = "https://www.twitch.tv";
     public static readonly Uri QqlUrl = new("https://gql.twitch.tv/gql");
     public const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
+    public static string TelegramAuthorizationBotToken { get; set; } = string.Empty;
     
     public static Dictionary<string, string> Headers { get; } = new()
     {
