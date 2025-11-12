@@ -9,20 +9,24 @@ public static class ApplicationConstants
     public const string RemoveAds = "RemoveAds";
     
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
-    public const int MaxRequestsPerMinute = 100;
-    public const int TimeWindowSeconds = 60;
+    
     public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
-    public const string TwitchUrl = "https://www.twitch.tv";
+    public static readonly Uri TwitchUrl = new("https://www.twitch.tv");
     public static readonly Uri QqlUrl = new("https://gql.twitch.tv/gql");
+    
     public const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
-    public static string TelegramAuthorizationBotToken { get; set; } = string.Empty;
+    
+    public static string TelegramBotToken { get; set; } = string.Empty;
+    public static readonly Uri TelegramUrl = new ("https://api.telegram.org");
+    public const string TelegramClientName = "TelegramClient";
+    public const long TelegramChatId = -1001578482756;
     
     public static Dictionary<string, string> Headers { get; } = new()
     {
         { "Accept", "*/*" },
         { "Accept-Language", "en-US" },
         { "Client-ID", ClientId },
-        { "Origin", TwitchUrl },
+        { "Origin", TwitchUrl.AbsoluteUri },
         { "sec-ch-ua", """Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138""" },
         { "sec-ch-ua-mobile", "?0" },
         { "sec-ch-ua-platform", """Windows""" },

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
+using StreamKey.Core.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.Entities;
 
@@ -56,7 +57,7 @@ public class Authorization : ICarterModule
             .WithSummary("Авторизация");
 
         group.MapPost("/telegram/login/check",
-            (TelegramAuthDto dto) =>
+            async (TelegramAuthDto dto, ITelegramService service) =>
             {
                 var dataCheckList = new List<string>();
 
@@ -75,7 +76,7 @@ public class Authorization : ICarterModule
                 var dataCheckString = string.Join("\n", dataCheckList);
 
                 var secretKey = SHA256.HashData(
-                    Encoding.UTF8.GetBytes(ApplicationConstants.TelegramAuthorizationBotToken)
+                    Encoding.UTF8.GetBytes(ApplicationConstants.TelegramBotToken)
                 );
 
                 byte[] hashBytes;
@@ -97,8 +98,17 @@ public class Authorization : ICarterModule
                     return Results.BadRequest("data is outdated");
                 }
 
-                return Results.Ok(dto);
+                var response = await service.GetChatMember(dto.Id);
+                if (response is null) return Results.BadRequest("response is null");
+                
+                if (response?.Result?.Status is not (ChatMemberStatus.Creator or ChatMemberStatus.Owner
+                    or ChatMemberStatus.Administrator or ChatMemberStatus.Member or ChatMemberStatus.Restricted))
+                {
+                    return Results.NotFound("user is not member");
+                }
+
+                return Results.Ok();
             })
-            .WithSummary("Проверка авторизации Telegram");
+            .WithSummary("Проверка пользователя Telegram");
     }
 }

@@ -18,7 +18,7 @@ OpenTelemetryConfiguration.Configure(builder);
 
 if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string>() is { } token)
 {
-    ApplicationConstants.TelegramAuthorizationBotToken = token;
+    ApplicationConstants.TelegramBotToken = token;
 }
 
 builder.Services.AddApplication();

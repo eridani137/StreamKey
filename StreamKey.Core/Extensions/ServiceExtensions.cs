@@ -26,6 +26,7 @@ public static class ServiceExtensions
 
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddSingleton<ICamoufoxService, CamoufoxService>();
+        services.AddSingleton<ITelegramService, TelegramService>();
 
         services.AddScoped<IJwtService, JwtService>();
 
@@ -57,7 +58,7 @@ public static class ServiceExtensions
         services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client) =>
             {
                 client.BaseAddress = ApplicationConstants.UsherUrl;
-                client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
+                client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
 
                 foreach (var header in ApplicationConstants.Headers)
                 {
@@ -67,12 +68,11 @@ public static class ServiceExtensions
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
             .AddHttpMessageHandler<FilterNotFoundHandler>();
-        //.AddStandardResilienceHandler();
 
         services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client) =>
             {
                 client.BaseAddress = ApplicationConstants.QqlUrl;
-                client.DefaultRequestHeaders.Referrer = new Uri(ApplicationConstants.TwitchUrl);
+                client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
 
                 foreach (var header in ApplicationConstants.Headers)
                 {
@@ -82,11 +82,17 @@ public static class ServiceExtensions
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
             .AddHttpMessageHandler<FilterNotFoundHandler>();
-        //.AddStandardResilienceHandler();
 
         services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
         {
             client.BaseAddress = new Uri("http://camoufox:8080");
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        });
+
+        services.AddHttpClient(ApplicationConstants.TelegramClientName, (_, client) =>
+        {
+            client.BaseAddress = ApplicationConstants.TelegramUrl;
+            client.DefaultRequestHeaders.Referrer = ApplicationConstants.TelegramUrl;
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         });
 
