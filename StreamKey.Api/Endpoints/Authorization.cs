@@ -64,7 +64,7 @@ public class Authorization : ICarterModule
                 {
                     $"username={dto.Username}",
                     $"first_name={dto.FirstName}",
-                    $"last_name={dto.LastName}",
+                    $"username={dto.Username}",
                     $"photo_url={dto.PhotoUrl}",
                     $"auth_date={dto.AuthDate}",
                     $"id={dto.Id}"
