@@ -55,26 +55,28 @@ public class Authorization : ICarterModule
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
             .WithSummary("Авторизация");
 
-        group.MapPost("/telegram/login",
+        group.MapPost("/telegram/login/check",
             (TelegramAuthDto dto) =>
             {
-                var checkHash = dto.Hash;
+                var dataCheckList = new List<string>();
 
-                var dataCheckList = new List<string>
-                {
-                    $"username={dto.Username}",
-                    $"first_name={dto.FirstName}",
-                    $"username={dto.Username}",
-                    $"photo_url={dto.PhotoUrl}",
-                    $"auth_date={dto.AuthDate}",
-                    $"id={dto.Id}"
-                };
+                if (dto.Id > 0) dataCheckList.Add($"id={dto.Id}");
+
+                if (dto.AuthDate > 0) dataCheckList.Add($"auth_date={dto.AuthDate}");
+
+                if (!string.IsNullOrEmpty(dto.FirstName)) dataCheckList.Add($"first_name={dto.FirstName}");
+
+                if (!string.IsNullOrEmpty(dto.Username)) dataCheckList.Add($"username={dto.Username}");
+
+                if (!string.IsNullOrEmpty(dto.PhotoUrl)) dataCheckList.Add($"photo_url={dto.PhotoUrl}");
 
                 dataCheckList.Sort();
 
                 var dataCheckString = string.Join("\n", dataCheckList);
 
-                var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(ApplicationConstants.TelegramAuthorizationBotToken));
+                var secretKey = SHA256.HashData(
+                    Encoding.UTF8.GetBytes(ApplicationConstants.TelegramAuthorizationBotToken)
+                );
 
                 byte[] hashBytes;
                 using (var hmac = new HMACSHA256(secretKey))
@@ -84,7 +86,7 @@ public class Authorization : ICarterModule
 
                 var hash = Convert.ToHexStringLower(hashBytes);
 
-                if (!hash.Equals(checkHash, StringComparison.OrdinalIgnoreCase))
+                if (!hash.Equals(dto.Hash, StringComparison.Ordinal))
                 {
                     return Results.BadRequest("hash does not match");
                 }
@@ -96,6 +98,7 @@ public class Authorization : ICarterModule
                 }
 
                 return Results.Ok(dto);
-            });
+            })
+            .WithSummary("Проверка авторизации Telegram");
     }
 }
