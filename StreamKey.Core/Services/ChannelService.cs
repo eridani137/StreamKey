@@ -114,7 +114,7 @@ public class ChannelService(
             return null;
         }
 
-        var avatarUrl = parse.GetAttributeValue($"{baseXpath}//img", "src");
+        var avatarUrl = parse.GetAttributeValue($"{baseXpath}//img", "src")?.Trim('"', '\\');
         var channelTitle = parse.GetInnerText($"{baseXpath}//h1");
         var viewers = parse.GetInnerText($"{baseXpath}//strong[contains(@data-a-target, \"animated-channel-viewers-count\")]");
         var description = parse.GetInnerText($"{baseXpath}//p[contains(@data-a-target, \"stream-title\")]");
