@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
@@ -17,6 +18,8 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
             
             var response = await httpResponse.Content.ReadFromJsonAsync<CamoufoxHtmlResponse>()
                            ?? throw new InvalidOperationException("Пустой ответ Camoufox");
+
+            response = response with { Html = WebUtility.HtmlDecode(response.Html) };
 
             return response;
         }
