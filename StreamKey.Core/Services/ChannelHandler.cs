@@ -15,7 +15,7 @@ public class ChannelHandler(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {

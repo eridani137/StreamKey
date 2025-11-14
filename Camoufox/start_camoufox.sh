@@ -13,7 +13,7 @@ sleep 5
 # 1️⃣ Запуск Camoufox один раз headless, чтобы создал профиль и установил расширения
 camoufox --headless "about:blank" &
 CAMOUFOX_PID=$!
-sleep 30   # даём время на установку расширений
+sleep 15   # даём время на установку расширений
 kill $CAMOUFOX_PID || true
 
 # 2️⃣ Папка профиля Camoufox

@@ -23,12 +23,12 @@ class URLRequest(BaseModel):
     wait_time: int = 3
 
 
-class HTMLResponse(BaseModel):
-    url: str
-    html: str
-    status: str
-    page_title: Optional[str] = None
-    final_url: Optional[str] = None
+# class HTMLResponse(BaseModel):
+#     url: str
+#     html: str
+#     status: str
+#     page_title: Optional[str] = None
+#     final_url: Optional[str] = None
 
 
 # ---------------- Globals & sync primitives ----------------
@@ -161,7 +161,7 @@ async def health() -> dict[str, str]:
 
 
 # ---------------- Core endpoints ----------------
-@app.post("/fetch-html", response_model=HTMLResponse)
+@app.post("/fetch-html")
 async def fetch_html(req: URLRequest):
     """
     Получение HTML-контента страницы.
@@ -202,15 +202,9 @@ async def fetch_html(req: URLRequest):
         page_title = await page.title()
         final_url = page.url
 
-        logger.info(f"✅ HTML получен ({len(html)} символов, title: {page_title})")
+        logger.info(f"✅ HTML получен ({len(html)} символов, title: {page_title}), url: {final_url}")
 
-        return HTMLResponse(
-            url=req.url,
-            html=html,
-            status="success",
-            page_title=page_title,
-            final_url=final_url
-        )
+        return html
     except HTTPException:
         # пробрасываем HTTPException как есть
         raise
