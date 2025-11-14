@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
@@ -19,11 +18,8 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
             
             var response = await httpResponse.Content.ReadAsStringAsync()
                            ?? throw new InvalidOperationException("Пустой ответ Camoufox");
-            
-            var html = JsonSerializer.Deserialize<string>(response)
-                       ?? throw new InvalidOperationException("Пустой ответ Camoufox");
 
-            return html;
+            return response;
         }
         catch (Exception e)
         {
