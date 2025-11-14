@@ -17,22 +17,22 @@ namespace StreamKey.Core.Services;
 
 public class UsherService(
     IHttpClientFactory clientFactory,
-    ITwitchService twitchService
-    // IMemoryCache cache
+    ITwitchService twitchService,
+    IMemoryCache cache
 ) : IUsherService
 {
     public async Task<Result<string>> GetStreamPlaylist(string username, HttpContext context)
     {
-        // if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
-        // {
-        //     tokenResponse = await twitchService.GetStreamAccessToken(username);
-        //     if (tokenResponse is not null)
-        //     {
-        //         cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
-        //     }
-        // }
+        if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        {
+            tokenResponse = await twitchService.GetStreamAccessToken(username);
+            if (tokenResponse is not null)
+            {
+                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
+            }
+        }
 
-        var tokenResponse = await twitchService.GetStreamAccessToken(username);
+        // var tokenResponse = await twitchService.GetStreamAccessToken(username);
 
         if (tokenResponse is null)
         {
@@ -99,16 +99,16 @@ public class UsherService(
 
     public async Task<Result<string>> GetVodPlaylist(string vodId, HttpContext context)
     {
-        // if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
-        // {
-        //     tokenResponse = await twitchService.GetVodAccessToken(vodId);
-        //     if (tokenResponse is not null)
-        //     {
-        //         cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(1));
-        //     }
-        // }
+        if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        {
+            tokenResponse = await twitchService.GetVodAccessToken(vodId);
+            if (tokenResponse is not null)
+            {
+                cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(1));
+            }
+        }
 
-        var tokenResponse = await twitchService.GetVodAccessToken(vodId);
+        // var tokenResponse = await twitchService.GetVodAccessToken(vodId);
 
         if (tokenResponse is null)
         {
