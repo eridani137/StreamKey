@@ -61,18 +61,6 @@ async def save_page_html(page: Page, path: str, name_generator: Callable[[str], 
     logger.info(f"💾 Сохранена страница: {filepath}")
 
 
-# def remove_profile_directory():
-#     if os.path.exists(config.profile_path):
-#         logger.info(f"🗑️ Удаление папки профиля: {config.profile_path}")
-#         try:
-#             shutil.rmtree(config.profile_path)
-#             logger.info("✅ Папка профиля успешно удалена.")
-#         except OSError as err:
-#             logger.error(f"❌ Не удалось удалить папку профиля: {err}")
-#     else:
-#         logger.warning("🤷 Папка профиля не найдена, удалять нечего.")
-
-
 async def cleanup_browser_gracefully(browser, worker_tabs):
     """Корректное закрытие всех вкладок и браузера"""
     logger.info("🚪 Начинаю корректное закрытие браузера...")

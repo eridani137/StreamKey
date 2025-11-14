@@ -18,7 +18,16 @@ RUN pip install --no-cache-dir camoufox[geoip] scalar-fastapi colorlog fastapi u
 
 RUN python -m camoufox fetch
 
+# Копируем приложение
 COPY Camoufox/ /app/
+
+# Создаём папку для политик + копируем policies.json
+RUN mkdir -p /usr/lib/camoufox/distribution/
+COPY Camoufox/policies.json /usr/lib/camoufox/distribution/policies.json
+
+# Копируем расширения (.xpi)
+COPY Camoufox/addons/ /app/addons/
+
 RUN dos2unix /app/start_camoufox.sh && chmod +x /app/start_camoufox.sh
 
 EXPOSE 8080

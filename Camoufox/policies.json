@@ -1,0 +1,9 @@
+{
+  "policies": {
+    "Extensions": {
+      "Install": [
+        "file:///app/addons/cookie_auto_decline-6.7.xpi"
+      ]
+    }
+  }
+}
