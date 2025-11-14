@@ -13,7 +13,6 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
         try
         {
             var httpResponse = await client.PostAsJsonAsync("/fetch-html", request);
-            
             httpResponse.EnsureSuccessStatusCode();
             
             var response = await httpResponse.Content.ReadAsStringAsync()

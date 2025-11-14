@@ -86,7 +86,6 @@ public static class ServiceExtensions
         services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
         {
             client.BaseAddress = new Uri("http://camoufox:8080");
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         });
 
         services.AddHttpClient(ApplicationConstants.TelegramClientName, (_, client) =>
