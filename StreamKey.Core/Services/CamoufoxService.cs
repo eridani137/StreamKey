@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
@@ -12,9 +13,13 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
     {
         try
         {
-            var httpResponse = await client.PostAsJsonAsync("/fetch-html", request);
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/fetch-html");
+            requestMessage.Content = JsonContent.Create(request);
+            requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html"));
+        
+            var httpResponse = await client.SendAsync(requestMessage);
             httpResponse.EnsureSuccessStatusCode();
-            
+        
             var response = await httpResponse.Content.ReadAsStringAsync()
                            ?? throw new InvalidOperationException("Пустой ответ Camoufox");
 
