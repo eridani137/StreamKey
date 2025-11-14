@@ -101,13 +101,13 @@ public class ChannelService(
             return null;
         }
 
-        if (string.IsNullOrEmpty(response.Html))
+        if (string.IsNullOrEmpty(response))
         {
             logger.LogWarning("Html is null: {ChannelUrl}", channelUrl);
             return null;
         }
 
-        var parse = response.Html.GetParse();
+        var parse = response.GetParse();
         if (parse is null)
         {
             logger.LogWarning("Parse is null: {ChannelUrl}", channelUrl);

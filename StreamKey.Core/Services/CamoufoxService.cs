@@ -8,7 +8,7 @@ namespace StreamKey.Core.Services;
 
 public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger) : ICamoufoxService
 {
-    public async Task<CamoufoxHtmlResponse?> GetPageHtml(CamoufoxRequest request)
+    public async Task<string?> GetPageHtml(CamoufoxRequest request)
     {
         try
         {
@@ -16,7 +16,7 @@ public class CamoufoxService(HttpClient client, ILogger<CamoufoxService> logger)
             
             httpResponse.EnsureSuccessStatusCode();
             
-            var response = await httpResponse.Content.ReadFromJsonAsync<CamoufoxHtmlResponse>()
+            var response = await httpResponse.Content.ReadFromJsonAsync<string>()
                            ?? throw new InvalidOperationException("Пустой ответ Camoufox");
 
             return response;
