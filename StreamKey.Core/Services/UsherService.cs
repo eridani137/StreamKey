@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using M3U8Parser;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,7 @@ public class UsherService(
     // IMemoryCache cache
 ) : IUsherService
 {
-    public async Task<Result<string>> GetStreamPlaylist(string username)
+    public async Task<Result<string>> GetStreamPlaylist(string username, HttpContext context)
     {
         // if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         // {
@@ -42,25 +43,16 @@ public class UsherService(
         {
             Path = $"api/v2/channel/hls/{username}.m3u8"
         };
-
+        
         var query = HttpUtility.ParseQueryString(string.Empty);
+
+        foreach (var (key, value) in context.Request.Query)
+        {
+            query[key] = value;
+        }
+
         query["sig"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature;
-
-        query["allow_source"] = "true";
-        query["cdm"] = "wv";
-        query["enable_score"] = "true";
-        query["fast_bread"] = "true";
-        query["include_unavailable"] = "true";
-        query["multigroup_video"] = "false";
-        query["platform"] = "web";
-        query["player_backend"] = "mediaplayer";
-        query["playlist_include_framerate"] = "true";
-        query["reassignments_supported"] = "true";
-        query["supported_codecs"] = "av1,h265,h264";
-
         query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
-
-        query["transcode_mode"] = "cbr_v1";
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
@@ -105,7 +97,7 @@ public class UsherService(
         }
     }
 
-    public async Task<Result<string>> GetVodPlaylist(string vodId)
+    public async Task<Result<string>> GetVodPlaylist(string vodId, HttpContext context)
     {
         // if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         // {
@@ -129,18 +121,15 @@ public class UsherService(
         };
 
         var query = HttpUtility.ParseQueryString(string.Empty);
+        
+        foreach (var (key, value) in context.Request.Query)
+        {
+            query[key] = value;
+        }
+        
         query["client_id"] = ApplicationConstants.ClientId;
         query["token"] = tokenResponse?.Data?.VideoPlaybackAccessToken?.Value;
         query["sig"] = tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature;
-        query["allow_source"] = "true";
-        query["enable_score"] = "true";
-        query["include_unavailable"] = "true";
-        query["multigroup_video"] = "false";
-        query["platform"] = "web";
-        query["player_backend"] = "mediaplayer";
-        query["playlist_include_framerate"] = "true";
-        query["reassignments_supported"] = "true";
-        query["supported_codecs"] = "av1,h265,h264";
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();

@@ -66,7 +66,7 @@ public class Playlist : ICarterModule
                 UserId = request.UserId
             });
 
-            var result = await usherService.GetStreamPlaylist(request.ChannelName);
+            var result = await usherService.GetStreamPlaylist(request.ChannelName, context);
 
             if (result.IsFailure)
             {
@@ -117,7 +117,7 @@ public class Playlist : ICarterModule
             // var request = ProcessRequest(context, logger);
             // if (request is null) return Results.BadRequest();
             
-            var result = await usherService.GetVodPlaylist(vodId.ToString());
+            var result = await usherService.GetVodPlaylist(vodId.ToString(), context);
             
             if (result.IsFailure)
             {

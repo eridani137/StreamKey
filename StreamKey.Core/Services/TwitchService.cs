@@ -35,7 +35,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
         {
             var jsonString = await response.Content.ReadAsStringAsync();
-            logger.LogError("Ошибка получения [Signature, Value] JSON: {JSON}", jsonString);
+            logger.LogError("Ошибка получения StreamAccessToken: {JSON}", jsonString);
 
             return null;
         }
@@ -69,7 +69,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Value is null)
         {
             var jsonString = await response.Content.ReadAsStringAsync();
-            logger.LogError("Ошибка получения [Signature, Value] JSON: {JSON}", jsonString);
+            logger.LogError("Ошибка получения VodAccessToken: {JSON}", jsonString);
 
             return null;
         }
