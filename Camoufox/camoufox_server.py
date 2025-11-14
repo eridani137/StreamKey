@@ -9,6 +9,7 @@ from pydantic import BaseModel
 import uvicorn
 
 from scalar_fastapi import get_scalar_api_reference
+from fastapi.responses import HTMLResponse
 
 import config
 from browser_utils import safe_goto
@@ -161,7 +162,7 @@ async def health() -> dict[str, str]:
 
 
 # ---------------- Core endpoints ----------------
-@app.post("/fetch-html")
+@app.post("/fetch-html", response_class=HTMLResponse)
 async def fetch_html(req: URLRequest):
     """
     Получение HTML-контента страницы.
@@ -175,17 +176,14 @@ async def fetch_html(req: URLRequest):
     try:
         logger.info(f"⏩ HTML-запрос: {req.url}")
 
-        # Ограничим число одновременно открытых страниц
         await _pages_semaphore.acquire()
         acquired = True
 
-        # Попытка создать страницу — если browser умер, пробуем реинициализировать и повторить один раз
         try:
             page = await current_browser.new_page()
         except Exception as e_newpage:
             logger.warning("new_page() упал: %s — пробуем реинициализировать браузер и повторить once", e_newpage)
             try:
-                # Попытка реинициализировать browser
                 current_browser = await ensure_browser()
                 page = await current_browser.new_page()
             except Exception as e2:
@@ -195,7 +193,6 @@ async def fetch_html(req: URLRequest):
         if not await safe_goto(page, req.url):
             raise HTTPException(400, "Не удалось загрузить страницу")
 
-        # Дополнительное ожидание для рендеринга
         await page.wait_for_timeout(req.wait_time * 1000)
 
         html = await page.content()
@@ -204,13 +201,11 @@ async def fetch_html(req: URLRequest):
 
         logger.info(f"✅ HTML получен ({len(html)} символов, title: {page_title}), url: {final_url}")
 
-        return html
+        return html  # HTMLResponse автоматически обработает строку
     except HTTPException:
-        # пробрасываем HTTPException как есть
         raise
     except Exception as exc:
         logger.exception("Ошибка загрузки %s: %s", req.url, exc)
-        # при фатальной ошибке - попытка зачистить глобальный браузер, чтобы следующая попытка реинициализировала его
         async with _browser_lock:
             try:
                 if browser:
@@ -218,9 +213,7 @@ async def fetch_html(req: URLRequest):
             except Exception:
                 logger.warning("Ошибка закрытия браузера после исключения")
             finally:
-                # явно очистить
                 try:
-                    # mypy / typing
                     globals_browser = globals()
                     globals_browser["browser"] = None
                 except Exception:
