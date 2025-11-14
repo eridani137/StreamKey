@@ -26,7 +26,7 @@ public class UsherService(
             tokenResponse = await twitchService.GetStreamAccessToken(username);
             if (tokenResponse is not null)
             {
-                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(3));
+                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
             }
         }
 
@@ -109,7 +109,7 @@ public class UsherService(
             tokenResponse = await twitchService.GetVodAccessToken(vodId);
             if (tokenResponse is not null)
             {
-                cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(3));
+                cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(1));
             }
         }
 
