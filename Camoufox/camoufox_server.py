@@ -9,7 +9,7 @@ from pydantic import BaseModel
 import uvicorn
 
 from scalar_fastapi import get_scalar_api_reference
-from fastapi.responses import HTMLResponse
+from fastapi.responses import PlainTextResponse
 
 import config
 from browser_utils import safe_goto
@@ -162,7 +162,7 @@ async def health() -> dict[str, str]:
 
 
 # ---------------- Core endpoints ----------------
-@app.post("/fetch-html", response_class=HTMLResponse)
+@app.post("/fetch-html")
 async def fetch_html(req: URLRequest):
     """
     Получение HTML-контента страницы.
@@ -201,7 +201,7 @@ async def fetch_html(req: URLRequest):
 
         logger.info(f"✅ HTML получен ({len(html)} символов, title: {page_title}), url: {final_url}")
 
-        return html  # HTMLResponse автоматически обработает строку
+        return PlainTextResponse(content=html, media_type="text/html")
     except HTTPException:
         raise
     except Exception as exc:
