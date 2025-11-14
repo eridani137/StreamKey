@@ -90,7 +90,7 @@ public class ChannelService(
 
     private async Task<ChannelInfo?> ParseChannelInfo(string name)
     {
-        const string baseXpath = "//div[@class='channel-info-content']";
+        const string baseXpath = "//div[contains(@class, \"channel-info-content\")]";
 
         var channelUrl = $"{ApplicationConstants.TwitchUrl}/{name}";
         var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 30));
@@ -114,11 +114,11 @@ public class ChannelService(
             return null;
         }
 
-        var avatarUrl = parse.GetAttributeValue($"{baseXpath}//img[contains(@class,'tw-image-avatar')]", "src");
-        var channelTitle = parse.GetInnerText($"{baseXpath}//h1[contains(@class,'tw-title')]");
-        var viewers = parse.GetInnerText($"{baseXpath}//strong[@data-a-target='animated-channel-viewers-count']");
-        var description = parse.GetInnerText($"{baseXpath}//p[@data-a-target='stream-title']");
-        var category = parse.GetInnerText($"{baseXpath}//a[@data-a-target='stream-game-link']");
+        var avatarUrl = parse.GetAttributeValue($"{baseXpath}//img", "src");
+        var channelTitle = parse.GetInnerText($"{baseXpath}//h1");
+        var viewers = parse.GetInnerText($"{baseXpath}//strong[contains(@data-a-target, \"animated-channel-viewers-count\")]");
+        var description = parse.GetInnerText($"{baseXpath}//p[contains(@data-a-target, \"stream-title\")]");
+        var category = parse.GetInnerText($"{baseXpath}//a[contains(@data-a-target, \"stream-game-link\")]");
 
         if (string.IsNullOrEmpty(avatarUrl))
         {
