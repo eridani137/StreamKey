@@ -11,7 +11,7 @@ public class ChannelHandler(
     IServiceProvider serviceProvider)
     : BackgroundService
 {
-    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(1);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
