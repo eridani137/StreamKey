@@ -92,7 +92,7 @@ public class ChannelService(
     {
         const string baseXpath = "//div[contains(@class, \"channel-info-content\")]";
 
-        var channelUrl = $"{ApplicationConstants.TwitchUrl}/{name}";
+        var channelUrl = $"{ApplicationConstants.TwitchUrl}{name}";
         var response = await camoufox.GetPageHtml(new CamoufoxRequest(channelUrl, 60));
 
         if (response is null)
