@@ -344,11 +344,11 @@ const ActiveChannelsEnhancer = {
                             return res.text().then(text => text ? JSON.parse(text) : {});
                         })
                         .then(_ => {
-                            // window.location.href = `/${nickname}`;
+                            window.location.href = `/${nickname}`;
                         })
                         .catch(err => {
                             console.error(err)
-                            // window.location.href = `/${nickname}`;
+                            window.location.href = `/${nickname}`;
                         });
                 }
             });
