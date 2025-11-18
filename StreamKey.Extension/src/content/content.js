@@ -21,10 +21,10 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const QualityMenuEnhancer = {
     observer: null,
     styleElement: null,
+    isProcessing: false,
 
     init() {
         this.injectStyles();
-        this.applyEnhancements();
         this.startObserver();
     },
 
@@ -74,6 +74,69 @@ const QualityMenuEnhancer = {
             });
     },
 
+    block2KResolutionElement() {
+        const elements = this.getResolutionElements();
+    
+        const element1440 = elements.find(label => {
+            const text = label.textContent || "";
+            return text.includes("1440");
+        });
+    
+        if (!element1440) return;
+        
+        const radioItem = element1440.closest(CONFIG.quality_menu_selectors.radioItems);
+        
+        // Проверить, уже ли обработан
+        if (radioItem?.getAttribute('data-streamkey-blocked') === 'true') {
+            return;
+        }
+        
+        const input = radioItem?.querySelector('input[type="radio"]');
+        const labelElement = radioItem?.querySelector('label');
+    
+        if (input && radioItem) {
+            // СРАЗУ пометить как обработанный
+            radioItem.setAttribute('data-streamkey-blocked', 'true');
+            
+            // Блокировать input
+            input.disabled = true;
+            
+            // Удалить связь label
+            if (labelElement) {
+                labelElement.removeAttribute('for');
+            }
+            
+            // Установить position: relative для контейнера
+            radioItem.style.position = 'relative';
+            radioItem.style.opacity = '0.5';
+            
+            // Создать overlay ОДИН раз
+            if (!radioItem.querySelector('.streamkey-block-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'streamkey-block-overlay';
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 9999;
+                    cursor: not-allowed;
+                    background: transparent;
+                `;
+                
+                overlay.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    return false;
+                };
+                
+                radioItem.appendChild(overlay);
+            }
+        }
+    },
+
     createBadge() {
         const badgeContainer = document.createElement("span");
         badgeContainer.classList.add(CONFIG.badgeName);
@@ -104,9 +167,12 @@ const QualityMenuEnhancer = {
     },
 
     enhanceLabel(label) {
-        if (!label.classList.contains(CONFIG.styleName)) {
-            label.classList.add(CONFIG.styleName);
+        // Проверить, уже обработан ли
+        if (label.dataset.listenerAttached === "true") {
+            return;
         }
+
+        label.classList.add(CONFIG.styleName);
 
         const text = label.textContent || "";
         if (text.includes("1080") || text.includes("1440")) {
@@ -117,12 +183,10 @@ const QualityMenuEnhancer = {
             }
         }
 
-        if (!label.dataset.listenerAttached) {
-            label.addEventListener("click", () => {
-                this.handleLabelClick(label);
-            });
-            label.dataset.listenerAttached = "true";
-        }
+        label.addEventListener("click", () => {
+            this.handleLabelClick(label);
+        });
+        label.dataset.listenerAttached = "true";
     },
 
     applyEnhancements() {
@@ -134,14 +198,36 @@ const QualityMenuEnhancer = {
     startObserver() {
         if (this.observer) return;
 
-        this.observer = new MutationObserver(() => this.applyEnhancements());
+        this.observer = new MutationObserver(() => {
+            // Debounce с флагом
+            if (this.isProcessing) return;
+            
+            this.isProcessing = true;
+            
+            // Небольшая задержка для группировки изменений
+            setTimeout(() => {
+                // Отключить observer перед изменениями
+                this.observer.disconnect();
+                
+                try {
+                    this.applyEnhancements();
+                    this.block2KResolutionElement();
+                } finally {
+                    // Переподключить observer
+                    this.observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+                    
+                    this.isProcessing = false;
+                }
+            }, 100);
+        });
 
-        const options = {
+        this.observer.observe(document.body, {
             childList: true,
             subtree: true
-        }
-
-        this.observer.observe(document.body, options);
+        });
     },
 
     destroy() {
@@ -162,6 +248,11 @@ const QualityMenuEnhancer = {
 
         document.querySelectorAll(`.${CONFIG.badgeName}`).forEach(badge => {
             badge.remove();
+        });
+        
+        // Удалить блокировки
+        document.querySelectorAll('[data-streamkey-blocked]').forEach(el => {
+            el.removeAttribute('data-streamkey-blocked');
         });
     }
 };
