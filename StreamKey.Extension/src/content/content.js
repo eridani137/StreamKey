@@ -313,25 +313,41 @@ const ActiveChannelsEnhancer = {
     },
 
     async fetchAndUpdateChannels() {
-        const r = await fetch(CONFIG.apiUrl + "/channels")
-            .catch(err => {
-            });
-        if (!r || !r.ok) {
-            console.error(`API request failed with status ${r?.status}`);
+        const now = Date.now();
+        const timeSinceLastFetch = now - this.lastUpdateTime;
+    
+        // Ограничение: максимум 1 запрос в 60 секунд
+        if (timeSinceLastFetch < 60000) {
+            console.log(`[Channels] Fetch skipped (${timeSinceLastFetch}ms < 60000ms)`);
             return;
         }
-
-        let error = null;
-        const data = await r.json()
-            .catch(err => error = err);
-
-        if (error) {
-            return console.error("Failed to fetch or update channels:", error);
+    
+        console.log(`[Channels] Performing fetch... (last was ${timeSinceLastFetch}ms ago)`);
+    
+        this.lastUpdateTime = now;
+    
+        const r = await fetch(CONFIG.apiUrl + "/channels")
+            .catch(err => {
+                console.error("[Channels] Fetch error:", err);
+            });
+    
+        if (!r || !r.ok) {
+            console.error(`[Channels] API request failed with status ${r?.status}`);
+            return;
         }
-
+    
+        let error = null;
+        const data = await r.json().catch(err => error = err);
+    
+        if (error) {
+            return console.error("[Channels] Failed to parse JSON:", error);
+        }
+    
+        console.log(`[Channels] Fetch OK — received ${data.length} items`);
+    
         this.channelData = data;
         this.isDataReady = true;
-
+    
         await this.waitForChannelsAndReplace();
     },
 
