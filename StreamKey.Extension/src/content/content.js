@@ -76,41 +76,35 @@ const QualityMenuEnhancer = {
 
     block2KResolutionElement() {
         const elements = this.getResolutionElements();
-    
+
         const element1440 = elements.find(label => {
             const text = label.textContent || "";
             return text.includes("1440");
         });
-    
+
         if (!element1440) return;
-        
+
         const radioItem = element1440.closest(CONFIG.quality_menu_selectors.radioItems);
-        
-        // Проверить, уже ли обработан
+
         if (radioItem?.getAttribute('data-streamkey-blocked') === 'true') {
             return;
         }
-        
+
         const input = radioItem?.querySelector('input[type="radio"]');
         const labelElement = radioItem?.querySelector('label');
-    
+
         if (input && radioItem) {
-            // СРАЗУ пометить как обработанный
             radioItem.setAttribute('data-streamkey-blocked', 'true');
-            
-            // Блокировать input
+
             input.disabled = true;
-            
-            // Удалить связь label
+
             if (labelElement) {
                 labelElement.removeAttribute('for');
             }
-            
-            // Установить position: relative для контейнера
+
             radioItem.style.position = 'relative';
             radioItem.style.opacity = '0.5';
-            
-            // Создать overlay ОДИН раз
+
             if (!radioItem.querySelector('.streamkey-block-overlay')) {
                 const overlay = document.createElement('div');
                 overlay.className = 'streamkey-block-overlay';
@@ -124,14 +118,14 @@ const QualityMenuEnhancer = {
                     cursor: not-allowed;
                     background: transparent;
                 `;
-                
+
                 overlay.onclick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     return false;
                 };
-                
+
                 radioItem.appendChild(overlay);
             }
         }
@@ -167,7 +161,6 @@ const QualityMenuEnhancer = {
     },
 
     enhanceLabel(label) {
-        // Проверить, уже обработан ли
         if (label.dataset.listenerAttached === "true") {
             return;
         }
@@ -199,26 +192,22 @@ const QualityMenuEnhancer = {
         if (this.observer) return;
 
         this.observer = new MutationObserver(() => {
-            // Debounce с флагом
             if (this.isProcessing) return;
-            
+
             this.isProcessing = true;
-            
-            // Небольшая задержка для группировки изменений
+
             setTimeout(() => {
-                // Отключить observer перед изменениями
                 this.observer.disconnect();
-                
+
                 try {
                     this.applyEnhancements();
                     this.block2KResolutionElement();
                 } finally {
-                    // Переподключить observer
                     this.observer.observe(document.body, {
                         childList: true,
                         subtree: true
                     });
-                    
+
                     this.isProcessing = false;
                 }
             }, 100);
@@ -249,8 +238,7 @@ const QualityMenuEnhancer = {
         document.querySelectorAll(`.${CONFIG.badgeName}`).forEach(badge => {
             badge.remove();
         });
-        
-        // Удалить блокировки
+
         document.querySelectorAll('[data-streamkey-blocked]').forEach(el => {
             el.removeAttribute('data-streamkey-blocked');
         });
@@ -315,39 +303,38 @@ const ActiveChannelsEnhancer = {
     async fetchAndUpdateChannels() {
         const now = Date.now();
         const timeSinceLastFetch = now - this.lastUpdateTime;
-    
-        // Ограничение: максимум 1 запрос в 60 секунд
+
         if (timeSinceLastFetch < 60000) {
             console.log(`[Channels] Fetch skipped (${timeSinceLastFetch}ms < 60000ms)`);
             return;
         }
-    
+
         console.log(`[Channels] Performing fetch... (last was ${timeSinceLastFetch}ms ago)`);
-    
+
         this.lastUpdateTime = now;
-    
+
         const r = await fetch(CONFIG.apiUrl + "/channels")
             .catch(err => {
                 console.error("[Channels] Fetch error:", err);
             });
-    
+
         if (!r || !r.ok) {
             console.error(`[Channels] API request failed with status ${r?.status}`);
             return;
         }
-    
+
         let error = null;
         const data = await r.json().catch(err => error = err);
-    
+
         if (error) {
             return console.error("[Channels] Failed to parse JSON:", error);
         }
-    
+
         console.log(`[Channels] Fetch OK — received ${data.length} items`);
-    
+
         this.channelData = data;
         this.isDataReady = true;
-    
+
         await this.waitForChannelsAndReplace();
     },
 
