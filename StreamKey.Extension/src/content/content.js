@@ -76,58 +76,67 @@ const QualityMenuEnhancer = {
 
     block2KResolutionElement() {
         const elements = this.getResolutionElements();
-
+    
         const element1440 = elements.find(label => {
             const text = label.textContent || "";
             return text.includes("1440");
         });
-
+    
         if (!element1440) return;
-
+    
         const radioItem = element1440.closest(CONFIG.quality_menu_selectors.radioItems);
-
+    
         if (radioItem?.getAttribute('data-streamkey-blocked') === 'true') {
             return;
         }
-
+    
         const input = radioItem?.querySelector('input[type="radio"]');
         const labelElement = radioItem?.querySelector('label');
-
+    
         if (input && radioItem) {
             radioItem.setAttribute('data-streamkey-blocked', 'true');
-
+    
+            // 1. Отключаем input
             input.disabled = true;
-
+            input.readOnly = true;
+    
+            // 2. Убираем связь label с input
             if (labelElement) {
                 labelElement.removeAttribute('for');
+                labelElement.style.pointerEvents = 'none';
             }
-
-            radioItem.style.position = 'relative';
-            radioItem.style.opacity = '0.5';
-
-            if (!radioItem.querySelector('.streamkey-block-overlay')) {
-                const overlay = document.createElement('div');
-                overlay.className = 'streamkey-block-overlay';
-                overlay.style.cssText = `
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    z-index: 9999;
-                    cursor: not-allowed;
-                    background: transparent;
-                `;
-
-                overlay.onclick = (e) => {
+    
+            // 3. Клонируем radioItem, чтобы удалить ВСЕ React-обработчики
+            const clone = radioItem.cloneNode(true);
+            clone.setAttribute('data-streamkey-blocked', 'true');
+            clone.style.opacity = '0.5';
+            clone.style.pointerEvents = 'none';
+            clone.style.cursor = 'not-allowed';
+            
+            // Заменяем оригинальный элемент клоном (это удаляет все слушатели)
+            radioItem.parentNode.replaceChild(clone, radioItem);
+    
+            // 4. Дополнительно блокируем клики на родительском flex-контейнере
+            const flexContainer = clone.parentElement;
+            
+            const blockClick = (e) => {
+                if (clone.contains(e.target) || e.target === flexContainer) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     return false;
-                };
-
-                radioItem.appendChild(overlay);
-            }
+                }
+            };
+    
+            // Добавляем обработчики в фазе capturing на document
+            document.addEventListener('click', blockClick, true);
+            document.addEventListener('mousedown', blockClick, true);
+            document.addEventListener('mouseup', blockClick, true);
+            document.addEventListener('pointerdown', blockClick, true);
+            document.addEventListener('pointerup', blockClick, true);
+            
+            // Сохраняем ссылку для очистки
+            clone._streamkeyBlockers = { blockClick };
         }
     },
 
