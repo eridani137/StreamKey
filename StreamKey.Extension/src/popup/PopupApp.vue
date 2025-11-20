@@ -25,9 +25,12 @@
     </div>
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
-    <button class="telegram-button" @click="openTelegram">
+    <div class="authentication-block">
+      <span>Пройти авторизацию</span>
+      <button class="telegram-button" @click="openTelegram">
       <TelegramCircle />
-    </button>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -189,7 +192,6 @@ export default {
       );
 
       await loadStoredState();
-      // is1440pActive.value = isEnabled.value;
       if (isEnabled.value) {
         await enableRuleset();
         currentVideo.value = EnabledVideo;
@@ -274,16 +276,22 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 12px;
+  padding: 8px 8px 8px 8px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 
 .telegram-button:hover {
   background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.telegram-button:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .telegram-button svg {
@@ -301,6 +309,21 @@ export default {
   line-height: 19px;
 
   color: #9a9a9a;
+}
+
+.authentication-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 34px;
+  padding: 8px;
+  width: 80%;
+  margin-left: 14px;
+
+  font-family: 'Manrope', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
 }
 
 </style>
