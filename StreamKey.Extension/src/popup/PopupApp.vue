@@ -17,9 +17,12 @@
         ></video>
       </template>
     </div>
-    <h1 class="title">STREAM KEY</h1>
-    <p class="subtitle">Твой ключ от мира стриминга</p>
-    <button class="tg-button" @click="openTelegram">
+    <div class="subscribe-status">
+      <p>1440p:</p>
+    </div>
+    <h1 class="stream-key-title">STREAM KEY</h1>
+    <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
+    <button class="telegram-button" @click="openTelegram">
       <TelegramCircle />
     </button>
   </div>
@@ -243,8 +246,8 @@ body {
   font-display: swap;
 }
 
-.title {
-  margin-top: 24px;
+.stream-key-title {
+  margin-top: 10px;
   margin-bottom: 4px;
   text-align: center;
 
@@ -274,7 +277,7 @@ body {
   font-display: swap;
 }
 
-.subtitle {
+.stream-key-subtitle {
   margin-top: 0;
   text-align: center;
 
@@ -287,7 +290,7 @@ body {
   color: #9a9a9a;
 }
 
-.tg-button {
+.telegram-button {
   margin-top: auto;
   background: none;
   border: none;
@@ -300,11 +303,25 @@ body {
   transition: background 0.2s;
 }
 
-.tg-button:hover {
+.telegram-button:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.tg-button svg {
+.telegram-button svg {
   display: block;
 }
+
+.subscribe-status {
+  margin-top: 0;
+  text-align: center;
+
+  font-family: 'Manrope', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+
+  color: #9a9a9a;
+}
+
 </style>
