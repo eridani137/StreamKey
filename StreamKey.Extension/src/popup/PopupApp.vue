@@ -18,7 +18,10 @@
       </template>
     </div>
     <div class="subscribe-status">
-      <p>1440p:</p>
+      <p>1440p: <span :class="status1440pColorClass">{{ status1440pText }}</span></p>
+    </div>
+    <div>
+      <QAButton />
     </div>
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
@@ -31,7 +34,8 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import StreamKeyLogo from './assets/StreamKeyLogo.vue';
-import TelegramCircle from './assets/TelegramCircle.vue'
+import TelegramCircle from './assets/TelegramCircle.vue';
+import QAButton from './assets/QAButton.vue';
 import EnableVideo from '/assets/enable.webm';
 import EnabledVideo from '/assets/enabled.webm';
 import DisableVideo from '/assets/disable.webm';
@@ -40,12 +44,14 @@ export default {
   name: 'PopupApp',
   components: {
     StreamKeyLogo,
-    TelegramCircle
+    TelegramCircle,
+    QAButton
   },
   setup() {
     const currentVideo = ref(undefined);
     const isEnabled = ref(true);
     const isLoading = ref(false);
+    const is1440pActive = ref(false);
 
     const extensionAPI = typeof browser !== 'undefined' ? browser : chrome;
 
@@ -55,6 +61,14 @@ export default {
 
     const isVideoLooped = computed(() => {
       return currentVideo.value === EnabledVideo;
+    });
+
+    const status1440pText = computed(() => {
+      return is1440pActive.value ? 'Активирован' : 'Не активирован*';
+    });
+
+    const status1440pColorClass = computed(() => {
+      return is1440pActive.value ? 'status-active' : 'status-inactive';
     });
 
     function onVideoEnded() {
@@ -175,6 +189,7 @@ export default {
       );
 
       await loadStoredState();
+      // is1440pActive.value = isEnabled.value;
       if (isEnabled.value) {
         await enableRuleset();
         currentVideo.value = EnabledVideo;
@@ -193,6 +208,9 @@ export default {
       onLogoClick,
       openTelegram,
       onVideoEnded,
+      is1440pActive,
+      status1440pText,
+      status1440pColorClass,
     };
   },
 };
@@ -216,7 +234,7 @@ export default {
 }
 
 .stream-key-title {
-  margin-top: 10px;
+  margin-top: 16px;
   margin-bottom: 4px;
   text-align: center;
 
@@ -241,6 +259,14 @@ export default {
   line-height: 19px;
 
   color: #9a9a9a;
+}
+
+.status-active {
+  color: rgb(14, 148, 114);
+}
+
+.status-inactive {
+  color: rgb(219, 75, 70);
 }
 
 .telegram-button {
