@@ -110,7 +110,6 @@ const QualityMenuEnhancer = {
             const clone = radioItem.cloneNode(true);
             clone.setAttribute('data-streamkey-blocked', 'true');
             clone.style.opacity = '0.5';
-            clone.style.pointerEvents = 'none';
             clone.style.cursor = 'not-allowed';
             
             // Заменяем оригинальный элемент клоном (это удаляет все слушатели)
