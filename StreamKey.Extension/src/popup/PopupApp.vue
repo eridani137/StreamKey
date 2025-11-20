@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup-window">
     <div class="circle-logo" @click="onLogoClick">
       <template v-if="!showVideo">
         <StreamKeyLogo />
@@ -199,29 +199,6 @@ export default {
 </script>
 
 <style>
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  user-select: none;
-}
-
-.popup {
-  width: 289px;
-  height: 386px;
-  padding: 16px 8px;
-  background: radial-gradient(ellipse at top, #271f2c 0%, #040715 100%);
-  color: #fff;
-  font-family: 'Montserrat', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  box-sizing: border-box;
-}
-
 .circle-logo {
   width: 164px;
   height: 164px;
@@ -238,14 +215,6 @@ body {
   display: block;
 }
 
-@font-face {
-  font-family: 'DIN Pro';
-  src: url('./fonts/DINPro-BlackItalic.otf') format('opentype');
-  font-weight: 900;
-  font-style: italic;
-  font-display: swap;
-}
-
 .stream-key-title {
   margin-top: 10px;
   margin-bottom: 4px;
@@ -259,22 +228,6 @@ body {
 
   color: #ffffff;
   text-transform: uppercase;
-}
-
-@font-face {
-  font-family: 'Manrope';
-  src: url('./fonts/Manrope-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Manrope';
-  src: url('./fonts/Manrope-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
 }
 
 .stream-key-subtitle {
