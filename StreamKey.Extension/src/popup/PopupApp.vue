@@ -41,6 +41,7 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue';
+import { CONFIG } from '../config';
 import StreamKeyLogo from './assets/StreamKeyLogo.vue';
 import TelegramCircle from './assets/TelegramCircle.vue';
 import QAButton from './assets/QAButton.vue';
@@ -185,20 +186,20 @@ export default {
     function openTelegram() {
       if (typeof browser !== 'undefined') {
         // Firefox
-        browser.tabs.create({ url: 'https://t.me/streamkey' });
+        browser.tabs.create({ url: CONFIG.telegramChannelUrl });
       } else {
         // Chrome
-        window.open('https://t.me/streamkey', '_blank');
+        window.open(CONFIG.telegramChannelUrl, '_blank');
       }
     }
 
     function openTelegramAuthentication(){
       if (typeof browser !== 'undefined') {
         // Firefox
-        browser.tabs.create({ url: 'https://streamkey.ru/extension-authorization/' });
+        browser.tabs.create({ url: CONFIG.extensionAuthorizationUrl });
       } else {
         // Chrome
-        window.open('https://streamkey.ru/extension-authorization/', '_blank');
+        window.open(CONFIG.extensionAuthorizationUrl, '_blank');
       }
     }
 

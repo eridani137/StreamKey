@@ -11,5 +11,7 @@ export const CONFIG = {
         url: "https://t.me/streamkey"
     },
     minResolution: 1080,
-    apiUrl: "https://service.streamkey.ru"
+    apiUrl: "https://service.streamkey.ru",
+    telegramChannelUrl: "https://t.me/streamkey",
+    extensionAuthorizationUrl: "https://streamkey.ru/extension-authorization/"
 };
