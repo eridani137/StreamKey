@@ -23,9 +23,8 @@ export function generateSessionId() {
 export function createNewSession() {
     const sessionId = generateSessionId();
 
-    api.storage.local.set({sessionId: sessionId}, () => {
-        console.log('Сгенерирован ID сессии:', sessionId);
-    });
+    saveState(CONFIG.sessionIdKeyName, sessionId);
+    console.log('Сгенерирован ID сессии:', sessionId);
 
     return sessionId;
 }
@@ -33,10 +32,10 @@ export function createNewSession() {
 export async function loadState(keyName) {
     try {
         const result = await api.storage.local.get([keyName]);
-        return !!result[keyName];
+        return result[keyName];
     } catch (error) {
         console.error(`Ошибка загрузки значения для ключа ${keyName}:`, error);
-        return false;
+        return undefined;
     }
 }
 

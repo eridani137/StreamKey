@@ -1,5 +1,22 @@
-import { CONFIG } from '../config';
-import * as utils from '../utils';
+const CONFIG = {
+    styleName: "custom-radio",
+    badgeName: "custom-radio-badge",
+    quality_menu_selectors: {
+        menuContainer: "div[data-a-target='player-settings-menu']",
+        radioItems: "div[role='menuitemradio']",
+        radioLabel: "label.ScRadioLabel-sc-1pxozg3-0"
+    },
+    badge: {
+        text: "Stream Key",
+        url: "https://t.me/streamkey"
+    },
+    minResolution: 1080,
+    apiUrl: "https://service.streamkey.ru"
+};
+
+const api = typeof browser !== 'undefined' ? browser : chrome;
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const QualityMenuEnhancer = {
     observer: null,
@@ -59,43 +76,43 @@ const QualityMenuEnhancer = {
 
     block2KResolutionElement() {
         const elements = this.getResolutionElements();
-    
+
         const element1440 = elements.find(label => {
             const text = label.textContent || "";
             return text.includes("1440");
         });
-    
+
         if (!element1440) return;
-    
+
         const radioItem = element1440.closest(CONFIG.quality_menu_selectors.radioItems);
-    
+
         if (radioItem?.getAttribute('data-streamkey-blocked') === 'true') {
             return;
         }
-    
+
         const input = radioItem?.querySelector('input[type="radio"]');
         const labelElement = radioItem?.querySelector('label');
-    
+
         if (input && radioItem) {
             radioItem.setAttribute('data-streamkey-blocked', 'true');
-    
+
             input.disabled = true;
             input.readOnly = true;
-    
+
             if (labelElement) {
                 labelElement.removeAttribute('for');
                 labelElement.style.pointerEvents = 'none';
             }
-    
+
             const clone = radioItem.cloneNode(true);
             clone.setAttribute('data-streamkey-blocked', 'true');
             clone.style.opacity = '0.5';
             clone.style.cursor = 'not-allowed';
-            
+
             radioItem.parentNode.replaceChild(clone, radioItem);
-    
+
             const flexContainer = clone.parentElement;
-            
+
             const blockClick = (e) => {
                 if (clone.contains(e.target) || e.target === flexContainer) {
                     e.preventDefault();
@@ -104,14 +121,14 @@ const QualityMenuEnhancer = {
                     return false;
                 }
             };
-    
+
             document.addEventListener('click', blockClick, true);
             document.addEventListener('mousedown', blockClick, true);
             document.addEventListener('mouseup', blockClick, true);
             document.addEventListener('pointerdown', blockClick, true);
             document.addEventListener('pointerup', blockClick, true);
-            
-            clone._streamkeyBlockers = { blockClick };
+
+            clone._streamkeyBlockers = {blockClick};
         }
     },
 
@@ -194,7 +211,7 @@ const QualityMenuEnhancer = {
 
                     this.isProcessing = false;
                 }
-            }, 100);
+            }, 300);
         });
 
         this.observer.observe(document.body, {
@@ -238,10 +255,10 @@ const ActiveChannelsEnhancer = {
     minUpdateInterval: 5000,
     pendingUpdate: null,
 
-    init() {
+    async init() {
         this.setupTooltipHandler();
-        this.fetchAndUpdateChannels();
-        this.updateInterval = setInterval(() => this.fetchAndUpdateChannels(), 60000);
+        await this.fetchAndUpdateChannels();
+        this.updateInterval = setInterval(async () => await this.fetchAndUpdateChannels(), 60000);
     },
 
     setupTooltipHandler() {
@@ -338,10 +355,10 @@ const ActiveChannelsEnhancer = {
         }
 
         console.log(`Found ${channelCards.length} channel cards, checking...`);
-        this.scheduleUpdate();
+        await this.scheduleUpdate();
     },
 
-    scheduleUpdate() {
+    async scheduleUpdate() {
         const now = Date.now();
         const timeSinceLastUpdate = now - this.lastUpdateTime;
 
@@ -351,8 +368,8 @@ const ActiveChannelsEnhancer = {
             }
 
             const remainingTime = this.minUpdateInterval - timeSinceLastUpdate;
-            this.pendingUpdate = setTimeout(() => {
-                this.updateChannels();
+            this.pendingUpdate = setTimeout(async () => {
+                await this.updateChannels();
                 this.pendingUpdate = null;
             }, remainingTime);
 
@@ -360,7 +377,7 @@ const ActiveChannelsEnhancer = {
             return;
         }
 
-        this.updateChannels();
+        await this.updateChannels();
     },
 
     waitForElement(selector, timeout = 10000, multiple = false) {
@@ -398,16 +415,20 @@ const ActiveChannelsEnhancer = {
         div.ariaLabel = 'false';
         div.style.cssText = style;
 
-        div.addEventListener('click', function (event) {
+        div.addEventListener('click', async function (event) {
             if (event && typeof event.preventDefault === 'function') {
                 event.preventDefault();
             }
             event.stopPropagation && event.stopPropagation();
 
-            utils.api.storage.local.get(['sessionId'], (result) => {
+            try {
+                const result = await new Promise((resolve) => {
+                    api.storage.local.get(['sessionId'], resolve);
+                });
+
                 const userId = localStorage.getItem('local_copy_unique_id');
                 if (result.sessionId && userId) {
-                    fetch(`${CONFIG.apiUrl}/channels/click`, {
+                    const response = await fetch(`${CONFIG.apiUrl}/channels/click`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -416,20 +437,17 @@ const ActiveChannelsEnhancer = {
                             channelName: item.channelName,
                             userId: userId
                         })
-                    })
-                        .then(res => {
-                            if (!res.ok) throw new Error('Сервер вернул ошибку: ' + res.status);
-                            return res.text().then(text => text ? JSON.parse(text) : {});
-                        })
-                        .then(_ => {
-                            window.location.href = `/${nickname}`;
-                        })
-                        .catch(err => {
-                            console.error(err)
-                            window.location.href = `/${nickname}`;
-                        });
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Сервер вернул ошибку: ' + response.status);
+                    }
                 }
-            });
+            } catch (err) {
+                console.error(err);
+            } finally {
+                window.location.href = `/${nickname}`;
+            }
         });
 
         div.innerHTML = `
@@ -455,7 +473,7 @@ const ActiveChannelsEnhancer = {
 
         let itemsPane = get_itemsPane();
         while (!itemsPane) {
-            await utils.sleep(500);
+            await sleep(500);
             itemsPane = get_itemsPane();
         }
 
@@ -501,36 +519,42 @@ const ActiveChannelsEnhancer = {
 
 const ActivityHandler = {
 
-    init() {
-        this.updateActivity();
+    async init() {
+        await this.updateActivity();
 
-        setInterval(() => {
-            this.updateActivity();
+        setInterval(async () => {
+            await this.updateActivity();
         }, 45000);
     },
 
-    updateActivity() {
-        utils.api.storage.local.get(['sessionId'], (result) => {
+    async updateActivity() {
+        try {
+            const result = await new Promise((resolve) => {
+                api.storage.local.get(['sessionId'], resolve);
+            });
+
             const userId = localStorage.getItem('local_copy_unique_id');
             if (result.sessionId && userId) {
-                fetch(`${CONFIG.apiUrl}/activity/update`, {
+                const response = await fetch(`${CONFIG.apiUrl}/activity/update`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         sessionId: result.sessionId,
                         userId: userId
                     })
-                })
-                    .then(res => {
-                        if (!res.ok) throw new Error('Сервер вернул ошибку: ' + res.status);
-                        return res.text().then(text => text ? JSON.parse(text) : {});
-                    })
-                    .then(data => console.log(data))
-                    .catch(err => console.error(err));
+                });
+
+                if (!response.ok) {
+                    throw new Error('Сервер вернул ошибку: ' + response.status);
+                }
+
+                const text = await response.text();
+                const data = text ? JSON.parse(text) : {};
+                console.log(data);
             }
-        });
+        } catch (err) {
+            console.error(err);
+        }
     }
 };
 
