@@ -16,3 +16,4 @@ postgres_data
 keys
 **/Migrations
 /StreamKey.Api/appsettings.Development.json
+Camoufox/__pycache__
