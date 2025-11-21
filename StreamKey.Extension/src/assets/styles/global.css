@@ -32,7 +32,7 @@ body {
 }
 
 .popup-window {
-  width: 289px;
+  width: 300px;
   height: 430px;
   padding: 16px 8px;
   background: radial-gradient(ellipse at top, #271f2c 0%, #040715 100%);

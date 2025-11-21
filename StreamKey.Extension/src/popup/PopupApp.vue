@@ -31,7 +31,7 @@
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
     <div class="authentication-block">
-      <span>Пройти авторизацию</span>
+      <span>*перейдите в меню выбора качества</span>
       <button class="telegram-button" @click="openTelegram">
       <TelegramCircle />
       </button>
@@ -335,13 +335,12 @@ export default {
   align-items: center;
   gap: 34px;
   padding: 8px;
-  width: 80%;
+  /* width: 80%; */
   margin-left: 14px;
 
   font-family: 'Manrope', sans-serif;
   font-style: normal;
-  font-weight: 600;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 </style>

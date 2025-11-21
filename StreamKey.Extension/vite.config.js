@@ -8,7 +8,7 @@ const getTargetBrowser = () => {
   if (targetArg) {
     return targetArg.split('=')[1]
   }
-  return 'chrome' 
+  return 'chrome'
 }
 
 const targetBrowser = getTargetBrowser()
@@ -111,11 +111,15 @@ export default defineConfig(({ mode }) => {
           popup: resolve(__dirname, 'src/popup/popup.html'),
           background: resolve(__dirname, 'src/background/background.js'),
           content: resolve(__dirname, 'src/content/content.js'),
+          config: resolve(__dirname, 'src/config.js'),
         },
         output: {
           entryFileNames: (chunkInfo) => {
             if (chunkInfo.name === 'popup') {
               return 'popup/[name].js';
+            }
+            if (chunkInfo.name === 'config') {
+              return '[name].js';
             }
             return '[name]/[name].js';
           },

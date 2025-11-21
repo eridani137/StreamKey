@@ -1,18 +1,4 @@
-const CONFIG = {
-    styleName: "custom-radio",
-    badgeName: "custom-radio-badge",
-    quality_menu_selectors: {
-        menuContainer: "div[data-a-target='player-settings-menu']",
-        radioItems: "div[role='menuitemradio']",
-        radioLabel: "label.ScRadioLabel-sc-1pxozg3-0"
-    },
-    badge: {
-        text: "Stream Key",
-        url: "https://t.me/streamkey"
-    },
-    minResolution: 1080,
-    apiUrl: "https://service.streamkey.ru"
-};
+import { CONFIG } from '../config';
 
 const api = typeof browser !== 'undefined' ? browser : chrome;
 
@@ -96,26 +82,21 @@ const QualityMenuEnhancer = {
         if (input && radioItem) {
             radioItem.setAttribute('data-streamkey-blocked', 'true');
     
-            // 1. Отключаем input
             input.disabled = true;
             input.readOnly = true;
     
-            // 2. Убираем связь label с input
             if (labelElement) {
                 labelElement.removeAttribute('for');
                 labelElement.style.pointerEvents = 'none';
             }
     
-            // 3. Клонируем radioItem, чтобы удалить ВСЕ React-обработчики
             const clone = radioItem.cloneNode(true);
             clone.setAttribute('data-streamkey-blocked', 'true');
             clone.style.opacity = '0.5';
             clone.style.cursor = 'not-allowed';
             
-            // Заменяем оригинальный элемент клоном (это удаляет все слушатели)
             radioItem.parentNode.replaceChild(clone, radioItem);
     
-            // 4. Дополнительно блокируем клики на родительском flex-контейнере
             const flexContainer = clone.parentElement;
             
             const blockClick = (e) => {
@@ -127,14 +108,12 @@ const QualityMenuEnhancer = {
                 }
             };
     
-            // Добавляем обработчики в фазе capturing на document
             document.addEventListener('click', blockClick, true);
             document.addEventListener('mousedown', blockClick, true);
             document.addEventListener('mouseup', blockClick, true);
             document.addEventListener('pointerdown', blockClick, true);
             document.addEventListener('pointerup', blockClick, true);
             
-            // Сохраняем ссылку для очистки
             clone._streamkeyBlockers = { blockClick };
         }
     },

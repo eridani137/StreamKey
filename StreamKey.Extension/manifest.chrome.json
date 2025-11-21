@@ -4,6 +4,7 @@
   "version": "1.0.12",
   "description": "STREAM KEY - твой ключ от мира стриминга. Расширение для твича 1080 возвращает качество 1080p на Twitch в России. Твич 1080 качество в России.",
   "permissions": [
+    "cookies",
     "storage",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess"
@@ -22,6 +23,7 @@
         "*://*.twitch.tv/*"
       ],
       "js": [
+        "config.js",
         "content/content.js"
       ],
       "run_at": "document_idle"
