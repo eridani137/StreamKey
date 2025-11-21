@@ -144,6 +144,7 @@ export default {
       }
 
       is1440pActive.value = await utils.hasAcidCookie();
+      await utils.saveExtensionState(is1440pActive.value);
     });
 
     return {
