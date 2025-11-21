@@ -10,9 +10,10 @@
     "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
-    "*://*.twitch.tv/*",
-    "*://*.ttvnw.net/*",
-    "*://*.streamkey.ru/*"
+    "https://*.twitch.tv/*",
+    "https://*.ttvnw.net/*",
+    "https://*.streamkey.ru/*",
+    "https://*.telegram.org/*"
   ],
   "background": {
     "service_worker": "background/background.js"
@@ -20,7 +21,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.twitch.tv/*"
+        "https://*.twitch.tv/*"
       ],
       "js": [
         "config.js",
@@ -36,7 +37,7 @@
         "fonts/*.otf"
       ],
       "matches": [
-        "*://*.twitch.tv/*"
+        "https://*.twitch.tv/*"
       ]
     }
   ],

@@ -18,11 +18,13 @@
       </template>
     </div>
     <div class="subscribe-status">
-      <p>1440p: <span :class="status1440pColorClass">{{ status1440pText }}</span></p>
+      <p>
+        1440p: <span :class="status1440pColorClass">{{ status1440pText }}</span>
+      </p>
     </div>
     <div>
       <template v-if="is1440pActive">
-        <QAButton />
+        <QAButton @click="openQA" />
       </template>
       <template v-else>
         <ActivateButton @click="openTelegramAuthentication" />
@@ -33,7 +35,7 @@
     <div class="authentication-block">
       <span>*перейдите в меню выбора качества</span>
       <button class="telegram-button" @click="openTelegram">
-      <TelegramCircle />
+        <TelegramCircle />
       </button>
     </div>
   </div>
@@ -56,9 +58,11 @@ export default {
     StreamKeyLogo,
     TelegramCircle,
     QAButton,
-    ActivateButton
+    ActivateButton,
   },
   setup() {
+    const api = typeof browser !== 'undefined' ? browser : chrome;
+
     const currentVideo = ref(undefined);
     const isEnabled = ref(true);
     const isLoading = ref(false);
@@ -183,31 +187,20 @@ export default {
       }
     }
 
-    function openTelegram() {
-      if (typeof browser !== 'undefined') {
-        // Firefox
-        browser.tabs.create({ url: CONFIG.telegramChannelUrl });
-      } else {
-        // Chrome
-        window.open(CONFIG.telegramChannelUrl, '_blank');
-      }
+    function openTelegramChannel() {
+      api.tabs.create({ url: CONFIG.telegramChannelUrl });
     }
 
-    function openTelegramAuthentication(){
-      if (typeof browser !== 'undefined') {
-        // Firefox
-        browser.tabs.create({ url: CONFIG.extensionAuthorizationUrl });
-      } else {
-        // Chrome
-        window.open(CONFIG.extensionAuthorizationUrl, '_blank');
-      }
+    function openTelegramAuthentication() {
+      api.tabs.create({ url: CONFIG.extensionAuthorizationUrl });
+    }
+
+    function openQA() {
+      api.tabs.create({ url: CONFIG.streamKeyQAUrl });
     }
 
     onMounted(async () => {
-      console.log(
-        'Popup запущен в:',
-        typeof browser !== 'undefined' ? 'Firefox' : 'Chrome'
-      );
+      console.log('Popup запущен в:', api);
 
       await loadStoredState();
       if (isEnabled.value) {
@@ -217,6 +210,14 @@ export default {
         await disableRuleset();
         currentVideo.value = undefined;
       }
+
+      api.cookies.get({ url: CONFIG.oauthTelegramUrl, name: 'stel_acid' }, (cookie) => {
+        if (chrome.runtime?.lastError) {
+          is1440pActive.value = false;
+          return;
+        }
+        is1440pActive.value = true;
+      });
     });
 
     return {
@@ -226,8 +227,9 @@ export default {
       isLoading,
       isVideoLooped,
       onLogoClick,
-      openTelegram,
+      openTelegram: openTelegramChannel,
       openTelegramAuthentication,
+      openQA,
       onVideoEnded,
       is1440pActive,
       status1440pText,
@@ -343,5 +345,4 @@ export default {
   font-style: normal;
   font-size: 10px;
 }
-
 </style>
