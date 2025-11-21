@@ -21,7 +21,12 @@
       <p>1440p: <span :class="status1440pColorClass">{{ status1440pText }}</span></p>
     </div>
     <div>
-      <QAButton />
+      <template v-if="is1440pActive">
+        <QAButton />
+      </template>
+      <template v-else>
+        <ActivateButton @click="openTelegramAuthentication" />
+      </template>
     </div>
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
@@ -39,6 +44,7 @@ import { ref, onMounted, computed } from 'vue';
 import StreamKeyLogo from './assets/StreamKeyLogo.vue';
 import TelegramCircle from './assets/TelegramCircle.vue';
 import QAButton from './assets/QAButton.vue';
+import ActivateButton from './assets/ActivateButton.vue';
 import EnableVideo from '/assets/enable.webm';
 import EnabledVideo from '/assets/enabled.webm';
 import DisableVideo from '/assets/disable.webm';
@@ -48,7 +54,8 @@ export default {
   components: {
     StreamKeyLogo,
     TelegramCircle,
-    QAButton
+    QAButton,
+    ActivateButton
   },
   setup() {
     const currentVideo = ref(undefined);
@@ -185,6 +192,16 @@ export default {
       }
     }
 
+    function openTelegramAuthentication(){
+      if (typeof browser !== 'undefined') {
+        // Firefox
+        browser.tabs.create({ url: 'https://streamkey.ru/extension-authorization/' });
+      } else {
+        // Chrome
+        window.open('https://streamkey.ru/extension-authorization/', '_blank');
+      }
+    }
+
     onMounted(async () => {
       console.log(
         'Popup запущен в:',
@@ -209,6 +226,7 @@ export default {
       isVideoLooped,
       onLogoClick,
       openTelegram,
+      openTelegramAuthentication,
       onVideoEnded,
       is1440pActive,
       status1440pText,
