@@ -44,10 +44,13 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { CONFIG } from '../config';
+import * as utils from '../utils';
+
 import StreamKeyLogo from './assets/StreamKeyLogo.vue';
 import TelegramCircle from './assets/TelegramCircle.vue';
 import QAButton from './assets/QAButton.vue';
 import ActivateButton from './assets/ActivateButton.vue';
+
 import EnableVideo from '/assets/enable.webm';
 import EnabledVideo from '/assets/enabled.webm';
 import DisableVideo from '/assets/disable.webm';
@@ -61,14 +64,10 @@ export default {
     ActivateButton,
   },
   setup() {
-    const api = typeof browser !== 'undefined' ? browser : chrome;
-
     const currentVideo = ref(undefined);
     const isEnabled = ref(true);
     const isLoading = ref(false);
     const is1440pActive = ref(false);
-
-    const extensionAPI = typeof browser !== 'undefined' ? browser : chrome;
 
     const showVideo = computed(() => {
       return currentVideo.value !== undefined;
@@ -96,36 +95,13 @@ export default {
       }
     }
 
-    async function loadStoredState() {
-      try {
-        const result = await extensionAPI.storage.local.get([
-          'streamKeyEnabled',
-        ]);
-        if (result.streamKeyEnabled !== undefined) {
-          isEnabled.value = result.streamKeyEnabled;
-        }
-      } catch (error) {
-        console.error('Ошибка загрузки состояния:', error);
-      }
-    }
-
-    async function saveStoredState() {
-      try {
-        await extensionAPI.storage.local.set({
-          streamKeyEnabled: isEnabled.value,
-        });
-      } catch (error) {
-        console.error('Ошибка сохранения состояния:', error);
-      }
-    }
-
     async function enableRuleset() {
       try {
         if (
-          extensionAPI.declarativeNetRequest &&
-          extensionAPI.declarativeNetRequest.updateEnabledRulesets
+          utils.api.declarativeNetRequest &&
+          utils.api.declarativeNetRequest.updateEnabledRulesets
         ) {
-          await extensionAPI.declarativeNetRequest.updateEnabledRulesets({
+          await utils.api.declarativeNetRequest.updateEnabledRulesets({
             enableRulesetIds: ['ruleset_1'],
             disableRulesetIds: [],
           });
@@ -143,10 +119,10 @@ export default {
     async function disableRuleset() {
       try {
         if (
-          extensionAPI.declarativeNetRequest &&
-          extensionAPI.declarativeNetRequest.updateEnabledRulesets
+          utils.api.declarativeNetRequest &&
+          utils.api.declarativeNetRequest.updateEnabledRulesets
         ) {
-          await extensionAPI.declarativeNetRequest.updateEnabledRulesets({
+          await utils.api.declarativeNetRequest.updateEnabledRulesets({
             enableRulesetIds: [],
             disableRulesetIds: ['ruleset_1'],
           });
@@ -180,7 +156,7 @@ export default {
           isEnabled.value = false;
           currentVideo.value = DisableVideo;
         }
-        await saveStoredState();
+        await utils.saveExtensionState(isEnabled.value);
       } catch (error) {
         console.error('Ошибка при переключении состояния:', error);
         isLoading.value = false;
@@ -188,21 +164,19 @@ export default {
     }
 
     function openTelegramChannel() {
-      api.tabs.create({ url: CONFIG.telegramChannelUrl });
+      utils.api.tabs.create({ url: CONFIG.telegramChannelUrl });
     }
 
     function openTelegramAuthentication() {
-      api.tabs.create({ url: CONFIG.extensionAuthorizationUrl });
+      utils.api.tabs.create({ url: CONFIG.extensionAuthorizationUrl });
     }
 
     function openQA() {
-      api.tabs.create({ url: CONFIG.streamKeyQAUrl });
+      utils.api.tabs.create({ url: CONFIG.streamKeyQAUrl });
     }
 
     onMounted(async () => {
-      console.log('Popup запущен в:', api);
-
-      await loadStoredState();
+      isEnabled.value = await utils.loadExtensionState();
       if (isEnabled.value) {
         await enableRuleset();
         currentVideo.value = EnabledVideo;
@@ -211,7 +185,7 @@ export default {
         currentVideo.value = undefined;
       }
 
-      api.cookies.get({ url: CONFIG.oauthTelegramUrl, name: 'stel_acid' }, (cookie) => {
+      utils.api.cookies.get({ url: CONFIG.oauthTelegramUrl, name: 'stel_acid' }, (cookie) => {
         if (chrome.runtime?.lastError) {
           is1440pActive.value = false;
           return;

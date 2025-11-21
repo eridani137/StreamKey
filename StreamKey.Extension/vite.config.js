@@ -112,13 +112,14 @@ export default defineConfig(({ mode }) => {
           background: resolve(__dirname, 'src/background/background.js'),
           content: resolve(__dirname, 'src/content/content.js'),
           config: resolve(__dirname, 'src/config.js'),
+          utils: resolve(__dirname, 'src/utils.js'),
         },
         output: {
           entryFileNames: (chunkInfo) => {
             if (chunkInfo.name === 'popup') {
               return 'popup/[name].js';
             }
-            if (chunkInfo.name === 'config') {
+            if (chunkInfo.name === 'config' || chunkInfo.name === 'utils') {
               return '[name].js';
             }
             return '[name]/[name].js';
