@@ -2,6 +2,8 @@ import { CONFIG } from './config';
 
 export const api = typeof browser !== 'undefined' ? browser : chrome;
 
+export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 export function generateSessionId() {
     const timestamp = Date.now();
     const tsHex = timestamp.toString(16).padStart(12, '0');
@@ -28,47 +30,23 @@ export function createNewSession() {
     return sessionId;
 }
 
-export async function loadExtensionState() {
+export async function loadState(keyName) {
     try {
-        const result = await api.storage.local.get([
-            CONFIG.extensionStateKeyName
-        ]);
-        return !!result[CONFIG.extensionStateKeyName];
+        const result = await api.storage.local.get([keyName]);
+        return !!result[keyName];
     } catch (error) {
-        console.error('Ошибка загрузки состояния:', error);
+        console.error(`Ошибка загрузки значения для ключа ${keyName}:`, error);
         return false;
     }
 }
 
-export async function saveExtensionState(value) {
+export async function saveState(keyName, value) {
     try {
         await api.storage.local.set({
-            [CONFIG.extensionStateKeyName]: value,
+            [keyName]: value,
         });
     } catch (error) {
-        console.error('Ошибка сохранения состояния:', error);
-    }
-}
-
-export async function loadExtensionMode() {
-    try {
-        const result = await api.storage.local.get([
-            CONFIG.enhancedQualityKeyName
-        ]);
-        return !!result[CONFIG.enhancedQualityKeyName];
-    } catch (error) {
-        console.error('Ошибка загрузки режима работы:', error);
-        return false;
-    }
-}
-
-export async function saveExtensionMode(value) {
-    try {
-        await api.storage.local.set({
-            [CONFIG.enhancedQualityKeyName]: value,
-        });
-    } catch (error) {
-        console.error('Ошибка сохранения режима работы:', error);
+        console.error(`Ошибка сохранения значения для ключа ${keyName}:`, error);
     }
 }
 

@@ -1,3 +1,4 @@
+import { CONFIG } from '../config';
 import * as utils from '../utils';
 
 utils.api.runtime.onInstalled.addListener(() => {
@@ -5,7 +6,7 @@ utils.api.runtime.onInstalled.addListener(() => {
 
     utils.createNewSession();
 
-    utils.saveExtensionState(true);
+    utils.saveState(CONFIG.extensionStateKeyName, true);
 
     utils.enableRuleset();
 });

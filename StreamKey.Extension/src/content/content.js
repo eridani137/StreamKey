@@ -1,8 +1,5 @@
 import { CONFIG } from '../config';
-
-const api = typeof browser !== 'undefined' ? browser : chrome;
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+import * as utils from '../utils';
 
 const QualityMenuEnhancer = {
     observer: null,
@@ -407,7 +404,7 @@ const ActiveChannelsEnhancer = {
             }
             event.stopPropagation && event.stopPropagation();
 
-            api.storage.local.get(['sessionId'], (result) => {
+            utils.api.storage.local.get(['sessionId'], (result) => {
                 const userId = localStorage.getItem('local_copy_unique_id');
                 if (result.sessionId && userId) {
                     fetch(`${CONFIG.apiUrl}/channels/click`, {
@@ -458,7 +455,7 @@ const ActiveChannelsEnhancer = {
 
         let itemsPane = get_itemsPane();
         while (!itemsPane) {
-            await sleep(500);
+            await utils.sleep(500);
             itemsPane = get_itemsPane();
         }
 
@@ -513,7 +510,7 @@ const ActivityHandler = {
     },
 
     updateActivity() {
-        api.storage.local.get(['sessionId'], (result) => {
+        utils.api.storage.local.get(['sessionId'], (result) => {
             const userId = localStorage.getItem('local_copy_unique_id');
             if (result.sessionId && userId) {
                 fetch(`${CONFIG.apiUrl}/activity/update`, {

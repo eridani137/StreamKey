@@ -56,7 +56,7 @@ import EnabledVideo from '/assets/enabled.webm';
 import DisableVideo from '/assets/disable.webm';
 
 export default {
-  name: 'PopupApp',
+  name: 'MainApp',
   components: {
     StreamKeyLogo,
     TelegramCircle,
@@ -114,7 +114,7 @@ export default {
           isEnabled.value = false;
           currentVideo.value = DisableVideo;
         }
-        await utils.saveExtensionState(isEnabled.value);
+        await utils.saveState(CONFIG.extensionStateKeyName, isEnabled.value);
       } catch (error) {
         console.error('Ошибка при переключении состояния:', error);
         isLoading.value = false;
@@ -134,7 +134,7 @@ export default {
     }
 
     onMounted(async () => {
-      isEnabled.value = await utils.loadExtensionState();
+      isEnabled.value = await utils.loadState(CONFIG.extensionStateKeyName);
       if (isEnabled.value) {
         await utils.enableRuleset();
         currentVideo.value = EnabledVideo;
@@ -144,7 +144,7 @@ export default {
       }
 
       is1440pActive.value = await utils.hasAcidCookie();
-      await utils.saveExtensionState(is1440pActive.value);
+      await utils.saveState(CONFIG.enhancedQualityKeyName, is1440pActive.value);
     });
 
     return {

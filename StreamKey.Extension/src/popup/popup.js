@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import '../assets/styles/global.css';
-import PopupApp from './PopupApp.vue';
+import MainApp from './MainApp.vue';
 
-createApp(PopupApp).mount('#app');
+createApp(MainApp).mount('#app');
 
 console.log('Popup приложение инициализировано');
