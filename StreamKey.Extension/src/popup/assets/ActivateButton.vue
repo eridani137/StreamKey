@@ -7,7 +7,7 @@
 </button>
 </template>
 
-<style scoped>
+<style>
 .activate-button {
   display: flex;
   align-items: center;
