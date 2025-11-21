@@ -95,48 +95,6 @@ export default {
       }
     }
 
-    async function enableRuleset() {
-      try {
-        if (
-          utils.api.declarativeNetRequest &&
-          utils.api.declarativeNetRequest.updateEnabledRulesets
-        ) {
-          await utils.api.declarativeNetRequest.updateEnabledRulesets({
-            enableRulesetIds: ['ruleset_1'],
-            disableRulesetIds: [],
-          });
-          console.log('Правила перенаправления активированы');
-        } else {
-          console.warn(
-            'declarativeNetRequest не поддерживается в этом браузере'
-          );
-        }
-      } catch (err) {
-        console.error('Ошибка активации правил:', err);
-      }
-    }
-
-    async function disableRuleset() {
-      try {
-        if (
-          utils.api.declarativeNetRequest &&
-          utils.api.declarativeNetRequest.updateEnabledRulesets
-        ) {
-          await utils.api.declarativeNetRequest.updateEnabledRulesets({
-            enableRulesetIds: [],
-            disableRulesetIds: ['ruleset_1'],
-          });
-          console.log('Правила перенаправления деактивированы');
-        } else {
-          console.warn(
-            'declarativeNetRequest не поддерживается в этом браузере'
-          );
-        }
-      } catch (err) {
-        console.error('Ошибка деактивации правил:', err);
-      }
-    }
-
     async function onLogoClick() {
       if (isLoading.value) {
         return;
@@ -147,12 +105,12 @@ export default {
       try {
         if (!isEnabled.value) {
           // Включаем
-          await enableRuleset();
+          await utils.enableRuleset();
           isEnabled.value = true;
           currentVideo.value = EnableVideo;
         } else {
           // Выключаем
-          await disableRuleset();
+          await utils.disableRuleset();
           isEnabled.value = false;
           currentVideo.value = DisableVideo;
         }
@@ -178,20 +136,14 @@ export default {
     onMounted(async () => {
       isEnabled.value = await utils.loadExtensionState();
       if (isEnabled.value) {
-        await enableRuleset();
+        await utils.enableRuleset();
         currentVideo.value = EnabledVideo;
       } else {
-        await disableRuleset();
+        await utils.disableRuleset();
         currentVideo.value = undefined;
       }
 
-      utils.api.cookies.get({ url: CONFIG.oauthTelegramUrl, name: 'stel_acid' }, (cookie) => {
-        if (chrome.runtime?.lastError) {
-          is1440pActive.value = false;
-          return;
-        }
-        is1440pActive.value = true;
-      });
+      is1440pActive.value = await utils.hasAcidCookie();
     });
 
     return {
@@ -231,7 +183,7 @@ export default {
 }
 
 .stream-key-title {
-  margin-top: 16px;
+  margin-top: 24px;
   margin-bottom: 4px;
   text-align: center;
 
@@ -311,6 +263,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   gap: 34px;
+  margin-top: 8px;
   padding: 8px;
   /* width: 80%; */
   margin-left: 14px;
