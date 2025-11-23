@@ -16,8 +16,7 @@ public static class ConfigureCors
                 policy
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
+                    .AllowAnyHeader();
             });
         });
     }
