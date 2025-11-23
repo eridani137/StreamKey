@@ -2,8 +2,6 @@ import { CONFIG } from './config';
 
 export const api = typeof browser !== 'undefined' ? browser : chrome;
 
-export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 export function generateSessionId() {
     const timestamp = Date.now();
     const tsHex = timestamp.toString(16).padStart(12, '0');

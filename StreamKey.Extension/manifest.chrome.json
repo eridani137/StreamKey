@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Твич 1080 | Твич качество 1080 от STREAM KEY",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "STREAM KEY - твой ключ от мира стриминга. Расширение для твича 1080 возвращает качество 1080p на Twitch в России. Твич 1080 качество в России.",
   "permissions": [
     "cookies",

@@ -94,8 +94,8 @@ public class Authorization : ICarterModule
                     }
 
                     var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                    const long seconds = 86400;
-                    // const long seconds = 31_536_000;
+                    // const long seconds = 86400;
+                    const long seconds = 604800;
                     
                     if (currentTime - dto.AuthDate > seconds)
                     {

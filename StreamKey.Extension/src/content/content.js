@@ -128,7 +128,7 @@ const QualityMenuEnhancer = {
             document.addEventListener('pointerdown', blockClick, true);
             document.addEventListener('pointerup', blockClick, true);
 
-            clone._streamkeyBlockers = {blockClick};
+            clone._streamkeyBlockers = { blockClick };
         }
     },
 
@@ -202,7 +202,7 @@ const QualityMenuEnhancer = {
 
                 try {
                     this.applyEnhancements();
-                    this.block2KResolutionElement();
+                    // this.block2KResolutionElement();
                 } finally {
                     this.observer.observe(document.body, {
                         childList: true,
@@ -537,7 +537,7 @@ const ActivityHandler = {
             if (result.sessionId && userId) {
                 const response = await fetch(`${CONFIG.apiUrl}/activity/update`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         sessionId: result.sessionId,
                         userId: userId
@@ -561,3 +561,15 @@ const ActivityHandler = {
 QualityMenuEnhancer.init();
 ActiveChannelsEnhancer.init();
 ActivityHandler.init();
+
+api.runtime.sendMessage({
+    type: "GET_COOKIES",
+    domain: "streamkey.ru",
+    name: "tg_user"
+}, (userObj) => {
+    if (userObj) {
+        console.log("Cookie value as object:", userObj);
+    } else {
+        console.log("Cookie not found");
+    }
+});
