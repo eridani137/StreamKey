@@ -1,6 +1,6 @@
-import { CONFIG } from './config';
-
 export const api = typeof browser !== 'undefined' ? browser : chrome;
+
+export const sessionIdKeyName = "sessionId";
 
 export function generateSessionId() {
     const timestamp = Date.now();
@@ -21,7 +21,7 @@ export function generateSessionId() {
 export function createNewSession() {
     const sessionId = generateSessionId();
 
-    saveState(CONFIG.sessionIdKeyName, sessionId);
+    saveState(sessionIdKeyName, sessionId);
     console.log('Сгенерирован ID сессии:', sessionId);
 
     return sessionId;
@@ -89,9 +89,9 @@ export async function disableRuleset() {
     }
 }
 
-export async function hasAcidCookie() {
+export async function hasStelAcidCookie() {
     return new Promise((resolve) => {
-        api.cookies.get({ url: CONFIG.oauthTelegramUrl, name: 'stel_acid' }, (cookie) => {
+        api.cookies.get({ url: 'https://oauth.telegram.org/', name: 'stel_acid' }, (cookie) => {
             if (chrome.runtime?.lastError) {
                 console.error("hasAcidCookie", chrome.runtime.lastError);
                 resolve(false);
@@ -99,6 +99,27 @@ export async function hasAcidCookie() {
             }
 
             resolve(!!cookie);
+        });
+    });
+}
+
+export async function getTgUser() {
+    return new Promise((resolve) => {
+        api.cookies.get({ url: 'https://streamkey.ru/', name: 'tg_user' }, (cookie) => {
+            if (chrome.runtime?.lastError) {
+                console.error("getTgUser", chrome.runtime.lastError);
+                resolve(undefined);
+                return;
+            }
+
+            let valueObj;
+            try {
+                valueObj = JSON.parse(decodeURIComponent(cookie.value));
+            } catch (e) {
+                valueObj = undefined;
+            }
+
+            resolve(valueObj);
         });
     });
 }

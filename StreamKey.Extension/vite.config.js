@@ -109,21 +109,17 @@ export default defineConfig(({ mode }) => {
       rollupOptions: isExtension ? {
         input: {
           popup: resolve(__dirname, 'src/popup/popup.html'),
-          background: resolve(__dirname, 'src/background/background.js'),
-          content: resolve(__dirname, 'src/content/content.js'),
+          background: resolve(__dirname, 'src/background.js'),
+          content: resolve(__dirname, 'src/content.js'),
           config: resolve(__dirname, 'src/config.js'),
           utils: resolve(__dirname, 'src/utils.js'),
-          content_utils: resolve(__dirname, 'src/content-utils.js'),
         },
         output: {
           entryFileNames: (chunkInfo) => {
             if (chunkInfo.name === 'popup') {
               return 'popup/[name].js';
             }
-            if (chunkInfo.name === 'config' || chunkInfo.name === 'utils' || chunkInfo.name === 'content_utils') {
-              return '[name].js';
-            }
-            return '[name]/[name].js';
+            return '[name].js';
           },
           chunkFileNames: 'chunks/[name].[hash].js',
           assetFileNames: (assetInfo) => {

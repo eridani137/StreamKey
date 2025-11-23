@@ -33,7 +33,20 @@
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
     <div class="authentication-block">
-      <span>*перейдите в меню выбора качества</span>
+      <template v-if="!tgUser">
+        <span>*перейдите в меню выбора качества</span>
+      </template>
+      <template v-else>
+        <div class="profile-block">
+          <div class="avatar">
+            <img :src="tgUser.photo_url" alt="avatar" class="avatar-img" />
+          </div>
+          <div class="info">
+            <div class="nickname">{{tgUser.username}}</div>
+            <div class="id">{{tgUser.id}}</div>
+          </div>
+        </div>
+      </template>
       <button class="telegram-button" @click="openTelegram">
         <TelegramCircle />
       </button>
@@ -68,6 +81,8 @@ export default {
     const isEnabled = ref(true);
     const isLoading = ref(false);
     const is1440pActive = ref(false);
+
+    const tgUser = ref(undefined);
 
     const showVideo = computed(() => {
       return currentVideo.value !== undefined;
@@ -143,8 +158,10 @@ export default {
         currentVideo.value = undefined;
       }
 
-      is1440pActive.value = await utils.hasAcidCookie();
-      await utils.saveState(CONFIG.enhancedQualityKeyName, is1440pActive.value);
+      is1440pActive.value = await utils.hasStelAcidCookie();
+      if (is1440pActive.value) {
+        tgUser.value = await utils.getTgUser();
+      }
     });
 
     return {
@@ -161,6 +178,7 @@ export default {
       is1440pActive,
       status1440pText,
       status1440pColorClass,
+      tgUser,
     };
   },
 };
@@ -272,5 +290,46 @@ export default {
   font-family: 'Manrope', sans-serif;
   font-style: normal;
   font-size: 10px;
+}
+
+.profile-block {
+  display: flex;
+  align-items: center;
+  background: #181725;
+  padding: 0px 16px 0px 0px;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  background: #8562b7;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  box-shadow: 0 2px 8px #0002;
+}
+
+.avatar-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: #8562b7;
+}
+
+.info .nickname {
+  font-size: 12px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.info .id {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
 }
 </style>

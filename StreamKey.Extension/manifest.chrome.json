@@ -16,7 +16,7 @@
     "https://oauth.telegram.org/*"
   ],
   "background": {
-    "service_worker": "background/background.js",
+    "service_worker": "background.js",
     "type": "module"
   },
   "content_scripts": [
@@ -25,7 +25,7 @@
         "https://*.twitch.tv/*"
       ],
       "js": [
-        "content/content.js"
+        "content.js"
       ],
       "run_at": "document_idle"
     }
