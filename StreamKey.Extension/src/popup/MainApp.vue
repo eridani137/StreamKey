@@ -161,7 +161,7 @@ export default {
       is1440pActive.value = await utils.hasStelAcidCookie();
       if (is1440pActive.value) {
         const user = await utils.getTgUser();
-        if (utils.checkTgUser(user)) {
+        if (utils.checkDate(user)) {
           tgUser.value = user;
         }
       }

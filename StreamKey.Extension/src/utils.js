@@ -126,7 +126,7 @@ export async function getTgUser() {
     });
 }
 
-export function checkTgUser(user) {
+export function checkDate(user) {
     const currentTime = Math.floor(Date.now() / 1000);
     const seconds = 604800;
     if (currentTime - user.authDate > seconds) {
