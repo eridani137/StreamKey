@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Carter;
 using Microsoft.AspNetCore.Identity;
 using StreamKey.Core.Abstractions;
@@ -57,58 +58,72 @@ public class Authorization : ICarterModule
             .WithSummary("Авторизация");
 
         group.MapPost("/telegram/login/check",
-            async (TelegramAuthDto dto, ITelegramService service) =>
-            {
-                var dataCheckList = new List<string>();
-
-                if (dto.Id > 0) dataCheckList.Add($"id={dto.Id}");
-
-                if (dto.AuthDate > 0) dataCheckList.Add($"auth_date={dto.AuthDate}");
-
-                if (!string.IsNullOrEmpty(dto.FirstName)) dataCheckList.Add($"first_name={dto.FirstName}");
-
-                if (!string.IsNullOrEmpty(dto.Username)) dataCheckList.Add($"username={dto.Username}");
-
-                if (!string.IsNullOrEmpty(dto.PhotoUrl)) dataCheckList.Add($"photo_url={dto.PhotoUrl}");
-
-                dataCheckList.Sort();
-
-                var dataCheckString = string.Join("\n", dataCheckList);
-
-                var secretKey = SHA256.HashData(
-                    Encoding.UTF8.GetBytes(ApplicationConstants.TelegramBotToken)
-                );
-
-                byte[] hashBytes;
-                using (var hmac = new HMACSHA256(secretKey))
+                async (TelegramAuthDto dto, ITelegramService service, HttpResponse response) =>
                 {
-                    hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataCheckString));
-                }
+                    var dataCheckList = new List<string>();
 
-                var hash = Convert.ToHexStringLower(hashBytes);
+                    if (dto.Id > 0) dataCheckList.Add($"id={dto.Id}");
 
-                if (!hash.Equals(dto.Hash, StringComparison.Ordinal))
-                {
-                    return Results.BadRequest("hash does not match");
-                }
+                    if (dto.AuthDate > 0) dataCheckList.Add($"auth_date={dto.AuthDate}");
 
-                var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                if (currentTime - dto.AuthDate > 86400)
-                {
-                    return Results.BadRequest("data is outdated");
-                }
+                    if (!string.IsNullOrEmpty(dto.FirstName)) dataCheckList.Add($"first_name={dto.FirstName}");
 
-                var response = await service.GetChatMember(dto.Id);
-                if (response is null) return Results.BadRequest("response is null");
-                
-                if (response?.Result?.Status is not (ChatMemberStatus.Creator or ChatMemberStatus.Owner
-                    or ChatMemberStatus.Administrator or ChatMemberStatus.Member or ChatMemberStatus.Restricted))
-                {
-                    return Results.NotFound("user is not member");
-                }
+                    if (!string.IsNullOrEmpty(dto.Username)) dataCheckList.Add($"username={dto.Username}");
 
-                return Results.Ok();
-            })
+                    if (!string.IsNullOrEmpty(dto.PhotoUrl)) dataCheckList.Add($"photo_url={dto.PhotoUrl}");
+
+                    dataCheckList.Sort();
+
+                    var dataCheckString = string.Join("\n", dataCheckList);
+
+                    var secretKey = SHA256.HashData(
+                        Encoding.UTF8.GetBytes(ApplicationConstants.TelegramBotToken)
+                    );
+
+                    byte[] hashBytes;
+                    using (var hmac = new HMACSHA256(secretKey))
+                    {
+                        hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataCheckString));
+                    }
+
+                    var hash = Convert.ToHexStringLower(hashBytes);
+
+                    if (!hash.Equals(dto.Hash, StringComparison.Ordinal))
+                    {
+                        return Results.BadRequest("hash does not match");
+                    }
+
+                    var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                    // const long seconds = 86400;
+                    const long seconds = 31_536_000;
+                    
+                    if (currentTime - dto.AuthDate > seconds)
+                    {
+                        return Results.BadRequest("data is outdated");
+                    }
+
+                    var getChatMemberResponse = await service.GetChatMember(dto.Id);
+                    if (getChatMemberResponse is null) return Results.BadRequest("response is null");
+
+                    if (getChatMemberResponse?.Result?.Status is not (ChatMemberStatus.Creator or ChatMemberStatus.Owner
+                        or ChatMemberStatus.Administrator or ChatMemberStatus.Member or ChatMemberStatus.Restricted))
+                    {
+                        return Results.NotFound("user is not member");
+                    }
+
+                    var cookieValue = JsonSerializer.Serialize(dto);
+                    
+                    response.Cookies.Append("tg-auth", cookieValue, new CookieOptions()
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Path = "/",
+                        Expires = DateTimeOffset.UtcNow.AddYears(1)
+                    });
+                    
+                    return Results.Ok();
+                })
             .WithSummary("Проверка пользователя Telegram");
     }
 }
