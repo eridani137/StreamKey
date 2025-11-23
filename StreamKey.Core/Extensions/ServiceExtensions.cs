@@ -34,6 +34,7 @@ public static class ServiceExtensions
 
         services.AddHostedService<ChannelHandler>();
         services.AddHostedService<StatisticHandler>();
+        services.AddHostedService<RestartService>();
 
         return services;
     }
