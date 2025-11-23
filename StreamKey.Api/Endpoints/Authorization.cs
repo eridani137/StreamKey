@@ -58,7 +58,7 @@ public class Authorization : ICarterModule
             .WithSummary("Авторизация");
 
         group.MapPost("/telegram/login/check",
-                async (TelegramAuthDto dto, ITelegramService service, HttpResponse response) =>
+                async (TelegramAuthDto dto, ITelegramService service) =>
                 {
                     var dataCheckList = new List<string>();
 
@@ -94,8 +94,8 @@ public class Authorization : ICarterModule
                     }
 
                     var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                    // const long seconds = 86400;
-                    const long seconds = 31_536_000;
+                    const long seconds = 86400;
+                    // const long seconds = 31_536_000;
                     
                     if (currentTime - dto.AuthDate > seconds)
                     {
@@ -110,17 +110,6 @@ public class Authorization : ICarterModule
                     {
                         return Results.NotFound("user is not member");
                     }
-
-                    var cookieValue = JsonSerializer.Serialize(dto);
-                    
-                    response.Cookies.Append("tg-auth", cookieValue, new CookieOptions()
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.None,
-                        Path = "/",
-                        Expires = DateTimeOffset.UtcNow.AddYears(1)
-                    });
                     
                     return Results.Ok();
                 })
