@@ -6,7 +6,7 @@ namespace StreamKey.Core.Configuration;
 public static class ConfigureCors
 {
     public const string ProductionCorsPolicyName = "CorsPolicy";
-
+    
     public static void Configure(WebApplicationBuilder builder)
     {
         builder.Services.AddCors(options =>
@@ -14,7 +14,7 @@ public static class ConfigureCors
             options.AddPolicy(ProductionCorsPolicyName, policy =>
             {
                 policy
-                    .WithOrigins("https://streamkey.ru")
+                    .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
