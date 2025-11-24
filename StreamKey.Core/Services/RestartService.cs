@@ -12,13 +12,18 @@ public class RestartService(IHostApplicationLifetime appLifetime, ILogger<Restar
         {
             var now = DateTime.Now;
             var next4Am = new DateTime(now.Year, now.Month, now.Day, 4, 0, 0);
-            if (now > next4Am)
+            
+            if (now.TimeOfDay >= new TimeSpan(4, 0, 0))
             {
                 next4Am = next4Am.AddDays(1);
             }
+            
             var delay = next4Am - now;
 
-            logger.LogInformation("RestartService: Ждем до {DateTime} ({DelayTotalMinutes} минут)", next4Am, delay.TotalMinutes);
+            logger.LogInformation(
+                "RestartService: Ждем до {DateTime} ({DelayTotalMinutes:F1} минут)", 
+                next4Am, 
+                delay.TotalMinutes);
 
             try
             {
@@ -26,11 +31,16 @@ public class RestartService(IHostApplicationLifetime appLifetime, ILogger<Restar
             }
             catch (TaskCanceledException)
             {
+                logger.LogInformation("RestartService: Отменен");
                 break;
             }
 
-            logger.LogInformation("RestartService: Плановый перезапуск сервиса...");
-            appLifetime.StopApplication();
+            if (!stoppingToken.IsCancellationRequested)
+            {
+                logger.LogInformation("RestartService: Плановый перезапуск сервиса в {Time}", DateTime.Now);
+                appLifetime.StopApplication();
+                break;
+            }
         }
     }
 }
