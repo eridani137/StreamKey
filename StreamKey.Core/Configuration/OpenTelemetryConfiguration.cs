@@ -18,6 +18,8 @@ public static class OpenTelemetryConfiguration
 
     public static void Configure(WebApplicationBuilder builder)
     {
+        var excludedPaths = builder.Configuration.GetSection("OpenTelemetry:ExcludedPaths").Get<string[]>() ?? [];
+        
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
             .WithTracing(tracing =>
@@ -25,9 +27,6 @@ public static class OpenTelemetryConfiguration
                 tracing
                     .AddAspNetCoreInstrumentation(options =>
                     {
-                        var excludedPaths =
-                            builder.Configuration.GetSection("OpenTelemetry:ExcludedPaths").Get<string[]>() ?? [];
-
                         options.Filter = httpContext => 
                         {
                             var path = httpContext.Request.Path.Value ?? string.Empty;
@@ -36,12 +35,31 @@ public static class OpenTelemetryConfiguration
                     })
                     .AddHttpClientInstrumentation(options =>
                     {
-                        options.FilterHttpRequestMessage = (httpRequestMessage) =>
+                        options.FilterHttpRequestMessage = httpRequestMessage =>
                         {
-                            var host = httpRequestMessage.RequestUri?.Host;
-                            return host != null &&
-                                   !host.Contains("usher.ttvnw.net") &&
-                                   !host.Contains("gql.twitch.tv");
+                            var uri = httpRequestMessage.RequestUri;
+
+                            if (uri == null) return true;
+
+                            var host = uri.Host;
+                            var path = uri.AbsolutePath;
+
+                            if (host.Contains("usher.ttvnw.net", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return false;
+                            }
+
+                            if (host.Contains("gql.twitch.tv", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return false;
+                            }
+
+                            if (excludedPaths.Any(excluded => path.StartsWith(excluded, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                return false;
+                            }
+
+                            return true;
                         };
 
                         options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
