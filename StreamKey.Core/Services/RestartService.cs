@@ -11,9 +11,9 @@ public class RestartService(IHostApplicationLifetime appLifetime, ILogger<Restar
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.Now;
-            var restartTime = new DateTime(now.Year, now.Month, now.Day, 4, 0, 0);
+            var restartTime = new DateTime(now.Year, now.Month, now.Day, 7, 0, 0);
             
-            if (now.TimeOfDay >= new TimeSpan(4, 0, 0))
+            if (now.TimeOfDay >= new TimeSpan(7, 0, 0))
             {
                 restartTime = restartTime.AddDays(1);
             }
