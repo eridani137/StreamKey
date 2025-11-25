@@ -33,13 +33,6 @@ public static class OpenTelemetryConfiguration
                             var path = httpContext.Request.Path.Value ?? string.Empty;
                             return !excludedPaths.Any(excludedPath => path.StartsWith(excludedPath));
                         };
-                        
-                        options.Filter = httpContext =>
-                            !httpContext.Request.Path.StartsWithSegments("/openapi/v1.json") &&
-                            !httpContext.Request.Path.StartsWithSegments("/activity/update") &&
-                            !httpContext.Request.Path.StartsWithSegments("/channels") &&
-                            !httpContext.Request.Path.StartsWithSegments("/playlist") &&
-                            !httpContext.Request.Path.StartsWithSegments("/playlist/vod");
                     })
                     .AddHttpClientInstrumentation(options =>
                     {
