@@ -136,7 +136,7 @@ public class ChannelService(
 
         if (string.IsNullOrEmpty(viewers))
         {
-            logger.LogWarning("Viewers is null: {ChannelName}", name);
+            // logger.LogWarning("Viewers is null: {ChannelName}", name);
             return null;
         }
 
