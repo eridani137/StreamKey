@@ -158,13 +158,7 @@ export default {
         currentVideo.value = undefined;
       }
 
-      is1440pActive.value = await utils.hasStelAcidCookie();
-      if (is1440pActive.value) {
-        const user = await utils.getTgUser();
-        if (utils.checkDate(user)) {
-          tgUser.value = user;
-        }
-      }
+      // is1440pActive.value = utils.userProfile && utils.userProfile.is_chat_member; // TODO
     });
 
     return {

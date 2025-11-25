@@ -130,22 +130,22 @@ export async function getUserProfile() {
         console.log("TelegramId получен", telegramUserId);
         console.log("TelegramHash получен", telegramUserHash);
 
-        fetch(`${CONFIG.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Сервер вернул ошибку: ' + response.status);
-                }
-                return response.text();
-            })
-            .then(text => {
-                const data = text ? JSON.parse(text) : {};
-                console.log("Получение статуса подписки:", data);
-            })
-            .catch(err => {
-                console.error(err);
+        try {
+            const response = await fetch(`${CONFIG.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
             });
+
+            if (!response.ok) {
+                throw new Error('Сервер вернул ошибку: ' + response.status);
+            }
+
+            const text = await response.text();
+            const obj = text ? JSON.parse(text) : null;
+            return obj;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
     }
 }

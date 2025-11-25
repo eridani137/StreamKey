@@ -1,6 +1,8 @@
 import { CONFIG } from './config';
 import * as utils from './utils';
 
+let userProfile = null;
+
 utils.api.runtime.onInstalled.addListener(async () => {
     console.log('Расширение установлено. Устанавливаем состояние по умолчанию');
 
@@ -10,13 +12,13 @@ utils.api.runtime.onInstalled.addListener(async () => {
 
     utils.enableRuleset();
 
-    utils.getUserProfile();
+    userProfile = await utils.getUserProfile();
 });
 
 utils.api.runtime.onStartup.addListener(async () => {
     utils.createNewSession();
 
-    utils.getUserProfile();
+    userProfile = await utils.getUserProfile();
 });
 
 utils.api.runtime.onMessage.addListener((message, sender, sendResponse) => {
