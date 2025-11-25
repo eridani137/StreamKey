@@ -12,6 +12,7 @@ namespace StreamKey.Core.Services;
 
 public class ChannelService(
     IChannelRepository channelRepository,
+    IUnitOfWork unitOfWork,
     ICamoufoxService camoufox,
     ILogger<ChannelService> logger) : IChannelService
 {
@@ -34,7 +35,8 @@ public class ChannelService(
 
         var channel = dto.Map();
 
-        await channelRepository.Create(channel);
+        await channelRepository.Add(channel);
+        await unitOfWork.SaveChangesAsync();
 
         return Result.Success(channel);
     }
@@ -47,7 +49,8 @@ public class ChannelService(
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
 
-        await channelRepository.Remove(channel);
+        channelRepository.Delete(channel);
+        await unitOfWork.SaveChangesAsync();
 
         return Result.Success(channel);
     }
@@ -67,7 +70,8 @@ public class ChannelService(
 
         channel.Position = dto.Position;
 
-        await channelRepository.Update(channel);
+        channelRepository.Update(channel);
+        await unitOfWork.SaveChangesAsync();
 
         return Result.Success(channel);
     }
@@ -82,7 +86,8 @@ public class ChannelService(
         var info = await ParseChannelInfo(channel.Name);
         fresh.Info = info;
 
-        await channelRepository.Update(fresh);
+        channelRepository.Update(fresh);
+        await unitOfWork.SaveChangesAsync();
     }
 
     private async Task<ChannelInfo?> ParseChannelInfo(string name)

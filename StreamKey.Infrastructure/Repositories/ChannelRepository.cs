@@ -7,24 +7,6 @@ namespace StreamKey.Infrastructure.Repositories;
 public class ChannelRepository(ApplicationDbContext context) 
     : BaseRepository<ChannelEntity>(context), IChannelRepository
 {
-    public async Task Create(ChannelEntity channel)
-    {
-        await Add(channel);
-        await Save();
-    }
-
-    public async Task Remove(ChannelEntity channel)
-    {
-        Delete(channel);
-        await Save();
-    }
-
-    Task IChannelRepository.Update(ChannelEntity channel)
-    {
-        Update(channel);
-        return Save();
-    }
-
     public async Task<List<ChannelEntity>> GetAll()
     {
         return await GetSet().ToListAsync();

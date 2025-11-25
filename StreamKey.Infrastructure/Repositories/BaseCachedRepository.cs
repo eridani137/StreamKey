@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
@@ -13,13 +14,18 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
     
     protected string GetCacheKey(string suffix = "") => 
         string.IsNullOrEmpty(suffix) ? CacheKeyPrefix : $"{CacheKeyPrefix}:{suffix}";
-    
-    protected void InvalidateKeyCache()
+
+    private void InvalidateKeyCache()
     {
         cache.Remove(GetCacheKey());
     }
+    
+    public DbSet<TEntity> GetSet()
+    {
+        return Repository.GetSet();
+    }
 
-    protected Task Add(TEntity entity)
+    public Task Add(TEntity entity)
     {
         InvalidateKeyCache();
         return Repository.Add(entity);
@@ -31,7 +37,7 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
         Repository.Update(entity);
     }
 
-    protected void Delete(TEntity entity)
+    public void Delete(TEntity entity)
     {
         InvalidateKeyCache();
         Repository.Delete(entity);

@@ -11,42 +11,50 @@ namespace StreamKey.Infrastructure.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
+        public IServiceCollection AddInfrastructure(IConfiguration configuration)
         {
-            options.UseNpgsql(configuration.GetConnectionString("Database"));
-        });
-
-        services.AddScoped<ChannelRepository>();
-        services.AddScoped<IChannelRepository, CachedChannelRepository>();
-
-        services.AddScoped<ViewStatisticRepository>();
-        services.AddScoped<UserSessionRepository>();
-        services.AddScoped<ChannelClickRepository>();
-
-        services.AddMemoryCache();
-
-        services.AddSingleton<ISettingsStorage, InMemorySettingsStorage>();
-
-        return services;
-    }
-
-    public static IdentityBuilder AddIdentity(this IServiceCollection services)
-    {
-        return services.AddIdentityCore<ApplicationUser>(options =>
+            services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequiredUniqueChars = 3;
+                options.UseNpgsql(configuration.GetConnectionString("Database"));
+            });
 
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddScoped<ChannelRepository>();
+            services.AddScoped<IChannelRepository, CachedChannelRepository>();
+
+            services.AddScoped<ViewStatisticRepository>();
+            services.AddScoped<UserSessionRepository>();
+            services.AddScoped<ChannelClickRepository>();
+
+            services.AddMemoryCache();
+
+            services.AddSingleton<ISettingsStorage, InMemorySettingsStorage>();
+
+            services.AddScoped<TelegramUserRepository>();
+            services.AddScoped<ITelegramUserRepository, CachedTelegramUserRepository>();
+        
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            return services;
+        }
+
+        public IdentityBuilder AddIdentity()
+        {
+            return services.AddIdentityCore<ApplicationUser>(options =>
+                {
+                    options.Password.RequireDigit = true;
+                    options.Password.RequiredLength = 8;
+                    options.Password.RequireNonAlphanumeric = true;
+                    options.Password.RequireUppercase = true;
+                    options.Password.RequireLowercase = true;
+                    options.Password.RequiredUniqueChars = 3;
+
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                    options.Lockout.MaxFailedAccessAttempts = 5;
+                    options.Lockout.AllowedForNewUsers = true;
+                })
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+        }
     }
 }

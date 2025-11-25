@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Entities;
 
@@ -122,6 +123,7 @@ public class StatisticHandler(
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var repository = scope.ServiceProvider.GetRequiredService<ViewStatisticRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
             var processed = 0;
 
@@ -138,7 +140,7 @@ public class StatisticHandler(
                 }
             }
 
-            await repository.Save();
+            await unitOfWork.SaveChangesAsync();
 
             if (processed > 0)
             {
@@ -157,6 +159,7 @@ public class StatisticHandler(
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
             List<string> userIds;
             if (!shutdown)
@@ -172,7 +175,7 @@ public class StatisticHandler(
                 userIds = statisticService.OnlineUsers.Keys.ToList();
             }
             
-            await RemoveAndSaveUserSessions(userIds, repository);
+            await RemoveAndSaveUserSessions(userIds, repository, unitOfWork);
         }
         catch (Exception e)
         {
@@ -180,7 +183,8 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository)
+    private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository,
+        IUnitOfWork unitOfWork)
     {
         var minimumSessionDuration = TimeSpan.FromSeconds(45);
         
@@ -199,8 +203,8 @@ public class StatisticHandler(
                 }
             }
         }
-        
-        await repository.Save();
+
+        await unitOfWork.SaveChangesAsync();
         
         if (processed > 0)
         {
@@ -214,6 +218,7 @@ public class StatisticHandler(
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var repository = scope.ServiceProvider.GetRequiredService<ChannelClickRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
             var processed = 0;
 
@@ -229,8 +234,8 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при добавлении записи клика на канал");
                 }
             }
-            
-            await repository.Save();
+
+            await unitOfWork.SaveChangesAsync();
             
             if (processed > 0)
             {

@@ -26,9 +26,4 @@ public abstract class BaseRepository<TEntity>(ApplicationDbContext context)
     {
         GetSet().Remove(entity);
     }
-
-    public async Task Save()
-    {
-        await context.SaveChangesAsync();
-    }
 }
