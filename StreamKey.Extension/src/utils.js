@@ -124,8 +124,8 @@ export async function getCookieValue(url, name) {
 }
 
 export async function getUserProfile() {
-    const telegramUserId = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_id');
-    const telegramUserHash = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_hash');
+    const telegramUserId = await getCookieValue(CONFIG.apiUrl, 'tg_user_id');
+    const telegramUserHash = await getCookieValue(CONFIG.apiUrl, 'tg_user_hash');
 
     if (telegramUserId && telegramUserHash) {
         try {

@@ -14,8 +14,7 @@ public class Telegram : ICarterModule
             .WithTags("Взаимодействие с Telegram");
 
         group.MapPost("/login",
-                async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository,
-                    IUnitOfWork unitOfWork) =>
+                async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository, IUnitOfWork unitOfWork) =>
                 {
                     var user = await repository.GetByTelegramId(dto.Id);
 
@@ -57,7 +56,7 @@ public class Telegram : ICarterModule
 
                     await unitOfWork.SaveChangesAsync();
 
-                    Results.Ok();
+                    return Results.Ok();
                 })
             .WithSummary("Авторизация");
 
