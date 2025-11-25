@@ -14,4 +14,7 @@ public class TelegramUserEntity : BaseIntEntity
     
     public required string Hash { get; set; }
     
+    public bool IsChatMember { get; set; }
+    
+    public DateTime AuthorizedAt { get; set; }
 }

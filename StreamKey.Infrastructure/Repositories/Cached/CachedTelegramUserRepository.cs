@@ -11,6 +11,6 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
 
     public Task<TelegramUserEntity?> GetByTelegramId(long id)
     {
-        throw new NotImplementedException();
+        return Repository.GetByTelegramId(id);
     }
 }

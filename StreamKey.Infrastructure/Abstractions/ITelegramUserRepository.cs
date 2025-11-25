@@ -2,7 +2,7 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Abstractions;
 
-public interface ITelegramUserRepository
+public interface ITelegramUserRepository : IBaseRepository<TelegramUserEntity>
 {
     Task<TelegramUserEntity?> GetByTelegramId(long id);
 }

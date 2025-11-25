@@ -54,5 +54,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.DateTime);
         });
+
+        modelBuilder.Entity<TelegramUserEntity>(entity =>
+        {
+            entity.ToTable("TelegramUsers");
+
+            entity.HasIndex(e => e.TelegramId).IsUnique();
+            entity.HasIndex(e => e.IsChatMember);
+            entity.HasIndex(e => e.AuthorizedAt);
+        });
     }
 }
