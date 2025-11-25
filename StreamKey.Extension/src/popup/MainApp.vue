@@ -169,7 +169,7 @@ export default {
         currentVideo.value = undefined;
       }
 
-      tgUser.value = await utils.getUserProfile();
+      tgUser.value = await utils.api.runtime.sendMessage({ type: "GET_USER_PROFILE" });
       if (tgUser.value) {
         if (tgUser.value.is_chat_member) {
           telegramStatus.value = 2;
