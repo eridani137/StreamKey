@@ -16,3 +16,8 @@ public class BaseIntEntity : BaseEntity
 {
     [Key] public int Id { get; set; }
 }
+
+public class BaseLongEntity : BaseEntity
+{
+    [Key] public long Id { get; set; }
+}

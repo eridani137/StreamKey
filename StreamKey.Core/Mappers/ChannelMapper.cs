@@ -5,18 +5,38 @@ namespace StreamKey.Core.Mappers;
 
 public static class ChannelMapper
 {
-    public static ChannelDto Map(this ChannelEntity channel)
+    extension(ChannelDto dto)
     {
-        return new ChannelDto(channel.Name, channel.Info, channel.Position);
-    }
-
-    public static List<ChannelDto> Map(this IEnumerable<ChannelEntity> channels)
-    {
-        return channels.Where(c => c.Info is not null).Select(Map).ToList();
+        public ChannelEntity Map()
+        {
+            var channel = new ChannelEntity()
+            {
+                Name = dto.ChannelName,
+                Position = dto.Position
+            };
+        
+            return  channel;
+        }
     }
     
-    public static List<ChannelDto> MapAll(this IEnumerable<ChannelEntity> channels)
+    extension(ChannelEntity channel)
     {
-        return channels.Select(Map).ToList();
+        public ChannelDto Map()
+        {
+            return new ChannelDto(channel.Name, channel.Info, channel.Position);
+        }
+    }
+
+    extension(IEnumerable<ChannelEntity> channels)
+    {
+        public List<ChannelDto> Map()
+        {
+            return channels.Where(c => c.Info is not null).Select(Map).ToList();
+        }
+
+        public List<ChannelDto> MapAll()
+        {
+            return channels.Select(Map).ToList();
+        }
     }
 }

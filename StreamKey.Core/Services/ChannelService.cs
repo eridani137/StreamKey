@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using ParserExtension;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Mappers;
 using StreamKey.Core.Results;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared;
@@ -31,11 +32,7 @@ public class ChannelService(
             return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
         }
 
-        var channel = new ChannelEntity()
-        {
-            Name = dto.ChannelName,
-            Position = dto.Position
-        };
+        var channel = dto.Map();
 
         await channelRepository.Create(channel);
 
