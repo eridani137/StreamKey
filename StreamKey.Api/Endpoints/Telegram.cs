@@ -26,14 +26,20 @@ public class Telegram : ICarterModule
                         user = dto.Map();
                         isNewUser = true;
                     }
-                    else
-                    {
-                        user = dto.Map();
-                    }
 
                     var getChatMemberResponse = await service.GetChatMember(dto.Id);
                     if (getChatMemberResponse is null) return Results.BadRequest("response is null");
 
+                    user.FirstName = dto.FirstName;
+                    
+                    user.Username = dto.Username;
+                    
+                    user.AuthDate = dto.AuthDate;
+                    
+                    user.PhotoUrl = dto.PhotoUrl;
+                    
+                    user.Hash = dto.Hash;
+                    
                     user.IsChatMember = getChatMemberResponse?.Result?.Status is ChatMemberStatus.Creator
                         or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member
                         or ChatMemberStatus.Restricted;
