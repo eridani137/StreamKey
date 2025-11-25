@@ -11,18 +11,19 @@ public class RestartService(IHostApplicationLifetime appLifetime, ILogger<Restar
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.Now;
-            var next4Am = new DateTime(now.Year, now.Month, now.Day, 4, 0, 0);
+            var restartTime = new DateTime(now.Year, now.Month, now.Day, 4, 0, 0);
             
             if (now.TimeOfDay >= new TimeSpan(4, 0, 0))
             {
-                next4Am = next4Am.AddDays(1);
+                restartTime = restartTime.AddDays(1);
             }
             
-            var delay = next4Am - now;
+            var delay = restartTime - now;
 
             logger.LogInformation(
-                "RestartService: Ждем до {DateTime} ({DelayTotalMinutes:F1} минут)", 
-                next4Am, 
+                "RestartService: Текущее время: {Now}, Следующий перезапуск в: {RestartTime}, Задержка: {DelayTotalMinutes:F0} минут",
+                now,
+                restartTime,
                 delay.TotalMinutes);
 
             try
