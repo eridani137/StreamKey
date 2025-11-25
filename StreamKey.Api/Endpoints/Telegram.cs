@@ -30,11 +30,7 @@ public class Telegram : ICarterModule
                     var getChatMemberResponse = await service.GetChatMember(dto.Id);
                     if (getChatMemberResponse is null) return Results.BadRequest("response is null");
 
-                    if (getChatMemberResponse?.Result?.Status is not (ChatMemberStatus.Creator or ChatMemberStatus.Owner
-                        or ChatMemberStatus.Administrator or ChatMemberStatus.Member or ChatMemberStatus.Restricted))
-                    {
-                        user.IsChatMember = false;
-                    }
+                    user.IsChatMember = getChatMemberResponse?.Result?.Status is ChatMemberStatus.Creator or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member or ChatMemberStatus.Restricted;
 
                     user.AuthorizedAt = DateTime.UtcNow;
 
