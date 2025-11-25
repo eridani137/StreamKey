@@ -26,6 +26,10 @@ public class Telegram : ICarterModule
                         user = dto.Map();
                         isNewUser = true;
                     }
+                    else
+                    {
+                        user = dto.Map();
+                    }
 
                     var getChatMemberResponse = await service.GetChatMember(dto.Id);
                     if (getChatMemberResponse is null) return Results.BadRequest("response is null");

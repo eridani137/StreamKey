@@ -73,42 +73,42 @@ const QualityMenuEnhancer = {
             });
     },
 
-    getCookieValue(domain, name) {
-        return new Promise((resolve) => {
-            chrome.runtime.sendMessage(
-                {
-                    type: "GET_COOKIE",
-                    domain: domain,
-                    name: name
-                },
-                (response) => {
-                    if (chrome.runtime.lastError || !response) {
-                        resolve(undefined);
-                    } else {
-                        resolve(response);
-                    }
-                }
-            );
-        });
-    },
+    // getCookieValue(domain, name) {
+    //     return new Promise((resolve) => {
+    //         chrome.runtime.sendMessage(
+    //             {
+    //                 type: "GET_COOKIE",
+    //                 domain: domain,
+    //                 name: name
+    //             },
+    //             (response) => {
+    //                 if (chrome.runtime.lastError || !response) {
+    //                     resolve(undefined);
+    //                 } else {
+    //                     resolve(response);
+    //                 }
+    //             }
+    //         );
+    //     });
+    // },
 
-    checkDate(user) {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const seconds = 604800;
-        if (currentTime - user.authDate > seconds) {
-            return false;
-        }
+    // checkDate(user) {
+    //     const currentTime = Math.floor(Date.now() / 1000);
+    //     const seconds = 604800;
+    //     if (currentTime - user.authDate > seconds) {
+    //         return false;
+    //     }
 
-        return true;
-    },
+    //     return true;
+    // },
 
     async block2KResolutionElement() {
-        const user = await this.getCookieValue("streamkey.ru", "tg_user_id");
-        if (user) {
-            if (this.checkDate(user)) {
-                return;
-            }
-        }
+        // const user = await this.getCookieValue("streamkey.ru", "tg_user_id");
+        // if (user) {
+        //     if (this.checkDate(user)) {
+        //         return;
+        //     }
+        // } // TODO
 
         const elements = this.getResolutionElements();
 

@@ -1,3 +1,5 @@
+import { CONFIG } from './config';
+
 export const api = typeof browser !== 'undefined' ? browser : chrome;
 
 const sessionIdKeyName = "sessionId";
@@ -119,4 +121,31 @@ export async function getCookieValue(url, name) {
             }
         });
     });
+}
+
+export async function getUserProfile() {
+    const telegramUserId = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_id');
+    const telegramUserHash = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_hash');
+    if (telegramUserId && telegramUserHash) {
+        console.log("TelegramId получен", telegramUserId);
+        console.log("TelegramHash получен", telegramUserHash);
+
+        fetch(`${CONFIG.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Сервер вернул ошибку: ' + response.status);
+                }
+                return response.text();
+            })
+            .then(text => {
+                const data = text ? JSON.parse(text) : {};
+                console.log("Получение статуса подписки:", data);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }
 }

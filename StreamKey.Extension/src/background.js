@@ -1,7 +1,7 @@
 import { CONFIG } from './config';
 import * as utils from './utils';
 
-utils.api.runtime.onInstalled.addListener(() => {
+utils.api.runtime.onInstalled.addListener(async () => {
     console.log('Расширение установлено. Устанавливаем состояние по умолчанию');
 
     utils.createNewSession();
@@ -9,17 +9,14 @@ utils.api.runtime.onInstalled.addListener(() => {
     utils.saveState(CONFIG.extensionStateKeyName, true);
 
     utils.enableRuleset();
+
+    utils.getUserProfile();
 });
 
-utils.api.runtime.onStartup.addListener(() => {
+utils.api.runtime.onStartup.addListener(async () => {
     utils.createNewSession();
 
-    const telegramUserId = utils.getCookieValue(CONFIG.streamKeyUrl, 'tg_user_id');
-    if (telegramUserId) {
-        console.log("TelegramId получен", telegramUserId);
-
-        
-    }
+    utils.getUserProfile();
 });
 
 utils.api.runtime.onMessage.addListener((message, sender, sendResponse) => {
