@@ -4,5 +4,6 @@ export const CONFIG = {
     apiUrl: "https://service.streamkey.ru",
     telegramChannelUrl: "https://t.me/streamkey",
     extensionAuthorizationUrl: "https://streamkey.ru/extension-authorization/",
-    extensionStateKeyName: "streamKeyEnabled"
+    extensionStateKeyName: "streamKeyEnabled",
+    streamKeyUrl: "https://streamkey.ru/"
 };

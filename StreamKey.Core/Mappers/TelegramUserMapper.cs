@@ -39,5 +39,16 @@ public static class TelegramUserMapper
             
             return dto;
         }
+
+        public TelegramUserDto MapUserDto()
+        {
+            return new TelegramUserDto()
+            {
+                Id = entity.TelegramId, 
+                Username = entity.Username,
+                PhotoUrl = entity.PhotoUrl, 
+                IsChatMember = entity.IsChatMember
+            };
+        }
     }
 }

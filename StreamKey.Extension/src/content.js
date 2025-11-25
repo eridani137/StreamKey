@@ -103,7 +103,7 @@ const QualityMenuEnhancer = {
     },
 
     async block2KResolutionElement() {
-        const user = await this.getCookieValue("streamkey.ru", "tg_user");
+        const user = await this.getCookieValue("streamkey.ru", "tg_user_id");
         if (user) {
             if (this.checkDate(user)) {
                 return;

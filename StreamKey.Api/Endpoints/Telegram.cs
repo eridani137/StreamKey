@@ -30,7 +30,9 @@ public class Telegram : ICarterModule
                     var getChatMemberResponse = await service.GetChatMember(dto.Id);
                     if (getChatMemberResponse is null) return Results.BadRequest("response is null");
 
-                    user.IsChatMember = getChatMemberResponse?.Result?.Status is ChatMemberStatus.Creator or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member or ChatMemberStatus.Restricted;
+                    user.IsChatMember = getChatMemberResponse?.Result?.Status is ChatMemberStatus.Creator
+                        or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member
+                        or ChatMemberStatus.Restricted;
 
                     user.AuthorizedAt = DateTime.UtcNow;
 
@@ -50,5 +52,21 @@ public class Telegram : ICarterModule
                         : Results.BadRequest("user is not member");
                 })
             .WithSummary("Авторизация");
+
+        group.MapGet("/user/{id:long}/{hash}",
+                async (long id, string hash, ITelegramUserRepository repository) =>
+                {
+                    var user = await repository.GetByTelegramId(id);
+                    if (user is null) return Results.NotFound();
+
+                    if (!string.Equals(hash, user.Hash, StringComparison.Ordinal))
+                    {
+                        return Results.Forbid();
+                    }
+
+                    return Results.Ok(user.MapUserDto());
+                })
+            .Produces<TelegramAuthDto>()
+            .WithSummary("Получение данных о пользователе");
     }
 }

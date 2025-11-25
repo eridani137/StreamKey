@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace StreamKey.Core.DTOs;
 
@@ -15,4 +15,12 @@ public class TelegramAuthDto
     [JsonPropertyName("photo_url")] public string PhotoUrl { get; set; } = string.Empty;
 
     [JsonPropertyName("username")] public string Username { get; set; } = string.Empty;
+}
+
+public class TelegramUserDto()
+{
+    [JsonPropertyName("id")] public long Id { get; set; }
+    [JsonPropertyName("username")] public required string Username { get; set; }
+    [JsonPropertyName("photo_url")] public required string PhotoUrl { get; set; }
+    [JsonPropertyName("is_chat_member")] public bool IsChatMember { get; set; }
 }

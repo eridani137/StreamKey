@@ -2,7 +2,6 @@ export const api = typeof browser !== 'undefined' ? browser : chrome;
 
 const sessionIdKeyName = "sessionId";
 const oauthTelegramUrl = "https://oauth.telegram.org/";
-const streamKeyUrl = "https://streamkey.ru/";
 
 export function generateSessionId() {
     const timestamp = Date.now();
@@ -105,33 +104,19 @@ export async function hasStelAcidCookie() {
     });
 }
 
-export async function getTgUser() {
+export async function getCookieValue(url, name) {
     return new Promise((resolve) => {
-        api.cookies.get({ url: streamKeyUrl, name: 'tg_user' }, (cookie) => {
+        api.cookies.get({ url, name }, (cookie) => {
             if (chrome.runtime?.lastError) {
-                console.error("getTgUser", chrome.runtime.lastError);
-                resolve(undefined);
+                console.error("getCookieValue:", chrome.runtime.lastError);
+                resolve(null);
                 return;
             }
-
-            let valueObj;
-            try {
-                valueObj = JSON.parse(decodeURIComponent(cookie.value));
-            } catch (e) {
-                valueObj = undefined;
+            if (cookie) {
+                resolve(cookie.value);
+            } else {
+                resolve(null);
             }
-
-            resolve(valueObj);
         });
     });
-}
-
-export function checkDate(user) {
-    const currentTime = Math.floor(Date.now() / 1000);
-    const seconds = 604800;
-    if (currentTime - user.authDate > seconds) {
-        return false;
-    }
-
-    return true;
 }
