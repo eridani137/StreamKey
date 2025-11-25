@@ -19,15 +19,16 @@
     </div>
     <div class="subscribe-status">
       <p>
-        1440p: <span :class="status1440pColorClass">{{ status1440pText }}</span>
+        1440p:
+        <span :class="telegramStatusColorClass">{{ telegramStatusText }}</span>
       </p>
     </div>
     <div>
-      <template v-if="is1440pActive">
-        <QAButton @click="openQA" />
+      <template v-if="telegramStatus == 0 || telegramStatus == 1">
+        <ActivateButton @click="openTelegramAuthentication" />
       </template>
       <template v-else>
-        <ActivateButton @click="openTelegramAuthentication" />
+        <QAButton @click="openQA" />
       </template>
     </div>
     <h1 class="stream-key-title">STREAM KEY</h1>
@@ -42,8 +43,8 @@
             <img :src="tgUser.photo_url" alt="avatar" class="avatar-img" />
           </div>
           <div class="info">
-            <div class="nickname">{{tgUser.username}}</div>
-            <div class="id">{{tgUser.id}}</div>
+            <div class="nickname">{{ tgUser.username }}</div>
+            <div class="id">{{ tgUser.id }}</div>
           </div>
         </div>
       </template>
@@ -80,7 +81,7 @@ export default {
     const currentVideo = ref(undefined);
     const isEnabled = ref(true);
     const isLoading = ref(false);
-    const is1440pActive = ref(false);
+    const telegramStatus = ref(0);
 
     const tgUser = ref(undefined);
 
@@ -92,12 +93,22 @@ export default {
       return currentVideo.value === EnabledVideo;
     });
 
-    const status1440pText = computed(() => {
-      return is1440pActive.value ? 'Активирован' : 'Не активирован*';
+    const telegramStatusText = computed(() => {
+      if (telegramStatus.value == 0) {
+        return 'Не активирован*';
+      } else if (telegramStatus.value == 1) {
+        return 'Нужно подписаться на канал';
+      } else {
+        return 'Активирован';
+      }
     });
 
-    const status1440pColorClass = computed(() => {
-      return is1440pActive.value ? 'status-active' : 'status-inactive';
+    const telegramStatusColorClass = computed(() => {
+      if (telegramStatus.value == 0 || telegramStatus.value == 1) {
+        return 'status-inactive';
+      } else {
+        return 'status-active';
+      }
     });
 
     function onVideoEnded() {
@@ -158,7 +169,16 @@ export default {
         currentVideo.value = undefined;
       }
 
-      // is1440pActive.value = utils.userProfile && utils.userProfile.is_chat_member; // TODO
+      tgUser.value = await utils.getUserProfile();
+      if (tgUser.value) {
+        if (tgUser.value.is_chat_member) {
+          telegramStatus.value = 2;
+        } else {
+          telegramStatus.value = 1;
+        }
+      } else {
+        telegramStatus.value = 0;
+      }
     });
 
     return {
@@ -172,9 +192,9 @@ export default {
       openTelegramAuthentication,
       openQA,
       onVideoEnded,
-      is1440pActive,
-      status1440pText,
-      status1440pColorClass,
+      telegramStatus,
+      telegramStatusText,
+      telegramStatusColorClass,
       tgUser,
     };
   },

@@ -57,9 +57,7 @@ public class Telegram : ICarterModule
 
                     await unitOfWork.SaveChangesAsync();
 
-                    return user.IsChatMember
-                        ? Results.Ok()
-                        : Results.BadRequest("user is not member");
+                    Results.Ok();
                 })
             .WithSummary("Авторизация");
 

@@ -126,10 +126,8 @@ export async function getCookieValue(url, name) {
 export async function getUserProfile() {
     const telegramUserId = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_id');
     const telegramUserHash = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_hash');
-    if (telegramUserId && telegramUserHash) {
-        console.log("TelegramId получен", telegramUserId);
-        console.log("TelegramHash получен", telegramUserHash);
 
+    if (telegramUserId && telegramUserHash) {
         try {
             const response = await fetch(`${CONFIG.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`, {
                 method: 'GET',
@@ -137,15 +135,18 @@ export async function getUserProfile() {
             });
 
             if (!response.ok) {
-                throw new Error('Сервер вернул ошибку: ' + response.status);
+                console.log('Сервер вернул ошибку: ' + response.status);
+                return;
             }
 
             const text = await response.text();
             const obj = text ? JSON.parse(text) : null;
+
             return obj;
         } catch (err) {
             console.error(err);
             return null;
         }
     }
+    return null;
 }
