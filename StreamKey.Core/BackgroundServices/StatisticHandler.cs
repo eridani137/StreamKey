@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
-using StreamKey.Shared.Entities;
 
-namespace StreamKey.Core.Services;
+namespace StreamKey.Core.BackgroundServices;
 
 public class StatisticHandler(
     StatisticService statisticService,

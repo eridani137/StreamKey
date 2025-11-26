@@ -2,7 +2,6 @@ using Carter;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
-using StreamKey.Shared.Entities;
 using StreamKey.Shared.Types;
 
 namespace StreamKey.Api.Endpoints;

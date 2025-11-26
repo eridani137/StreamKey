@@ -15,16 +15,24 @@ public class TelegramService(IHttpClientFactory clientFactory, ILogger<TelegramS
 {
     public async Task<GetChatMemberResponse?> GetChatMember(long userId)
     {
-        using var client = clientFactory.CreateClient(ApplicationConstants.TelegramClientName);
-        using var response = await client.PostAsJsonAsync($"/bot{ApplicationConstants.TelegramBotToken}/getChatMember", new
+        try
         {
-            chat_id = ApplicationConstants.TelegramChatId,
-            user_id = userId,
-        });
+            using var client = clientFactory.CreateClient(ApplicationConstants.TelegramClientName);
+            using var response = await client.PostAsJsonAsync($"/bot{ApplicationConstants.TelegramBotToken}/getChatMember", new
+            {
+                chat_id = ApplicationConstants.TelegramChatId,
+                user_id = userId,
+            });
         
-        await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var getChatMemberResponse = await JsonSerializer.DeserializeAsync<GetChatMemberResponse>(contentStream);
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            var getChatMemberResponse = await JsonSerializer.DeserializeAsync<GetChatMemberResponse>(contentStream);
         
-        return getChatMemberResponse;
+            return getChatMemberResponse;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "GetChatMember");
+            return null;
+        }
     }
 }

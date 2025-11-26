@@ -1,12 +1,10 @@
 using Carter;
-using Microsoft.AspNetCore.Mvc;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
-using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Api.Endpoints;

@@ -1,16 +1,12 @@
 using System.Net;
-using System.Text;
 using System.Web;
-using M3U8Parser;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs.TwitchGraphQL;
-using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
-using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
@@ -34,7 +30,7 @@ public class UsherService(
 
         // var tokenResponse = await twitchService.GetStreamAccessToken(username);
 
-        if (tokenResponse is null)
+        if (tokenResponse?.Data is null)
         {
             return Result.Failure<string>(Error.ServerTokenNotFound);
         }
@@ -51,8 +47,8 @@ public class UsherService(
             query[key] = value;
         }
 
-        query["sig"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature;
-        query["token"] = tokenResponse?.Data?.StreamPlaybackAccessToken?.Value;
+        query["sig"] = tokenResponse.Data?.StreamPlaybackAccessToken?.Signature;
+        query["token"] = tokenResponse.Data?.StreamPlaybackAccessToken?.Value;
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
@@ -110,7 +106,7 @@ public class UsherService(
 
         // var tokenResponse = await twitchService.GetVodAccessToken(vodId);
 
-        if (tokenResponse is null)
+        if (tokenResponse?.Data is null)
         {
             return Result.Failure<string>(Error.ServerTokenNotFound);
         }
@@ -128,8 +124,8 @@ public class UsherService(
         }
         
         query["client_id"] = ApplicationConstants.ClientId;
-        query["token"] = tokenResponse?.Data?.VideoPlaybackAccessToken?.Value;
-        query["sig"] = tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature;
+        query["token"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Value;
+        query["sig"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Signature;
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();

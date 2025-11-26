@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using StreamKey.Core.DTOs;
 using StreamKey.Shared.Entities;
-using StreamKey.Shared.Types;
 
 namespace StreamKey.Core.Services;
 

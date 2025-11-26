@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Infrastructure;

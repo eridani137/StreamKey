@@ -1,6 +1,4 @@
-using System.Text;
 using Carter;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;

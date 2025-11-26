@@ -51,7 +51,7 @@ public class UserSessionRepository(ApplicationDbContext context)
         var perUserSeconds = await GetSet()
             .Where(s => s.UpdatedAt >= cutoffTime)
             .GroupBy(s => s.UserId)
-            .Select(g => g.Sum(s => (double)s.AccumulatedTime.TotalSeconds))
+            .Select(g => g.Sum(s => s.AccumulatedTime.TotalSeconds))
             .ToListAsync();
         
         if (perUserSeconds.Count == 0)

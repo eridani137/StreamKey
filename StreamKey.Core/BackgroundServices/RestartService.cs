@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace StreamKey.Core.Services;
+namespace StreamKey.Core.BackgroundServices;
 
 public class RestartService(IHostApplicationLifetime appLifetime, ILogger<RestartService> logger)
     : BackgroundService

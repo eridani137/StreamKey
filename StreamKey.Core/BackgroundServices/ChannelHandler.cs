@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Infrastructure.Abstractions;
 
-namespace StreamKey.Core.Services;
+namespace StreamKey.Core.BackgroundServices;
 
 public class ChannelHandler(
     ILogger<ChannelHandler> logger,

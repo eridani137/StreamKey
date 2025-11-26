@@ -17,7 +17,7 @@ public class TelegramAuthDto
     [JsonPropertyName("username")] public string Username { get; set; } = string.Empty;
 }
 
-public class TelegramUserDto()
+public class TelegramUserDto
 {
     [JsonPropertyName("id")] public long Id { get; set; }
     [JsonPropertyName("username")] public required string Username { get; set; }

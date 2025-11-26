@@ -3,7 +3,6 @@ using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -97,7 +96,6 @@ public static class OpenTelemetryConfiguration
                     .AddOtlpExporter(o =>
                     {
                         o.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/metrics");
-                        ;
                         o.Protocol = OtlpExportProtocol.HttpProtobuf;
                     });
             });

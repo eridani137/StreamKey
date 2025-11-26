@@ -32,7 +32,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         var accessTokenResponse = await JsonSerializer.DeserializeAsync<StreamPlaybackAccessTokenResponse>(contentStream);
 
         if (accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
-            accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
+            accessTokenResponse.Data?.StreamPlaybackAccessToken?.Value is null)
         {
             var jsonString = await response.Content.ReadAsStringAsync();
             logger.LogError("Ошибка получения StreamAccessToken: {JSON}", jsonString);
@@ -66,7 +66,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         var accessTokenResponse = await JsonSerializer.DeserializeAsync<VideoPlaybackAccessTokenResponse>(contentStream);
 
         if (accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
-            accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Value is null)
+            accessTokenResponse.Data?.VideoPlaybackAccessToken?.Value is null)
         {
             var jsonString = await response.Content.ReadAsStringAsync();
             logger.LogError("Ошибка получения VodAccessToken: {JSON}", jsonString);

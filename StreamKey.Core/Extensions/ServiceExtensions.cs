@@ -1,10 +1,10 @@
 using System.Net.Http.Headers;
 using FluentValidation;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StreamKey.Core.Abstractions;
+using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.Services;
 using StreamKey.Core.Validation;
 using StreamKey.Infrastructure.Abstractions;

@@ -39,7 +39,7 @@ public class Telegram : ICarterModule
                     
                     user.Hash = dto.Hash;
                     
-                    user.IsChatMember = getChatMemberResponse?.Result?.Status is ChatMemberStatus.Creator
+                    user.IsChatMember = getChatMemberResponse.Result?.Status is ChatMemberStatus.Creator
                         or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member
                         or ChatMemberStatus.Restricted;
 
