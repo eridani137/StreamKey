@@ -48,6 +48,10 @@ public class Telegram : ICarterModule
                     {
                         await repository.Add(user);
                     }
+                    else
+                    {
+                        repository.Update(user);
+                    }
 
                     await unitOfWork.SaveChangesAsync();
 

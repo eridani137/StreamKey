@@ -70,6 +70,7 @@ public class ChannelService(
 
         channel.Position = dto.Position;
 
+        channelRepository.Update(channel);
         await unitOfWork.SaveChangesAsync();
 
         return Result.Success(channel);
@@ -85,6 +86,7 @@ public class ChannelService(
         var info = await ParseChannelInfo(channel.Name);
         fresh.Info = info;
 
+        channelRepository.Update(fresh);
         await unitOfWork.SaveChangesAsync();
     }
 
