@@ -18,9 +18,11 @@ public class TelegramService(IHttpClientFactory clientFactory, ILogger<TelegramS
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.TelegramClientName);
-            using var response =
-                await client.GetAsync(
-                    $"/bot{ApplicationConstants.TelegramBotToken}/getChatMember?chat_id={ApplicationConstants.TelegramChatId}&user_id={userId}");
+            using var response = await client.PostAsJsonAsync($"/bot{ApplicationConstants.TelegramBotToken}/getChatMember", new
+            {
+                chat_id = ApplicationConstants.TelegramChatId,
+                user_id = userId,
+            });
             
             await using var contentStream = await response.Content.ReadAsStreamAsync();
             var getChatMemberResponse = await JsonSerializer.DeserializeAsync<GetChatMemberResponse>(contentStream);
