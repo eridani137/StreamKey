@@ -33,6 +33,8 @@ public static class ServiceExtensions
 
             services.AddScoped<TelegramUserRepository>();
             services.AddScoped<ITelegramUserRepository, CachedTelegramUserRepository>();
+            
+            services.AddScoped<IRestartRepository, RestartRepository>();
         
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

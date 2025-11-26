@@ -15,28 +15,32 @@ namespace StreamKey.Core.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddScoped<IUsherService, UsherService>();
-        services.AddScoped<ITwitchService, TwitchService>();
+        public IServiceCollection AddApplication()
+        {
+            services.AddScoped<IUsherService, UsherService>();
+            services.AddScoped<ITwitchService, TwitchService>();
 
-        services.AddScoped<IChannelService, ChannelService>();
+            services.AddScoped<IChannelService, ChannelService>();
 
-        services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
+            services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
 
-        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
-        services.AddSingleton<ICamoufoxService, CamoufoxService>();
-        services.AddSingleton<ITelegramService, TelegramService>();
+            services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+            services.AddSingleton<ICamoufoxService, CamoufoxService>();
+            services.AddSingleton<ITelegramService, TelegramService>();
 
-        services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IJwtService, JwtService>();
 
-        services.AddSingleton<StatisticService>();
+            services.AddSingleton<StatisticService>();
 
-        services.AddHostedService<ChannelHandler>();
-        services.AddHostedService<StatisticHandler>();
-        services.AddHostedService<RestartService>();
+            services.AddHostedService<ChannelHandler>();
+            services.AddHostedService<StatisticHandler>();
+            services.AddHostedService<RestartHandler>();
+            services.AddHostedService<TelegramHandler>();
 
-        return services;
+            return services;
+        }
     }
 
     public static void AddAdditionHeaders(this IHostApplicationBuilder builder)

@@ -63,5 +63,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(e => e.IsChatMember);
             entity.HasIndex(e => e.AuthorizedAt);
         });
+
+        modelBuilder.Entity<RestartEntity>(entity =>
+        {
+            entity.ToTable("Restarts");
+            
+            entity.HasIndex(e => e.DateTime);
+        });
     }
 }
