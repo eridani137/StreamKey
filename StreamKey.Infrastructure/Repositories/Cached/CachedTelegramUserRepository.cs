@@ -13,4 +13,14 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
     {
         return Repository.GetByTelegramId(id);
     }
+
+    public Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id)
+    {
+        return GetCachedData(GetCacheKey(id.ToString()), () => Repository.GetByTelegramIdNotTracked(id));
+    }
+
+    public Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit)
+    {
+        return Repository.GetOldestUpdatedUsers(limit);
+    }
 }

@@ -19,31 +19,29 @@ public class RestartHandler(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            using (var scope = serviceProvider.CreateScope())
+            using var scope = serviceProvider.CreateScope();
+            var repository = scope.ServiceProvider.GetRequiredService<IRestartRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            var lastRestartEntity = await repository.GetLastRestart();
+
+            var now = DateTime.UtcNow;
+            var timeToday = new DateTime(now.Year, now.Month, now.Day, _time.Hours, _time.Minutes, _time.Seconds);
+
+            if (now >= timeToday)
             {
-                var repository = scope.ServiceProvider.GetRequiredService<IRestartRepository>();
-                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-                var lastRestartEntity = await repository.GetLastRestart();
-
-                var now = DateTime.UtcNow;
-                var timeToday = new DateTime(now.Year, now.Month, now.Day, _time.Hours, _time.Minutes, _time.Seconds);
-
-                if (now >= timeToday)
+                if (lastRestartEntity == null || lastRestartEntity.DateTime.Date < now.Date)
                 {
-                    if (lastRestartEntity == null || lastRestartEntity.DateTime.Date < now.Date)
+                    logger.LogInformation("Плановый перезапуск сервиса");
+
+                    await repository.Add(new RestartEntity
                     {
-                        logger.LogInformation("Плановый перезапуск сервиса");
+                        DateTime = now
+                    });
+                    await unitOfWork.SaveChangesAsync(stoppingToken);
 
-                        await repository.Add(new RestartEntity
-                        {
-                            DateTime = now
-                        });
-                        await unitOfWork.SaveChangesAsync(stoppingToken);
-
-                        appLifetime.StopApplication();
-                        break;
-                    }
+                    appLifetime.StopApplication();
+                    break;
                 }
             }
 

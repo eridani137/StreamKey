@@ -11,4 +11,17 @@ public class TelegramUserRepository(ApplicationDbContext context)
     {
         return await GetSet().FirstOrDefaultAsync(e => e.TelegramId == id);
     }
+
+    public async Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id)
+    {
+        return await GetSet().AsNoTracking().FirstOrDefaultAsync(e => e.TelegramId == id);
+    }
+
+    public async Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit)
+    {
+        return await GetSet()
+            .OrderBy(e => e.UpdatedAt)
+            .Take(limit)
+            .ToListAsync();
+    }
 }

@@ -62,6 +62,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(e => e.TelegramId).IsUnique();
             entity.HasIndex(e => e.IsChatMember);
             entity.HasIndex(e => e.AuthorizedAt);
+            entity.HasIndex(e => e.UpdatedAt);
         });
 
         modelBuilder.Entity<RestartEntity>(entity =>

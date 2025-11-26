@@ -1,5 +1,6 @@
 using Carter;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Extensions;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
@@ -38,20 +39,14 @@ public class Telegram : ICarterModule
                     user.PhotoUrl = dto.PhotoUrl;
                     
                     user.Hash = dto.Hash;
-                    
-                    user.IsChatMember = getChatMemberResponse.Result?.Status is ChatMemberStatus.Creator
-                        or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member
-                        or ChatMemberStatus.Restricted;
+
+                    user.IsChatMember = getChatMemberResponse.IsChatMember();
 
                     user.AuthorizedAt = DateTime.UtcNow;
 
                     if (isNewUser)
                     {
                         await repository.Add(user);
-                    }
-                    else
-                    {
-                        repository.Update(user);
                     }
 
                     await unitOfWork.SaveChangesAsync();
@@ -63,7 +58,7 @@ public class Telegram : ICarterModule
         group.MapGet("/user/{id:long}/{hash}",
                 async (long id, string hash, ITelegramUserRepository repository) =>
                 {
-                    var user = await repository.GetByTelegramId(id);
+                    var user = await repository.GetByTelegramIdNotTracked(id);
                     if (user is null) return Results.NotFound();
 
                     if (!string.Equals(hash, user.Hash, StringComparison.Ordinal))

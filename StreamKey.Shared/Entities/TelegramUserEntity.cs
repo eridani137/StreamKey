@@ -17,4 +17,8 @@ public class TelegramUserEntity : BaseIntEntity
     public bool IsChatMember { get; set; }
     
     public DateTime AuthorizedAt { get; set; }
+    
+    public DateTime UpdatedAt { get; set; }
+    
+    // public DateTime UsedAt { get; set; } // TODO
 }

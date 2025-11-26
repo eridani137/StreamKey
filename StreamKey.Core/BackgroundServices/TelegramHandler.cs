@@ -1,31 +1,54 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Extensions;
+using StreamKey.Core.Services;
+using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class TelegramHandler(ILogger<RestartHandler> logger)
+public class TelegramHandler(
+    IServiceProvider serviceProvider,
+    ILogger<TelegramHandler> logger)
     : BackgroundService
 {
-    private readonly TimeSpan _time = new(0, 0, 0);
-    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(5);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.Now;
-            var timeToday = new DateTime(now.Year, now.Month, now.Day, _time.Hours, _time.Minutes, _time.Seconds);
+            var now = DateTime.UtcNow;
 
-            if (now >= timeToday)
+            using var scope = serviceProvider.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
+            var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            var processedUsersCount = 0;
+            const int usersCount = 100;
+            var users = await repository.GetOldestUpdatedUsers(usersCount);
+            foreach (var user in users)
             {
-                timeToday = timeToday.AddDays(1);
+                if (stoppingToken.IsCancellationRequested) break;
+                
+                var response = await service.GetChatMember(user.Id);
+                var isChatMember = response?.IsChatMember() ?? false;
+                if (user.IsChatMember != isChatMember)
+                {
+                    user.IsChatMember = isChatMember;
+                    processedUsersCount++;
+                }
+
+                user.UpdatedAt = now;
+
+                await Task.Delay(500, stoppingToken);
             }
 
-            if (now >= timeToday)
-            {
-                // TODO
-            }
+            await unitOfWork.SaveChangesAsync(stoppingToken);
             
+            logger.LogInformation("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount}", usersCount, processedUsersCount);
+
             try
             {
                 await Task.Delay(_checkDelay, stoppingToken);
