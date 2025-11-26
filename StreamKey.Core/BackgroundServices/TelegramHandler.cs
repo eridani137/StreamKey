@@ -46,9 +46,12 @@ public class TelegramHandler(
             }
 
             await unitOfWork.SaveChangesAsync(stoppingToken);
-            
-            logger.LogInformation("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount}", users.Count, processedUsersCount);
 
+            if (processedUsersCount > 0)
+            {
+                logger.LogInformation("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount}", users.Count, processedUsersCount);
+            }
+            
             try
             {
                 await Task.Delay(_checkDelay, stoppingToken);
