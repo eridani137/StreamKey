@@ -18,12 +18,7 @@ export default defineConfig(({ mode }) => {
   const isExtension = mode === 'extension' || mode === 'extension-dev'
   const enableObfuscation = mode === 'extension'
 
-  const terserCompressOptionsNormal = {
-    drop_console: false,
-    drop_debugger: false,
-  }
-
-  const terserCompressOptionsObfuscate = {
+  const terserCompressOptions = {
     drop_console: true,
     drop_debugger: true,
     pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error'],
@@ -136,7 +131,7 @@ export default defineConfig(({ mode }) => {
       },
       minify: 'terser',
       terserOptions: {
-        compress: enableObfuscation ? terserCompressOptionsObfuscate : terserCompressOptionsNormal,
+        compress: terserCompressOptions,
         mangle: {
           toplevel: true,
           safari10: true,
