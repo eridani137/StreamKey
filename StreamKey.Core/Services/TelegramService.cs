@@ -1,15 +1,11 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
-
-public interface ITelegramService
-{
-    Task<GetChatMemberResponse?> GetChatMember(long userId);
-}
 
 public class TelegramService(IHttpClientFactory clientFactory, ILogger<TelegramService> logger) : ITelegramService
 {

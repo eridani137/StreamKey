@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
@@ -12,7 +13,7 @@ public class TelegramHandler(
     ILogger<TelegramHandler> logger)
     : BackgroundService
 {
-    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(1);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -26,14 +27,15 @@ public class TelegramHandler(
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
             var processedUsersCount = 0;
-            const int usersCount = 100;
-            var users = await repository.GetOldestUpdatedUsers(usersCount);
+            var users = await repository.GetOldestUpdatedUsers(100);
             foreach (var user in users)
             {
                 if (stoppingToken.IsCancellationRequested) break;
                 
                 var response = await service.GetChatMember(user.Id);
-                var isChatMember = response?.IsChatMember() ?? false;
+                if (response is null) continue;
+                
+                var isChatMember = response.IsChatMember();
                 if (user.IsChatMember != isChatMember)
                 {
                     user.IsChatMember = isChatMember;
@@ -49,7 +51,7 @@ public class TelegramHandler(
 
             if (processedUsersCount > 0)
             {
-                logger.LogInformation("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount}", users.Count, processedUsersCount);
+                logger.LogInformation("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount} пользователя", users.Count, processedUsersCount);
             }
             
             try
