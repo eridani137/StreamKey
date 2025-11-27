@@ -127,6 +127,7 @@ export async function getUserProfile() {
     const hasAcid = await hasStelAcidCookie();
     if (!hasAcid) {
         console.log('acid not found');
+        await api.storage.local.remove("userProfile");
         return null;
     }
 
