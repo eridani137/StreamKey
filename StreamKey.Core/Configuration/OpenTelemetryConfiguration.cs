@@ -19,6 +19,7 @@ public static class OpenTelemetryConfiguration
     public static void Configure(WebApplicationBuilder builder)
     {
         var excludedPaths = builder.Configuration.GetSection("OpenTelemetry:ExcludedPaths").Get<string[]>() ?? [];
+        var excludedDomains = builder.Configuration.GetSection("OpenTelemetry:ExcludedDomains").Get<string[]>() ?? [];
         
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
@@ -43,18 +44,12 @@ public static class OpenTelemetryConfiguration
                         options.FilterHttpRequestMessage = httpRequestMessage =>
                         {
                             var uri = httpRequestMessage.RequestUri;
-
                             if (uri == null) return true;
 
                             var host = uri.Host;
                             var path = uri.AbsolutePath;
 
-                            if (host.Contains("usher.ttvnw.net", StringComparison.OrdinalIgnoreCase))
-                            {
-                                return false;
-                            }
-
-                            if (host.Contains("gql.twitch.tv", StringComparison.OrdinalIgnoreCase))
+                            if (excludedDomains.Any(domain => host.Contains(domain, StringComparison.OrdinalIgnoreCase)))
                             {
                                 return false;
                             }
