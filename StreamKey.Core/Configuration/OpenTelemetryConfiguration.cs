@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Exporter;
@@ -30,6 +31,11 @@ public static class OpenTelemetryConfiguration
                         {
                             var path = httpContext.Request.Path.Value ?? string.Empty;
                             return !excludedPaths.Any(excludedPath => path.StartsWith(excludedPath));
+                        };
+                        
+                        options.EnrichWithHttpRequest = (activity, httpRequest) =>
+                        {
+                            activity.SetTag("http.request.query_string", httpRequest.QueryString.Value);
                         };
                     })
                     .AddHttpClientInstrumentation(options =>

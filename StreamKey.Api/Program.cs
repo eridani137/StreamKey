@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;
@@ -55,6 +56,23 @@ app.Use(async (context, next) =>
         context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, proxy-revalidate";
         context.Response.Headers.Pragma = "no-cache";
         context.Response.Headers.Expires = "0";
+    }
+
+    await next();
+});
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == HttpMethods.Post)
+    {
+        context.Request.EnableBuffering();
+        
+        using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+
+        var activity = Activity.Current;
+        activity?.SetTag("http.request.body", body);
     }
 
     await next();
