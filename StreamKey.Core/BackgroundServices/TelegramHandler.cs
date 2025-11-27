@@ -27,7 +27,7 @@ public class TelegramHandler(
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
             var processedUsersCount = 0;
-            var users = await repository.GetOldestUpdatedUsers(100);
+            var users = await repository.GetOldestUpdatedUsers(30);
             foreach (var user in users)
             {
                 if (stoppingToken.IsCancellationRequested) break;
@@ -44,7 +44,7 @@ public class TelegramHandler(
 
                 user.UpdatedAt = now;
 
-                await Task.Delay(500, stoppingToken);
+                await Task.Delay(1000, stoppingToken);
             }
 
             await unitOfWork.SaveChangesAsync(stoppingToken);
