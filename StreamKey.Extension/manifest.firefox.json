@@ -12,7 +12,7 @@
     "https://*.twitch.tv/*",
     "https://*.ttvnw.net/*",
     "https://*.streamkey.ru/*",
-    "https://oauth.telegram.org/*"
+    "https://telegram.org/*"
   ],
   "background": {
     "scripts": [

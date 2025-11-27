@@ -3,7 +3,6 @@ import { CONFIG } from './config';
 export const api = typeof browser !== 'undefined' ? browser : chrome;
 
 const sessionIdKeyName = "sessionId";
-const oauthTelegramUrl = "https://oauth.telegram.org/";
 
 export function generateSessionId() {
     const timestamp = Date.now();
@@ -94,7 +93,7 @@ export async function disableRuleset() {
 
 export async function hasStelAcidCookie() {
     return new Promise((resolve) => {
-        api.cookies.get({ url: oauthTelegramUrl, name: 'stel_acid' }, (cookie) => {
+        api.cookies.get({ url: 'https://telegram.org', name: 'stel_acid' }, (cookie) => {
             if (chrome.runtime?.lastError) {
                 console.error("hasAcidCookie", chrome.runtime.lastError);
                 resolve(false);
@@ -128,6 +127,7 @@ export async function getUserProfile() {
     if (!hasAcid) {
         console.log('acid not found');
         await api.storage.local.remove("userProfile");
+
         return null;
     }
 
@@ -148,6 +148,8 @@ export async function getUserProfile() {
 
             const text = await response.text();
             const obj = text ? JSON.parse(text) : null;
+
+            console.log(obj);
 
             return obj;
         } catch (err) {

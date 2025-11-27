@@ -32,7 +32,7 @@ public class RestartHandler(
             {
                 if (lastRestartEntity == null || lastRestartEntity.DateTime.Date < now.Date)
                 {
-                    logger.LogInformation("Плановый перезапуск сервиса");
+                    logger.LogInformation("Плановый перезапуск");
 
                     await repository.Add(new RestartEntity
                     {
