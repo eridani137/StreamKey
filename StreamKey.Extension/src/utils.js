@@ -124,6 +124,12 @@ export async function getCookieValue(url, name) {
 }
 
 export async function getUserProfile() {
+    const hasAcid = await hasStelAcidCookie();
+    if (!hasAcid) {
+        console.log('acid not found');
+        return null;
+    }
+
     const telegramUserId = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_id');
     const telegramUserHash = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_hash');
 

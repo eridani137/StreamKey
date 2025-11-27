@@ -60,7 +60,7 @@ const QualityMenuEnhancer = {
                 border-radius: 4px;
                 padding: 10px;
                 margin-bottom: 10px;
-                border-bottom: 2px solid #9147ff;
+                border-bottom: 4px solid #f0cbdc;
             }
             
             .tw-in-feature-notification .fIxYas {
