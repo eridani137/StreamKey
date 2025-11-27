@@ -54,7 +54,65 @@ const QualityMenuEnhancer = {
                 cursor: pointer;
                 pointer-events: auto;
             }
+                
+            .tw-in-feature-notification {
+                background-color: rgba(255, 255, 255, 0.06);
+                border-radius: 4px;
+                padding: 10px;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #9147ff;
+            }
+            
+            .tw-in-feature-notification .fIxYas {
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .tw-notification-figure svg {
+                fill: currentColor;
+                color: #efeff1;
+            }
+            
+            .tw-in-feature-notification .efdWMj {
+                color: #adadb8;
+                font-size: 13px;
+                line-height: 1.5;
+                margin-top: 4px;
+            }
+            
+            .notification-image-container {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .notification-image {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                border-radius: 4px;
+            }
+            
+            .tw-in-feature-notification .tw-link {
+                color: #a970ff;
+                text-decoration: none;
+                font-size: 13px;
+                display: block;
+                text-align: center;
+            }
+            
+            .tw-in-feature-notification .tw-link:hover {
+                color: #bf94ff;
+                text-decoration: underline;
+            }
+            
+            .tw-in-feature-notification .bwtGga {
+                margin-top: 8px;
+            }
         `;
+
         document.head.appendChild(this.styleElement);
     },
 
@@ -73,12 +131,46 @@ const QualityMenuEnhancer = {
             });
     },
 
+    addInstruction() {
+        const targetMenu = document.querySelector(CONFIG.quality_menu_selectors.menuContainer);
+        if (!targetMenu) return;
+
+        if (targetMenu.querySelector('.tw-in-feature-notification')) return;
+
+        const notificationHTML = `
+        <div class="Layout-sc-1xcs6mc-0 goosYB">
+            <div class="ScInFeatureNotification-sc-a4oqgt-1 MSbwY tw-in-feature-notification" role="alert">
+                <div class="Layout-sc-1xcs6mc-0 kGRpNK">
+                    <div class="Layout-sc-1xcs6mc-0 fHdBNk">
+                        <div class="Layout-sc-1xcs6mc-0 fIxYas">
+                            <div class="Layout-sc-1xcs6mc-0 evOsLv" style="width: 100%;">
+                                <div class="Layout-sc-1xcs6mc-0 dZHLjx">
+                                    <div class="Layout-sc-1xcs6mc-0 bwtGga">
+                                        <div class="Layout-sc-1xcs6mc-0 efdWMj notification-image-container">
+                                            <img src="https://streamkey.ru/wp-content/uploads/2025/11/instruction.png" alt="instruction" class="notification-image">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+        
+        targetMenu.insertAdjacentHTML('afterbegin', notificationHTML);
+        console.log('Инструкция добавлена');
+    },
+
     async block2KResolutionElement() {
         const tgUser = await api.runtime.sendMessage({ type: "GET_USER_PROFILE" });
         console.log('user', tgUser);
         if (tgUser && tgUser.is_chat_member) {
             return;
         }
+
+        this.addInstruction();
 
         const elements = this.getResolutionElements();
 
@@ -248,6 +340,10 @@ const QualityMenuEnhancer = {
 
         document.querySelectorAll('[data-streamkey-blocked]').forEach(el => {
             el.removeAttribute('data-streamkey-blocked');
+        });
+
+        document.querySelectorAll('.tw-in-feature-notification').forEach(el => {
+            el.closest('.goosYB')?.remove();
         });
     }
 };
