@@ -32,7 +32,7 @@ public class TelegramHandler(
             {
                 if (stoppingToken.IsCancellationRequested) break;
                 
-                var response = await service.GetChatMember(user.Id);
+                var response = await service.GetChatMember(user.TelegramId);
                 if (response is null) continue;
                 
                 var isChatMember = response.IsChatMember();
