@@ -16,7 +16,8 @@ public class Telegram : ICarterModule
             .WithTags("Взаимодействие с Telegram");
 
         group.MapPost("/login",
-                async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository, IUnitOfWork unitOfWork) =>
+                async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository,
+                    IUnitOfWork unitOfWork) =>
                 {
                     var user = await repository.GetByTelegramId(dto.Id);
 
@@ -32,13 +33,13 @@ public class Telegram : ICarterModule
                     if (getChatMemberResponse is null) return Results.BadRequest("response is null");
 
                     user.FirstName = dto.FirstName;
-                    
+
                     user.Username = dto.Username;
-                    
+
                     user.AuthDate = dto.AuthDate;
-                    
+
                     user.PhotoUrl = dto.PhotoUrl;
-                    
+
                     user.Hash = dto.Hash;
 
                     user.IsChatMember = getChatMemberResponse.IsChatMember();
@@ -75,5 +76,16 @@ public class Telegram : ICarterModule
                 })
             .Produces<TelegramAuthDto>()
             .WithSummary("Получение данных о пользователе");
+
+        group.MapGet("/user/check-member/{id:long}",
+                async (long id, ITelegramService service) =>
+                {
+                    var getChatMemberResponse = await service.GetChatMember(id);
+                    return getChatMemberResponse is null
+                        ? Results.BadRequest(getChatMemberResponse)
+                        : Results.Ok(getChatMemberResponse);
+                })
+            .Produces<GetChatMemberResponse?>()
+            .WithSummary("Проверка подписки на канал");
     }
 }
