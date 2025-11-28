@@ -16,7 +16,7 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
 
     public Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id)
     {
-        return Repository.GetByTelegramIdNotTracked(id);
+        return GetCachedData(GetCacheKey(id.ToString()), () => Repository.GetByTelegramIdNotTracked(id));
     }
 
     public Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit)

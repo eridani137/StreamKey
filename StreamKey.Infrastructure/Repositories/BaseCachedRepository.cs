@@ -6,20 +6,21 @@ using StreamKey.Shared.Entities;
 namespace StreamKey.Infrastructure.Repositories;
 
 public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository repository, IMemoryCache cache)
+    : IBaseRepository<TEntity>
     where TEntity : BaseEntity
     where TRepository : IBaseRepository<TEntity>
 {
     protected readonly TRepository Repository = repository;
     protected abstract string CacheKeyPrefix { get; }
-    
-    protected string GetCacheKey(string suffix = "") => 
+
+    protected string GetCacheKey(string suffix = "") =>
         string.IsNullOrEmpty(suffix) ? CacheKeyPrefix : $"{CacheKeyPrefix}:{suffix}";
 
     private void InvalidateKeyCache()
     {
         cache.Remove(GetCacheKey());
     }
-    
+
     public DbSet<TEntity> GetSet()
     {
         return Repository.GetSet();
@@ -42,9 +43,9 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
         InvalidateKeyCache();
         Repository.Delete(entity);
     }
-    
+
     protected async Task<List<TResult>> GetCachedData<TResult>(
-        string cacheKey, 
+        string cacheKey,
         Func<Task<List<TResult>>> dataLoader,
         TimeSpan? absoluteExpiration = null)
     {
@@ -54,14 +55,15 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
             {
                 entry.SetAbsoluteExpiration((TimeSpan)absoluteExpiration);
             }
+
             return dataLoader();
         });
-    
+
         return result ?? [];
     }
-    
+
     protected async Task<TResult?> GetCachedData<TResult>(
-        string cacheKey, 
+        string cacheKey,
         Func<Task<TResult>> dataLoader,
         TimeSpan? absoluteExpiration = null)
     {
@@ -71,9 +73,10 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
             {
                 entry.SetAbsoluteExpiration((TimeSpan)absoluteExpiration);
             }
+
             return dataLoader();
         });
-    
+
         return result;
     }
 }
