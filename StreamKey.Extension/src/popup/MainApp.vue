@@ -24,8 +24,11 @@
       </p>
     </div>
     <div>
-      <template v-if="telegramStatus == 0 || telegramStatus == 1">
-        <ActivateButton @click="openTelegramAuthentication" />
+      <template v-if="telegramStatus == 0">
+        <ActivateButton label="Подключить 1440p" @click="openTelegramAuthentication" />
+      </template>
+      <template v-else-if="telegramStatus == 1">
+        <ActivateButton label="Подписаться на канал" @click="openTelegramAuthentication" />
       </template>
       <template v-else>
         <QAButton @click="openQA" />
@@ -97,7 +100,7 @@ export default {
       if (telegramStatus.value == 0) {
         return 'Не активирован*';
       } else if (telegramStatus.value == 1) {
-        return 'Нужно подписаться на канал';
+        return 'Нужно подписаться';
       } else {
         return 'Активирован';
       }

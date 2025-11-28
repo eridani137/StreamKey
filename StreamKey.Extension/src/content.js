@@ -11,7 +11,8 @@ const CONFIG = {
         url: "https://t.me/streamkey"
     },
     minResolution: 1080,
-    apiUrl: "https://service.streamkey.ru"
+    apiUrl: "https://service.streamkey.ru",
+    instructionUrl: "https://streamkey.ru/wp-content/uploads/2025/11/instruction.jpg"
 };
 
 const api = typeof browser !== 'undefined' ? browser : chrome;
@@ -56,29 +57,8 @@ const QualityMenuEnhancer = {
             }
                 
             .tw-in-feature-notification {
-                background-color: rgba(255, 255, 255, 0.06);
                 border-radius: 4px;
-                padding: 10px;
-                margin-bottom: 10px;
                 border-bottom: 4px solid #f0cbdc;
-            }
-            
-            .tw-in-feature-notification .fIxYas {
-                display: flex;
-                gap: 10px;
-                align-items: flex-start;
-            }
-            
-            .tw-notification-figure svg {
-                fill: currentColor;
-                color: #efeff1;
-            }
-            
-            .tw-in-feature-notification .efdWMj {
-                color: #adadb8;
-                font-size: 13px;
-                line-height: 1.5;
-                margin-top: 4px;
             }
             
             .notification-image-container {
@@ -106,10 +86,6 @@ const QualityMenuEnhancer = {
             .tw-in-feature-notification .tw-link:hover {
                 color: #bf94ff;
                 text-decoration: underline;
-            }
-            
-            .tw-in-feature-notification .bwtGga {
-                margin-top: 8px;
             }
         `;
 
@@ -147,7 +123,7 @@ const QualityMenuEnhancer = {
                                 <div class="Layout-sc-1xcs6mc-0 dZHLjx">
                                     <div class="Layout-sc-1xcs6mc-0 bwtGga">
                                         <div class="Layout-sc-1xcs6mc-0 efdWMj notification-image-container">
-                                            <img src="https://streamkey.ru/wp-content/uploads/2025/11/instruction.png" alt="instruction" class="notification-image">
+                                            <img src="${CONFIG.instructionUrl}" alt="instruction" class="notification-image">
                                         </div>
                                     </div>
                                 </div>
