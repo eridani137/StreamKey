@@ -59,6 +59,8 @@ const QualityMenuEnhancer = {
             .tw-in-feature-notification {
                 border-radius: 4px;
                 border-bottom: 4px solid #f0cbdc;
+                padding-top: 6px;
+                padding-bottom: 6px;
             }
             
             .notification-image-container {
