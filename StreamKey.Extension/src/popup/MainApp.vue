@@ -28,7 +28,7 @@
         <ActivateButton label="Подключить 1440p" @click="openTelegramAuthentication" />
       </template>
       <template v-else-if="telegramStatus == 1">
-        <ActivateButton label="Подписаться на канал" @click="openTelegramAuthentication" />
+        <ActivateButton label="Подписаться на канал" @click="openTelegramChannel" />
       </template>
       <template v-else>
         <QAButton @click="openQA" />
@@ -51,7 +51,7 @@
           </div>
         </div>
       </template>
-      <button class="telegram-button" @click="openTelegram">
+      <button class="telegram-button" @click="openTelegramChannel">
         <TelegramCircle />
       </button>
     </div>
@@ -191,7 +191,7 @@ export default {
       isLoading,
       isVideoLooped,
       onLogoClick,
-      openTelegram: openTelegramChannel,
+      openTelegramChannel,
       openTelegramAuthentication,
       openQA,
       onVideoEnded,
