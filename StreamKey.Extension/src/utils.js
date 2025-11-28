@@ -91,20 +91,6 @@ export async function disableRuleset() {
     }
 }
 
-export async function hasStelAcidCookie() {
-    return new Promise((resolve) => {
-        api.cookies.get({ url: 'https://telegram.org', name: 'stel_acid' }, (cookie) => {
-            if (chrome.runtime?.lastError) {
-                console.error("hasAcidCookie", chrome.runtime.lastError);
-                resolve(false);
-                return;
-            }
-
-            resolve(!!cookie);
-        });
-    });
-}
-
 export async function getCookieValue(url, name) {
     return new Promise((resolve) => {
         api.cookies.get({ url, name }, (cookie) => {
@@ -123,14 +109,6 @@ export async function getCookieValue(url, name) {
 }
 
 export async function getUserProfile() {
-    const hasAcid = await hasStelAcidCookie();
-    if (!hasAcid) {
-        console.log('acid not found');
-        await api.storage.local.remove("userProfile");
-
-        return null;
-    }
-
     const telegramUserId = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_id');
     const telegramUserHash = await getCookieValue(CONFIG.streamKeyUrl, 'tg_user_hash');
 
@@ -156,6 +134,8 @@ export async function getUserProfile() {
             console.error(err);
             return null;
         }
+    } else {
+        await api.storage.local.remove("userProfile");
     }
     return null;
 }

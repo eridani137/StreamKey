@@ -19,9 +19,9 @@ export default defineConfig(({ mode }) => {
   const enableObfuscation = mode === 'extension'
 
   const terserCompressOptions = {
-    drop_console: false,
-    drop_debugger: false,
-    // pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error'],
+    drop_console: true,
+    drop_debugger: true,
+    pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error'],
   }
 
   const safeObfuscationOptions = {

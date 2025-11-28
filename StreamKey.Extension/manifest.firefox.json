@@ -11,8 +11,7 @@
   "host_permissions": [
     "https://*.twitch.tv/*",
     "https://*.ttvnw.net/*",
-    "https://*.streamkey.ru/*",
-    "https://telegram.org/*"
+    "https://*.streamkey.ru/*"
   ],
   "background": {
     "scripts": [

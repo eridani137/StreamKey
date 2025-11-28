@@ -118,25 +118,34 @@ const QualityMenuEnhancer = {
             <div class="ScInFeatureNotification-sc-a4oqgt-1 MSbwY tw-in-feature-notification" role="alert">
                 <div class="Layout-sc-1xcs6mc-0 kGRpNK">
                     <div class="Layout-sc-1xcs6mc-0 fHdBNk">
-                        <div class="Layout-sc-1xcs6mc-0 fIxYas">
-                            <div class="Layout-sc-1xcs6mc-0 evOsLv" style="width: 100%;">
-                                <div class="Layout-sc-1xcs6mc-0 dZHLjx">
-                                    <div class="Layout-sc-1xcs6mc-0 bwtGga">
-                                        <div class="Layout-sc-1xcs6mc-0 efdWMj notification-image-container">
-                                            <img src="${CONFIG.instructionUrl}" alt="instruction" class="notification-image">
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="Layout-sc-1xcs6mc-0 fIxYas">
+                        <div class="Layout-sc-1xcs6mc-0 evOsLv" style="width: 100%;">
+                        <div class="Layout-sc-1xcs6mc-0 dZHLjx">
+                            <div class="Layout-sc-1xcs6mc-0 bwtGga">
+                            <div class="Layout-sc-1xcs6mc-0 efdWMj notification-image-container">
+                                <img src="${CONFIG.instructionUrl}" alt="instruction" class="notification-image">
+                            </div>
                             </div>
                         </div>
+                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
         </div>
         `;
-        
+
         targetMenu.insertAdjacentHTML('afterbegin', notificationHTML);
         console.log('Инструкция добавлена');
+
+        const notificationImage = targetMenu.querySelector('.notification-image');
+        if (notificationImage) {
+            notificationImage.style.cursor = 'pointer';
+            notificationImage.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.open(CONFIG.badge.url, '_blank');
+            });
+        }
     },
 
     async block2KResolutionElement() {
