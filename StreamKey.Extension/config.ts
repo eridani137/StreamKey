@@ -10,7 +10,7 @@ export const Config: AppConfig = {
     extensionStateKeyName: 'streamKeyEnabled',
   },
   messaging: {
-
+    getUserProfile: 'GET_USER_PROFILE'
   },
   keys: {
     sessionId: 'local:sessionId',

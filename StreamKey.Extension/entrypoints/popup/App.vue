@@ -174,7 +174,7 @@ export default {
       }
 
       tgUser.value = await browser.runtime.sendMessage({
-        type: 'GET_USER_PROFILE',
+        type: Config.messaging.getUserProfile,
       });
       if (tgUser.value) {
         if (tgUser.value.is_chat_member) {

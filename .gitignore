@@ -17,3 +17,5 @@ keys
 **/Migrations
 /StreamKey.Api/appsettings.Development.json
 Camoufox/__pycache__
+StreamKey.Extension/yarn.lock
+StreamKey.Extension/.vscode/

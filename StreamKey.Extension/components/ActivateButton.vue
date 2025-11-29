@@ -48,7 +48,7 @@ const props = defineProps<{
 }
 
 .activate-button:hover {
-  background: #60ccf3 !important;
+  background: #58bbdf !important;
   cursor: pointer;
 }
 

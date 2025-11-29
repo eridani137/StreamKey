@@ -82,7 +82,7 @@ export class QualityMenu {
 
   async block2KResolutionElement(): Promise<void> {
     const tgUser = await browser.runtime.sendMessage({
-      type: 'GET_USER_PROFILE',
+      type: Config.messaging.getUserProfile,
     });
     if (tgUser?.is_chat_member) return;
 

@@ -20,11 +20,13 @@ export default defineBackground(() => {
     await utils.initUserProfile();
   });
 
-  browser.runtime.onMessage.addListener(async (message) => {
-    if (message.type === 'GET_USER_PROFILE') {
-      return await storage.getItem(Config.keys.userProfile);
-    }
+  browser.runtime.onMessage.addListener((message): Promise<any> | undefined => {
+    switch (message.type) {
+      case Config.messaging.getUserProfile:
+        return storage.getItem(Config.keys.userProfile);
 
-    return undefined;
+      default:
+        return Promise.resolve(undefined);
+    }
   });
 });

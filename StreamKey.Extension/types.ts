@@ -14,18 +14,18 @@ export interface StorageKeys {
 }
 
 export interface QualityMenu {
-    qualityMenuSelectors: {
-        menuContainer: string;
-        radioItems: string;
-        radioLabel: string;
-    },
-    badgeText: string;
-    minResolution: number,
-    instructionUrl: string;
+  qualityMenuSelectors: {
+    menuContainer: string;
+    radioItems: string;
+    radioLabel: string;
+  };
+  badgeText: string;
+  minResolution: number;
+  instructionUrl: string;
 }
 
 export interface MessagingKeys {
-
+  getUserProfile: string;
 }
 
 export interface AppConfig {
@@ -48,4 +48,18 @@ export interface StreamkeyBlockedElement extends HTMLElement {
   _streamkeyBlockers?: {
     blockClick: (e: Event) => void;
   };
+}
+
+export interface ChannelInfo {
+  thumb: string;
+  title: string;
+  viewers: number;
+  category: string;
+  description?: string;
+}
+
+export interface ChannelData {
+  channelName: string;
+  position: number;
+  info: ChannelInfo;
 }

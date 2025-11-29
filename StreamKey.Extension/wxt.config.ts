@@ -51,14 +51,5 @@ export default defineConfig({
       };
     }
     return manifest;
-  },
-  hooks: {
-    'build:manifestGenerated': (_wxt, manifest) => {
-      manifest.content_scripts ??= [];
-      manifest.content_scripts.push({
-        css: ['assets/style.css'],
-        matches: ['*://*/*'],
-      });
-    },
   }
 });

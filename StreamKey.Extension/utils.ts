@@ -121,3 +121,5 @@ export async function initUserProfile(): Promise<void> {
         await storage.setItem(Config.keys.userProfile, userProfile);
     }
 }
+
+export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
