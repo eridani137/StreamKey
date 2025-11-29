@@ -1,0 +1,56 @@
+.tw-radio {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px;
+}
+
+.custom-radio-badge {
+    padding-left: 24px !important;
+    color: white;
+    font-weight: normal;
+    pointer-events: none;
+}
+
+.custom-radio-badge-clickable {
+    color: #ff3194;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-style: oblique;
+    cursor: pointer;
+    pointer-events: auto;
+}
+    
+.tw-in-feature-notification {
+    border-radius: 4px;
+    border-bottom: 4px solid #f0cbdc;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.notification-image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.notification-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+}
+
+.tw-in-feature-notification .tw-link {
+    color: #a970ff;
+    text-decoration: none;
+    font-size: 13px;
+    display: block;
+    text-align: center;
+}
+
+.tw-in-feature-notification .tw-link:hover {
+    color: #bf94ff;
+    text-decoration: underline;
+}
