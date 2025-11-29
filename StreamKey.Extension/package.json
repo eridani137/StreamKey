@@ -1,24 +1,27 @@
 {
-  "name": "streamkey-chrome-extension",
-  "version": "1.0.0",
-  "description": "A Chrome extension built with Vue.js",
+  "name": "wxt-vue-starter",
+  "description": "manifest.json description",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview",
-  "build:chrome-dev": "vite build --mode extension-dev -- --target=chrome",
-  "build:firefox-dev": "vite build --mode extension-dev -- --target=firefox",
-  "build:chrome-prod": "vite build --mode extension -- --target=chrome",
-  "build:firefox-prod": "vite build --mode extension -- --target=firefox"
-},
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "vue-tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
   "dependencies": {
-    "vue": "^3.5.24"
+    "vue": "^3.5.21"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.2",
-    "javascript-obfuscator": "^4.1.1",
-    "terser": "^5.44.1",
-    "vite": "^7.2.4"
+    "@wxt-dev/module-vue": "^1.0.2",
+    "typescript": "^5.9.2",
+    "vue-tsc": "^3.0.6",
+    "wxt": "^0.20.6"
   },
-  "type": "module"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
