@@ -21,6 +21,9 @@
         condition: service_started
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
+      - type: bind
+        source: ./files
+        target: /app/files
     networks:
       - internal
   

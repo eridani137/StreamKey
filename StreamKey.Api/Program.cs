@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using Carter;
 using DotNetEnv;
+using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
