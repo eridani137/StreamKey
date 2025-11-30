@@ -16,7 +16,7 @@ export class BrowserExtensionClient {
                 transport: HttpTransportType.WebSockets,
             })
             .withHubProtocol(new MessagePackHubProtocol())
-            .configureLogging(LogLevel.Information)
+            .configureLogging(LogLevel.Debug) // TODO
             .withAutomaticReconnect()
             .build();
 
@@ -69,6 +69,5 @@ export class BrowserExtensionClient {
 }
 
 const extensionClient = new BrowserExtensionClient();
-await extensionClient.start();
 
 export default extensionClient;
