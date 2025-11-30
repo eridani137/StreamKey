@@ -8,6 +8,7 @@ using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
+using StreamKey.Core.Hubs;
 using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared;
 
@@ -92,5 +93,7 @@ app.UseAuthorization();
 app.MapCarter();
 
 await app.SeedDatabase();
+
+app.MapHub<BrowserExtensionHub>("/hubs/extension");
 
 app.Run();
