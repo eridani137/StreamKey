@@ -6,7 +6,7 @@ import activityHandler from './ActivityHandler';
 export default defineContentScript({
     matches: ['https://*.twitch.tv/*'],
     async main(ctx) {
-        qualityMenu.init(ctx);
+        await qualityMenu.init(ctx);
         await activeChannels.init(ctx);
         activityHandler.init(ctx);
     },
