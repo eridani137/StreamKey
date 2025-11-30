@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
@@ -16,11 +17,34 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
 
     public Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id)
     {
-        return Repository.GetByTelegramIdNotTracked(id);
+        return GetCachedData(GetCacheKey(id.ToString()), () => Repository.GetByTelegramIdNotTracked(id));
     }
 
     public Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit)
     {
         return Repository.GetOldestUpdatedUsers(limit);
+    }
+
+    public DbSet<TelegramUserEntity> GetSet()
+    {
+        return Repository.GetSet();
+    }
+
+    public Task Add(TelegramUserEntity entity)
+    {
+        InvalidateCache(entity.TelegramId.ToString());
+        return Repository.Add(entity);
+    }
+
+    public void Update(TelegramUserEntity entity)
+    {
+        InvalidateCache(entity.TelegramId.ToString());
+        Repository.Update(entity);
+    }
+
+    public void Delete(TelegramUserEntity entity)
+    {
+        InvalidateCache(entity.TelegramId.ToString());
+        Repository.Delete(entity);
     }
 }

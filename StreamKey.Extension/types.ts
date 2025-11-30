@@ -35,11 +35,17 @@ export interface AppConfig {
   messaging: MessagingKeys;
 }
 
-export interface TgUser {
+export interface TelegramUser {
   photo_url: string;
   username: string;
   id: number | string;
   is_chat_member?: boolean;
+}
+
+export enum TelegramStatus {
+    NotAuthorized,
+    NotMember,
+    Ok
 }
 
 export type Nullable<T> = T | null;

@@ -12,7 +12,7 @@ export class ActivityHandler {
 
     this.ctx.setInterval(async () => {
       await this.updateActivity();
-    }, 45000);
+    }, 180000);
   }
 
   async updateActivity() {

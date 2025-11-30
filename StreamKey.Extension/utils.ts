@@ -1,5 +1,5 @@
-import { Config } from './config';
-import { TgUser } from './types';
+import {Config} from './config';
+import {TelegramUser} from './types';
 
 export function generateSessionId(): string {
     const timestamp = Date.now();
@@ -70,7 +70,7 @@ export async function disableRuleset(): Promise<void> {
 
 export async function getCookieValue(url: string, name: string): Promise<string | null> {
     return new Promise((resolve) => {
-        browser.cookies.get({ url, name }, (cookie) => {
+        browser.cookies.get({url, name}, (cookie) => {
             if (browser.runtime?.lastError) {
                 console.error("getCookieValue:", browser.runtime.lastError);
                 resolve(null);
@@ -85,15 +85,18 @@ export async function getCookieValue(url: string, name: string): Promise<string 
     });
 }
 
-export async function getUserProfile(): Promise<TgUser | null> {
+export async function getUserProfile(): Promise<TelegramUser | null> {
     const telegramUserId = await getCookieValue(Config.urls.streamKeyUrl, 'tg_user_id');
     const telegramUserHash = await getCookieValue(Config.urls.streamKeyUrl, 'tg_user_hash');
+
+    console.log('tgUserId:', telegramUserId);
+    console.log('tgUserHash:', telegramUserHash);
 
     if (telegramUserId && telegramUserHash) {
         try {
             const response = await fetch(`${Config.urls.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {'Content-Type': 'application/json'}
             });
 
             if (!response.ok) {
@@ -102,9 +105,12 @@ export async function getUserProfile(): Promise<TgUser | null> {
             }
 
             const text = await response.text();
-            const obj = text ? JSON.parse(text) : null;
 
-            return obj;
+            const data = text ? JSON.parse(text) : null;
+
+            console.log('received user data', data);
+
+            return data;
         } catch (err) {
             console.error(err);
             return null;

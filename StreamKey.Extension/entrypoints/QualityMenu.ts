@@ -7,8 +7,6 @@ export class QualityMenu {
   private styleElement: Nullable<HTMLStyleElement> = null;
   private isProcessing = false;
 
-  constructor() {}
-
   init(ctx: any): void {
     this.ctx = ctx;
     this.startObserver();

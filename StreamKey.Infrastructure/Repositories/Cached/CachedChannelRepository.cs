@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
@@ -32,5 +33,28 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
     public Task<bool> HasInPosition(int position)
     {
         return Repository.HasInPosition(position);
+    }
+
+    public DbSet<ChannelEntity> GetSet()
+    {
+        return Repository.GetSet();
+    }
+
+    public Task Add(ChannelEntity entity)
+    {
+        InvalidateCache(entity.Id.ToString());
+        return Repository.Add(entity);
+    }
+
+    public void Update(ChannelEntity entity)
+    {
+        InvalidateCache(entity.Id.ToString());
+        Repository.Update(entity);
+    }
+
+    public void Delete(ChannelEntity entity)
+    {
+        InvalidateCache(entity.Id.ToString());
+        Repository.Delete(entity);
     }
 }
