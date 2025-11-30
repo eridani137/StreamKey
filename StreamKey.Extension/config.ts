@@ -8,6 +8,7 @@ const Config: AppConfig = {
         telegramChannelUrl: 'https://t.me/streamkey',
         extensionAuthorizationUrl: 'https://streamkey.ru/extension-authorization/',
         extensionStateKeyName: 'streamKeyEnabled',
+        extensionHub: 'https://service.streamkey.ru/hubs/extension'
     },
     messaging: {
         getUserProfile: 'GET_USER_PROFILE'

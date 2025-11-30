@@ -7,6 +7,7 @@ export interface AppUrls {
   telegramChannelUrl: string;
   extensionAuthorizationUrl: string;
   extensionStateKeyName: string;
+  extensionHub: string;
 }
 
 export interface StorageKeys {
@@ -72,4 +73,8 @@ export interface ChannelData {
   channelName: string;
   position: number;
   info: ChannelInfo;
+}
+
+export interface UserData {
+    sessionId: string;
 }
