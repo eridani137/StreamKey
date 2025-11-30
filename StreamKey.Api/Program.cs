@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using Carter;
 using DotNetEnv;
-using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
@@ -23,6 +22,8 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 {
     ApplicationConstants.TelegramBotToken = token;
 }
+
+builder.Services.AddSignalR().AddMessagePackProtocol();
 
 builder.Services.AddApplication();
 
