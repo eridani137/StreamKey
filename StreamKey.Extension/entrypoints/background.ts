@@ -1,10 +1,8 @@
 import * as utils from '@/utils';
 import Config from '@/config';
-import BrowserExtensionClient from "@/entrypoints/BrowserExtensionClient";
+import extensionClient from "@/entrypoints/BrowserExtensionClient";
 
 export default defineBackground(() => {
-    const extensionClient = new BrowserExtensionClient();
-
     browser.runtime.onInstalled.addListener(async () => {
         console.log('Расширение установлено. Устанавливаем состояние по умолчанию');
         const sessionId = await utils.createNewSession();

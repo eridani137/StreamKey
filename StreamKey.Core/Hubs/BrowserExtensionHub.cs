@@ -10,7 +10,7 @@ public class BrowserExtensionHub(
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
-    public static ConcurrentDictionary<string, UserData> Users { get; } = new();
+    public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _registrationTimeouts = new();
     private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(7);
@@ -43,18 +43,16 @@ public class BrowserExtensionHub(
         await base.OnConnectedAsync();
     }
 
-    public Task EntranceUserData(UserData? userData)
+    public Task EntranceUserData(UserData userData)
     {
-        if (userData is null)
-        {
-            logger.LogWarning("Получены невалидные данные пользователя: {@UserData}", userData);
-            Context.Abort();
-            return Task.CompletedTask;
-        }
-
         var connectionId = Context.ConnectionId;
 
-        if (!Users.TryAdd(connectionId, userData))
+        var session = new UserSession()
+        {
+            SessionId = userData.SessionId
+        };
+        
+        if (!Users.TryAdd(connectionId, session))
         {
             logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
             Context.Abort();
@@ -70,6 +68,16 @@ public class BrowserExtensionHub(
         if (!_registrationTimeouts.TryRemove(connectionId, out var cancellationTokenSource)) return;
         cancellationTokenSource.Cancel();
         cancellationTokenSource.Dispose();
+    }
+
+    public Task UpdateActivity(UserSession userSession)
+    {
+        if (!Users.TryGetValue(Context.ConnectionId, out var session)) return Task.CompletedTask;
+        
+        session.UserId ??= userSession.UserId;
+        session.AccumulatedTime += TimeSpan.FromMinutes(1);
+
+        return Task.CompletedTask;
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

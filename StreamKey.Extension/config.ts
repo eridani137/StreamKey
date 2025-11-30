@@ -10,9 +10,6 @@ const Config: AppConfig = {
         extensionStateKeyName: 'streamKeyEnabled',
         extensionHub: 'https://service.streamkey.ru/hubs/extension'
     },
-    messaging: {
-        getUserProfile: 'GET_USER_PROFILE'
-    },
     keys: {
         sessionId: 'local:sessionId',
         userProfile: 'local:userProfile',

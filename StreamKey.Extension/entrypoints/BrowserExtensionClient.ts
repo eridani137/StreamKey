@@ -1,6 +1,6 @@
 import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
 import {MessagePackHubProtocol} from '@microsoft/signalr-protocol-msgpack';
-import {UserData} from "@/types";
+import {UserActivity, UserData} from "@/types";
 import Config from "@/config";
 
 class BrowserExtensionClient {
@@ -22,7 +22,15 @@ class BrowserExtensionClient {
             .withAutomaticReconnect()
             .build();
 
-        this.connection.on('RequestUserData', this.handleRequestUserData.bind(this));
+        this.connection.on('RequestUserData', async () => {
+            const userData: UserData = {
+                SessionId: this.sessionId,
+            };
+
+            clearTimeout(this.registrationTimeoutHandle);
+
+            await this.connection.invoke('EntranceUserData', userData);
+        });
 
         this.connection.onclose(() => {
             console.warn('Connection closed');
@@ -30,7 +38,7 @@ class BrowserExtensionClient {
         });
     }
 
-    async start(sessionId: string) : Promise<void> {
+    async start(sessionId: string): Promise<void> {
         if (this.connection.state === HubConnectionState.Connected) return;
 
         this.sessionId = sessionId;
@@ -43,14 +51,13 @@ class BrowserExtensionClient {
         }, this.registrationTimeoutMs);
     }
 
-    async handleRequestUserData() {
-        const userData: UserData = {
+    async updateActivity(userId: string): Promise<void> {
+        const userActivity: UserActivity = {
             SessionId: this.sessionId,
+            UserId: userId,
         };
 
-        clearTimeout(this.registrationTimeoutHandle);
-
-        await this.connection.invoke('EntranceUserData', userData);
+        await this.connection.invoke('UpdateActivity', userActivity)
     }
 
     async stop() {
@@ -58,4 +65,6 @@ class BrowserExtensionClient {
     }
 }
 
-export default BrowserExtensionClient
+const extensionClient = new BrowserExtensionClient();
+
+export default extensionClient;

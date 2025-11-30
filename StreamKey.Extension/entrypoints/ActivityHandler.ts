@@ -1,4 +1,5 @@
 import Config from '@/config';
+import extensionClient from "@/entrypoints/BrowserExtensionClient";
 
 export class ActivityHandler {
     private ctx: any = null;
@@ -12,32 +13,36 @@ export class ActivityHandler {
 
         this.ctx.setInterval(async () => {
             await this.updateActivity();
-        }, 180000);
+        }, 60000);
     }
 
     async updateActivity() {
-        const sessionId = await storage.getItem(Config.keys.sessionId);
+        // const sessionId = await storage.getItem(Config.keys.sessionId);
         const userId = localStorage.getItem(Config.keys.twId);
 
-        console.log('sessionId', sessionId);
+        console.log('Обновление активности');
+        // console.log('sessionId', sessionId);
         console.log('userId', userId);
 
-        if (sessionId && userId) {
-            const updateActivity = await fetch(
-                `${Config.urls.apiUrl}/activity/update`,
-                {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({sessionId: sessionId, userId: userId}),
-                }
-            );
+        // if (sessionId && userId) {
+        if (userId) {
+            // const updateActivity = await fetch(
+            //     `${Config.urls.apiUrl}/activity/update`,
+            //     {
+            //         method: 'POST',
+            //         headers: {'Content-Type': 'application/json'},
+            //         body: JSON.stringify({sessionId: sessionId, userId: userId}),
+            //     }
+            // );
+            //
+            // if (!updateActivity.ok) {
+            //     console.error('Сервер вернул ошибку:', updateActivity.status);
+            //     return undefined;
+            // }
 
-            if (!updateActivity.ok) {
-                console.error('Сервер вернул ошибку:', updateActivity.status);
-                return undefined;
-            }
+            await extensionClient.updateActivity(userId);
 
-            console.log('Обновление активности');
+            console.log('Активность обновлена');
         }
     }
 }

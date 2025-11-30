@@ -28,15 +28,10 @@ export interface QualityMenu {
   instructionUrl: string;
 }
 
-export interface MessagingKeys {
-  getUserProfile: string;
-}
-
 export interface AppConfig {
   urls: AppUrls;
   keys: StorageKeys;
   qualityMenu: QualityMenu;
-  messaging: MessagingKeys;
 }
 
 export interface TelegramUser {
@@ -77,4 +72,8 @@ export interface ChannelData {
 
 export interface UserData {
     SessionId: string;
+}
+
+export interface UserActivity extends UserData {
+    UserId: string;
 }
