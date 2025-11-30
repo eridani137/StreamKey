@@ -1,14 +1,16 @@
-import {HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel} from "@microsoft/signalr";
+import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
 import {MessagePackHubProtocol} from '@microsoft/signalr-protocol-msgpack';
 import {UserData} from "@/types";
 import Config from "@/config";
 
-export class BrowserExtensionClient {
+class BrowserExtensionClient {
     private connection: HubConnection;
     private registrationTimeoutMs = 7000;
     private registrationTimeoutHandle: any;
+    private sessionId: string;
 
     constructor() {
+        this.sessionId = "";
         this.connection = new HubConnectionBuilder()
             .withUrl(Config.urls.extensionHub, {
                 withCredentials: true,
@@ -28,7 +30,11 @@ export class BrowserExtensionClient {
         });
     }
 
-    async start() {
+    async start(sessionId: string) : Promise<void> {
+        if (this.connection.state === HubConnectionState.Connected) return;
+
+        this.sessionId = sessionId;
+
         await this.connection.start();
 
         this.registrationTimeoutHandle = setTimeout(() => {
@@ -38,29 +44,13 @@ export class BrowserExtensionClient {
     }
 
     async handleRequestUserData() {
-        const userData: UserData | null = await this.getUserData();
-
-        if (userData === null) {
-            console.warn('Получены невалидные данные пользователя');
-            await this.connection.stop();
-            return;
-        }
+        const userData: UserData = {
+            SessionId: this.sessionId,
+        };
 
         clearTimeout(this.registrationTimeoutHandle);
 
         await this.connection.invoke('EntranceUserData', userData);
-    }
-
-    async getUserData(): Promise<UserData | null> {
-        const sessionId = await storage.getItem<string>(Config.keys.sessionId);
-
-        if (!sessionId) {
-            return null;
-        }
-
-        return {
-            sessionId,
-        };
     }
 
     async stop() {
@@ -68,6 +58,4 @@ export class BrowserExtensionClient {
     }
 }
 
-const extensionClient = new BrowserExtensionClient();
-
-export default extensionClient;
+export default BrowserExtensionClient

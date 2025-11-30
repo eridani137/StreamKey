@@ -76,5 +76,5 @@ export interface ChannelData {
 }
 
 export interface UserData {
-    sessionId: string;
+    SessionId: string;
 }
