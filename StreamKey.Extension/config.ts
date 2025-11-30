@@ -26,8 +26,7 @@ const Config: AppConfig = {
         },
         badgeText: 'Stream Key',
         minResolution: 1080,
-        instructionUrl:
-            'https://streamkey.ru/wp-content/uploads/2025/11/instruction.jpg',
+        instructionUrl: 'https://service.streamkey.ru/files/menu-instruction.jpg',
     },
 };
 

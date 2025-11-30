@@ -3,16 +3,16 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
-  // vite() {
-  //   return {
-  //     build: {
-  //       minify: 'esbuild',
-  //       esbuild: {
-  //         pure: ['console.log', 'console.debug'],
-  //       },
-  //     },
-  //   }
-  // },
+  vite() {
+    return {
+      build: {
+        minify: 'esbuild',
+        esbuild: {
+          pure: ['console.log', 'console.debug'],
+        },
+      },
+    }
+  },
   manifest: (env) => {
     const manifest = {
       name: 'Твич 1080 | Твич качество 1080 от STREAM KEY',
