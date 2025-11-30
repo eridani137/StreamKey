@@ -1,4 +1,4 @@
-import {Nullable, StreamkeyBlockedElement, TelegramUser} from '@/types';
+import {Nullable, TelegramUser} from '@/types';
 import Config from '@/config';
 
 export class QualityMenu {
@@ -308,12 +308,12 @@ export class QualityMenu {
 
             this.isProcessing = true;
 
-            this.ctx.setTimeout(() => {
+            this.ctx.setTimeout(async () => {
                 this.observer!.disconnect();
 
                 try {
                     this.applyEnhancements();
-                    this.block2KResolutionElement();
+                    await this.block2KResolutionElement();
                 } finally {
                     this.observer!.observe(document.body, {
                         childList: true,
