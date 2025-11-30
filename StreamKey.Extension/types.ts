@@ -1,3 +1,5 @@
+import {HTMLDivElement} from "linkedom";
+
 export interface AppUrls {
   streamKeyUrl: string;
   streamKeyQAUrl: string;
@@ -53,7 +55,8 @@ export type Nullable<T> = T | null;
 
 export interface StreamkeyBlockedElement extends HTMLElement {
   _streamkeyBlockers?: {
-    blockClick: (e: Event) => void;
+      blockAllEvents: (e: Event) => void;
+      overlay: HTMLDivElement;
   };
 }
 

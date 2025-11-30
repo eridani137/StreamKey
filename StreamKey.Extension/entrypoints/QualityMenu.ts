@@ -98,14 +98,20 @@ export class QualityMenu {
         );
         if (!radioItem) return;
 
-        if (radioItem.getAttribute('data-streamkey-blocked') === 'true') {
+        // Находим родительский flex-контейнер
+        const flexContainer = radioItem.parentElement;
+        if (!flexContainer || flexContainer.style.display !== 'flex') {
+            return;
+        }
+
+        // Проверяем, не заблокирован ли уже весь контейнер
+        if (flexContainer.getAttribute('data-streamkey-blocked') === 'true') {
             return;
         }
 
         const input = radioItem.querySelector<HTMLInputElement>(
             "input[type='radio']"
         );
-        const labelElement = radioItem.querySelector<HTMLLabelElement>('label');
 
         if (!input) return;
 
@@ -113,38 +119,64 @@ export class QualityMenu {
             await this.autoSwitch();
         }
 
-        radioItem.setAttribute('data-streamkey-blocked', 'true');
-        input.disabled = true;
-        input.readOnly = true;
+        // Блокируем весь flex-контейнер
+        flexContainer.setAttribute('data-streamkey-blocked', 'true');
+        flexContainer.style.opacity = '0.5';
+        flexContainer.style.cursor = 'not-allowed';
+        flexContainer.style.position = 'relative';
 
+        // Отключаем input
+        input.disabled = true;
+
+        // Удаляем связь label с input
+        const labelElement = radioItem.querySelector<HTMLLabelElement>('label');
         if (labelElement) {
             labelElement.removeAttribute('for');
-            labelElement.style.pointerEvents = 'none';
         }
 
-        const clone = radioItem.cloneNode(true) as StreamkeyBlockedElement;
-        clone.setAttribute('data-streamkey-blocked', 'true');
-        (clone.style as any).opacity = '0.5';
-        clone.style.cursor = 'not-allowed';
-
-        radioItem.parentNode?.replaceChild(clone, radioItem);
-
-        const blockClick = (e: Event): false | void => {
-            if (clone.contains(e.target as Node)) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                return false;
-            }
+        // Блокируем ВСЕ события
+        const blockAllEvents = (e: Event): void => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
         };
 
-        document.addEventListener('click', blockClick, true);
-        document.addEventListener('mousedown', blockClick, true);
-        document.addEventListener('mouseup', blockClick, true);
-        document.addEventListener('pointerdown', blockClick, true);
-        document.addEventListener('pointerup', blockClick, true);
+        const events = [
+            'click', 'mousedown', 'mouseup', 'mousemove',
+            'pointerdown', 'pointerup', 'pointermove',
+            'touchstart', 'touchend', 'touchmove',
+            'change', 'input'
+        ];
 
-        clone._streamkeyBlockers = {blockClick};
+        events.forEach(eventType => {
+            flexContainer.addEventListener(eventType, blockAllEvents, true);
+        });
+
+        // Добавляем overlay на весь flex-контейнер
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: not-allowed;
+        z-index: 10;
+        background: transparent;
+    `;
+
+        flexContainer.insertBefore(overlay, flexContainer.firstChild);
+
+        events.forEach(eventType => {
+            overlay.addEventListener(eventType, blockAllEvents, true);
+        });
+
+        // Снимаем галочку с input
+        if (input.checked) {
+            input.checked = false;
+        }
+
+        (flexContainer as any)._streamkeyBlockers = {blockAllEvents, overlay};
     }
 
     async autoSwitch(): Promise<void> {
