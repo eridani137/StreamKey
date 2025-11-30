@@ -1,4 +1,4 @@
-import { Nullable, StreamkeyBlockedElement } from '@/types';
+import {Nullable, StreamkeyBlockedElement, TelegramUser} from '@/types';
 import Config from '@/config';
 
 export class QualityMenu {
@@ -79,9 +79,7 @@ export class QualityMenu {
   }
 
   async block2KResolutionElement(): Promise<void> {
-    const tgUser = await browser.runtime.sendMessage({
-      type: Config.messaging.getUserProfile,
-    });
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile);
     if (tgUser?.is_chat_member) return;
 
     this.addInstruction();
