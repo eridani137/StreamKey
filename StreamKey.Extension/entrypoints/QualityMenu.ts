@@ -1,5 +1,5 @@
 import { Nullable, StreamkeyBlockedElement } from '@/types';
-import { Config } from '@/config';
+import Config from '@/config';
 
 export class QualityMenu {
   private ctx: any = null;

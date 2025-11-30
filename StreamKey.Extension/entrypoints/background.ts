@@ -1,5 +1,5 @@
 import * as utils from '@/utils';
-import {Config} from '@/config';
+import Config from '@/config';
 
 export default defineBackground(() => {
     browser.runtime.onInstalled.addListener(async () => {

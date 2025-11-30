@@ -1,4 +1,4 @@
-import { Config } from '@/config';
+import Config from '@/config';
 
 export class ActivityHandler {
   private ctx: any = null;
@@ -17,7 +17,7 @@ export class ActivityHandler {
 
   async updateActivity() {
     const sessionId = await storage.getItem(Config.keys.sessionId);
-    const userId = localStorage.getItem('local_copy_unique_id');
+    const userId = localStorage.getItem(Config.keys.twId);
 
     if (sessionId && userId) {
       const updateActivity = await fetch(

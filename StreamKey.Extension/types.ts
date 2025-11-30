@@ -11,6 +11,7 @@ export interface StorageKeys {
   sessionId: StorageItemKey;
   userProfile: StorageItemKey;
   extensionState: StorageItemKey;
+  twId: string;
 }
 
 export interface QualityMenu {

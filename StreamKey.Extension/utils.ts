@@ -1,4 +1,4 @@
-import {Config} from './config';
+import Config from './config';
 import {TelegramUser} from './types';
 
 export function generateSessionId(): string {

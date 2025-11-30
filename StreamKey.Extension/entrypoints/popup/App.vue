@@ -58,7 +58,7 @@
 
 <script lang="ts" setup>
 import {ref, computed, onMounted} from 'vue';
-import {Config} from '@/config';
+import Config from '@/config';
 import {TelegramStatus, TelegramUser} from '@/types';
 import * as utils from '@/utils';
 
