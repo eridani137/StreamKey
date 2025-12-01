@@ -6,8 +6,6 @@ import * as utils from "@/utils";
 
 class BrowserExtensionClient {
     private connection: HubConnection;
-    private registrationTimeoutMs = 7000;
-    private registrationTimeoutHandle: any;
     private sessionId: string;
 
     constructor() {
@@ -28,8 +26,6 @@ class BrowserExtensionClient {
                 SessionId: this.sessionId,
             };
 
-            clearTimeout(this.registrationTimeoutHandle);
-
             console.log('EntranceUserData', userData);
             await this.connection.invoke('EntranceUserData', userData);
         });
@@ -41,7 +37,6 @@ class BrowserExtensionClient {
 
         this.connection.onclose(() => {
             console.warn('Connection closed');
-            clearTimeout(this.registrationTimeoutHandle);
         });
     }
 
@@ -51,11 +46,6 @@ class BrowserExtensionClient {
         this.sessionId = sessionId;
 
         await this.connection.start();
-
-        this.registrationTimeoutHandle = setTimeout(() => {
-            console.warn('Пользователь не предоставил данные в течение 7 секунд, отключаем.');
-            this.connection.stop();
-        }, this.registrationTimeoutMs);
     }
 
     async updateActivity(userId: string): Promise<void> {

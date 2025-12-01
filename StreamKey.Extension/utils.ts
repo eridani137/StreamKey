@@ -166,13 +166,14 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
 }
 
 export async function initUserProfile(telegramUser: TelegramUser | null = null): Promise<void> {
-    const data = telegramUser
-        ? telegramUser :
-        await getUserProfile();
+    const userData = telegramUser ?? await getUserProfile();
 
-    if (data) {
-        await storage.setItem(Config.keys.userProfile, data);
+    if (!userData) {
+        await storage.removeItem(Config.keys.userProfile);
+        return;
     }
+
+    await storage.setItem(Config.keys.userProfile, userData);
 }
 
 export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));

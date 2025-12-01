@@ -154,7 +154,7 @@ async function loadUserProfile() {
     console.log('received user data', userData);
 
     if (userData) {
-      tgUser.value = {...userData};
+      tgUser.value = userData;
 
       if (userData.is_chat_member) {
         telegramStatus.value = TelegramStatus.Ok;
