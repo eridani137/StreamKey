@@ -91,7 +91,7 @@ public class Telegram : ICarterModule
             .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");
 
-        group.MapPost<TelegramUserDto>("/user/set-data",
+        group.MapPost("/user/set-data",
             async (TelegramUserDto dto, Guid sessionId, IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub, ILogger<Telegram> logger) =>
             {
                 var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);

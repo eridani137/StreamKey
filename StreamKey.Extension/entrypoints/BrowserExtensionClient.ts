@@ -33,21 +33,7 @@ class BrowserExtensionClient {
             console.log('EntranceUserData', userData);
             await this.connection.invoke('EntranceUserData', userData);
         });
-        group.MapPost<TelegramUserDto>("/user/set-data",
-            async (TelegramUserDto dto, Guid sessionId, Hub<IBrowserExtensionHub> extensionHub, ILogger<Telegram> logger) =>
-        {
-            var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-            if (client.Key is null)
-            {
-                return Results.NotFound();
-            }
 
-            logger.LogInformation("Found client: {@Client}", client);
-
-            await extensionHub.Clients.Client(client.Key).ReloadUserData(dto);
-
-            return Results.Ok();
-        });
         this.connection.on('ReloadUserData', async (user: TelegramUser) : Promise<void> => {
             console.log('ReloadUserData', user);
             await utils.initUserProfile(user);
