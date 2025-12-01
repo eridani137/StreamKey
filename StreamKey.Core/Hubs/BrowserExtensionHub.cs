@@ -32,9 +32,9 @@ public class BrowserExtensionHub(
 
                 if (Users.ContainsKey(connectionId)) return;
 
-                logger.LogWarning(
-                    "Пользователь не предоставил свои данные в течение {Timeout} секунд. Отключение: {ConnectionId}",
-                    RegistrationTimeout.TotalSeconds, connectionId);
+                // logger.LogWarning(
+                //     "Пользователь не предоставил свои данные в течение {Timeout} секунд. Отключение: {ConnectionId}",
+                //     RegistrationTimeout.TotalSeconds, connectionId);
 
                 context.Abort();
                 _registrationTimeouts.TryRemove(connectionId, out _);
@@ -54,7 +54,7 @@ public class BrowserExtensionHub(
         
         if (!Users.TryAdd(connectionId, session))
         {
-            logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
+            // logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
             Context.Abort();
             return Task.CompletedTask;
         }
