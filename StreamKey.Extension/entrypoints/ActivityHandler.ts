@@ -1,5 +1,4 @@
 import Config from '@/config';
-import extensionClient from "@/entrypoints/BrowserExtensionClient";
 
 export class ActivityHandler {
     private ctx: any = null;
@@ -17,30 +16,27 @@ export class ActivityHandler {
     }
 
     async updateActivity() {
-        // const sessionId = await storage.getItem(Config.keys.sessionId);
+        const sessionId = await storage.getItem(Config.keys.sessionId);
         const userId = localStorage.getItem(Config.keys.twId);
 
         console.log('Обновление активности');
-        // console.log('sessionId', sessionId);
+        console.log('sessionId', sessionId);
         console.log('userId', userId);
 
-        // if (sessionId && userId) {
-        if (userId) {
-            // const updateActivity = await fetch(
-            //     `${Config.urls.apiUrl}/activity/update`,
-            //     {
-            //         method: 'POST',
-            //         headers: {'Content-Type': 'application/json'},
-            //         body: JSON.stringify({sessionId: sessionId, userId: userId}),
-            //     }
-            // );
-            //
-            // if (!updateActivity.ok) {
-            //     console.error('Сервер вернул ошибку:', updateActivity.status);
-            //     return undefined;
-            // }
+        if (sessionId && userId) {
+            const updateActivity = await fetch(
+                `${Config.urls.apiUrl}/activity/update`,
+                {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sessionId: sessionId, userId: userId}),
+                }
+            );
 
-            await extensionClient.updateActivity(userId);
+            if (!updateActivity.ok) {
+                console.error('Сервер вернул ошибку:', updateActivity.status);
+                return undefined;
+            }
 
             console.log('Активность обновлена');
         }
@@ -48,5 +44,4 @@ export class ActivityHandler {
 }
 
 const activityHandler = new ActivityHandler();
-
 export default activityHandler;

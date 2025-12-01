@@ -1,7 +1,8 @@
 import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
 import {MessagePackHubProtocol} from '@microsoft/signalr-protocol-msgpack';
-import {UserActivity, UserData} from "@/types";
+import {TelegramUser, UserActivity, UserData} from "@/types";
 import Config from "@/config";
+import * as utils from "@/utils";
 
 class BrowserExtensionClient {
     private connection: HubConnection;
@@ -22,7 +23,7 @@ class BrowserExtensionClient {
             .withAutomaticReconnect()
             .build();
 
-        this.connection.on('RequestUserData', async () => {
+        this.connection.on('RequestUserData', async () : Promise<void> => {
             const userData: UserData = {
                 SessionId: this.sessionId,
             };
@@ -30,6 +31,10 @@ class BrowserExtensionClient {
             clearTimeout(this.registrationTimeoutHandle);
 
             await this.connection.invoke('EntranceUserData', userData);
+        });
+
+        this.connection.on('ReloadUserData', async (user: TelegramUser) : Promise<void> => {
+            await utils.initUserProfile(user);
         });
 
         this.connection.onclose(() => {

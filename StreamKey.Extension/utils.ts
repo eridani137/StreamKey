@@ -89,6 +89,7 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
     const telegramUserId = await getCookieValue(Config.urls.streamKeyUrl, 'tg_user_id');
     const telegramUserHash = await getCookieValue(Config.urls.streamKeyUrl, 'tg_user_hash');
 
+    console.log('Обновление профиля');
     console.log('tgUserId:', telegramUserId);
     console.log('tgUserHash:', telegramUserHash);
 
@@ -108,7 +109,7 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
 
             const data = text ? JSON.parse(text) : null;
 
-            console.log('received user data', data);
+            console.log(data);
 
             return data;
         } catch (err) {
@@ -121,10 +122,13 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
     return null;
 }
 
-export async function initUserProfile(): Promise<void> {
-    const userProfile = await getUserProfile();
-    if (userProfile) {
-        await storage.setItem(Config.keys.userProfile, userProfile);
+export async function initUserProfile(telegramUser: TelegramUser | null = null): Promise<void> {
+    const data = telegramUser
+        ? telegramUser :
+        await getUserProfile();
+
+    if (data) {
+        await storage.setItem(Config.keys.userProfile, data);
     }
 }
 

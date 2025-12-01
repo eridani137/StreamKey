@@ -1,7 +1,9 @@
 using Carter;
+using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
+using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
@@ -17,7 +19,7 @@ public class Telegram : ICarterModule
 
         group.MapPost("/login",
                 async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository,
-                    IUnitOfWork unitOfWork) =>
+                    IUnitOfWork unitOfWork, Hub<IBrowserExtensionHub> extensionHub) =>
                 {
                     var user = await repository.GetByTelegramId(dto.Id);
 
