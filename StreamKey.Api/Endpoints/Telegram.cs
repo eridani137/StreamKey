@@ -69,7 +69,7 @@ public class Telegram : ICarterModule
                 })
             .WithSummary("Авторизация");
 
-        var userGroup = app.MapGroup("/user");
+        var userGroup = group.MapGroup("/user");
 
         userGroup.MapGet("/{id:long}/{hash}",
                 async (long id, string hash, ITelegramUserRepository repository) =>
