@@ -5,12 +5,13 @@ namespace StreamKey.Core;
 
 public class IgnoreSignalRSampler : Sampler
 {
-    public override SamplingResult ShouldSample(in SamplingParameters parameters)
+    public override SamplingResult ShouldSample(in SamplingParameters samplingParameters)
     {
-        var spanName = parameters.Name;
+        var activityName = samplingParameters.Name;
 
-        if (parameters.Kind == ActivityKind.Server &&
-            spanName.StartsWith("StreamKey.Core.Hubs.", StringComparison.OrdinalIgnoreCase))
+        if (activityName.Contains("SignalR", StringComparison.OrdinalIgnoreCase) ||
+            activityName.Contains("BrowserExtensionHub", StringComparison.OrdinalIgnoreCase) ||
+            activityName.StartsWith("Microsoft.AspNetCore.SignalR", StringComparison.OrdinalIgnoreCase))
         {
             return new SamplingResult(SamplingDecision.Drop);
         }

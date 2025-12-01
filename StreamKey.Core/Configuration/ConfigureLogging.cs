@@ -38,6 +38,8 @@ public static class ConfigureLogging
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
             .MinimumLevel.Override("Polly", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.SignalR", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Warning)
             .Filter.ByExcluding(logEvent =>
             {
                 if (!logEvent.Properties.TryGetValue("RequestPath", out var value))
