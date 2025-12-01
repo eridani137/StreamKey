@@ -31,6 +31,7 @@ public class Admin : ICarterModule
                 })
             .WithSummary("Перезапуск");
 
-        group.MapGet("/users", () => Results.Json(BrowserExtensionHub.Users.ToList()));
+        group.MapGet("/users", () => Results.Json(BrowserExtensionHub.Users.ToList()))
+            .WithSummary("Получение подключенных пользователей");
     }
 }
