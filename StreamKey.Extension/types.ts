@@ -11,7 +11,7 @@ export interface AppUrls {
 }
 
 export interface StorageKeys {
-  sessionId: string;
+  sessionId: StorageItemKey;
   userProfile: StorageItemKey;
   extensionState: StorageItemKey;
   twId: string;

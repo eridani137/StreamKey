@@ -1,6 +1,7 @@
 import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from "@/entrypoints/BrowserExtensionClient";
+import {onMessage} from "@/messaging";
 
 export default defineBackground(() => {
     browser.runtime.onInstalled.addListener(async () => {
@@ -15,5 +16,9 @@ export default defineBackground(() => {
         const sessionId = await utils.createNewSession();
         await utils.initUserProfile();
         await extensionClient.start(sessionId);
+    });
+
+    onMessage('updateActivity', async ({data: userId}) => {
+        await extensionClient.updateActivity(userId);
     });
 });

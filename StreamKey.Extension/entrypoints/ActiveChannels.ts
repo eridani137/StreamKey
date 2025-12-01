@@ -228,10 +228,7 @@ export class ActiveChannels {
                 event.stopPropagation && event.stopPropagation();
 
                 try {
-                    const sessionId = await browser.cookies.get({
-                        url: Config.urls.streamKeyUrl,
-                        name: Config.keys.sessionId
-                    });
+                    const sessionId = await storage.getItem(Config.keys.sessionId);
                     const userId = localStorage.getItem(Config.keys.twId);
                     if (sessionId && userId) {
                         const response = await fetch(
