@@ -26,6 +26,7 @@ public static class OpenTelemetryConfiguration
             .WithTracing(tracing =>
             {
                 tracing
+                    .SetSampler<IgnoreSignalRSampler>()
                     .AddAspNetCoreInstrumentation(options =>
                     {
                         options.Filter = httpContext => 
@@ -87,8 +88,6 @@ public static class OpenTelemetryConfiguration
                         options.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/traces");
                         options.Protocol = OtlpExportProtocol.HttpProtobuf;
                     });
-
-                tracing.AddProcessor<SignalRFilterProcessor>();
             })
             .WithMetrics(metrics =>
             {
