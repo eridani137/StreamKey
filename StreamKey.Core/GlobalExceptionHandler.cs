@@ -19,7 +19,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         {
             Status = (int)HttpStatusCode.InternalServerError,
             Title = "Внутренняя ошибка сервера",
-            Detail = "В приложении произошла непредвиденная ошибка. Попробуйте позже или обратитесь в поддержку.",
+            Detail = exception.Message,
             Instance = httpContext.Request.Path
         };
         
