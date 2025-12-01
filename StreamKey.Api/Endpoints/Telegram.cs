@@ -104,7 +104,7 @@ public class Telegram : ICarterModule
 
                 await extensionHub.Clients.Client(client.Key).ReloadUserData(dto);
                 
-                return Results.Ok();
+                return Results.Ok(client);
             });
     }
 }

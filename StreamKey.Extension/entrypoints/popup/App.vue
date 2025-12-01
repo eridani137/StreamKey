@@ -82,9 +82,9 @@ const showVideo = computed(() => currentVideo.value !== undefined);
 const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
 
 const STATUS_MAP = {
-  [TelegramStatus.NotAuthorized]: { text: 'Не активирован*', class: 'status-inactive' },
-  [TelegramStatus.NotMember]: { text: 'Нужно подписаться', class: 'status-inactive' },
-  [TelegramStatus.Ok]: { text: 'Активирован', class: 'status-active' },
+  [TelegramStatus.NotAuthorized]: {text: 'Не активирован*', class: 'status-inactive'},
+  [TelegramStatus.NotMember]: {text: 'Нужно подписаться', class: 'status-inactive'},
+  [TelegramStatus.Ok]: {text: 'Активирован', class: 'status-active'},
 } as const;
 
 const statusText = computed(() => STATUS_MAP[telegramStatus.value]?.text || '');
@@ -154,7 +154,7 @@ async function loadUserProfile() {
     console.log('received user data', userData);
 
     if (userData) {
-      tgUser.value = userData;
+      tgUser.value = {...userData};
 
       if (userData.is_chat_member) {
         telegramStatus.value = TelegramStatus.Ok;

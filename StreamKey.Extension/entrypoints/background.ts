@@ -16,13 +16,4 @@ export default defineBackground(() => {
         await utils.initUserProfile();
         await extensionClient.start(sessionId);
     });
-
-    browser.runtime.onMessage.addListener(async (message) => {
-        switch (message.type) {
-            case 'getExtensionClient':
-                return extensionClient;
-            default:
-                return undefined;
-        }
-    });
 });
