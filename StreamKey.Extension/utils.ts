@@ -60,11 +60,23 @@ export function generateDeviceUUID(): string {
     ].join('-');
 }
 
+export async function setSessionId(sessionId: string): Promise<void> {
+    await storage.setItem(Config.keys.sessionId, sessionId);
+
+    browser.cookies.set({
+        url: Config.urls.streamKeyUrl,
+        name: 'sessionId',
+        value: sessionId,
+        path: '/'
+    });
+
+    console.log('Сгенерирован ID сессии:', sessionId);
+}
+
 export async function createNewSession(): Promise<string> {
     const sessionId = generateDeviceUUID();
 
-    await storage.setItem(Config.keys.sessionId, sessionId);
-    console.log('Сгенерирован ID сессии:', sessionId);
+    await setSessionId(sessionId);
 
     return sessionId;
 }

@@ -5,8 +5,6 @@ using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
-using StreamKey.Core.Services;
-using StreamKey.Core.Types;
 using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Api.Endpoints;
@@ -19,9 +17,14 @@ public class Telegram : ICarterModule
             .WithTags("Взаимодействие с Telegram");
 
         group.MapPost("/login",
-                async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository,
-                    IUnitOfWork unitOfWork) =>
+                async (TelegramAuthDto dto, Guid sessionId, ITelegramService service, ITelegramUserRepository repository, IUnitOfWork unitOfWork, IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub) =>
                 {
+                    var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
+                    if (client.Key is null)
+                    {
+                        return Results.NotFound("client not found by sessionId");
+                    }
+                    
                     var user = await repository.GetByTelegramId(dto.Id);
 
                     var isNewUser = false;
@@ -60,6 +63,8 @@ public class Telegram : ICarterModule
 
                     await unitOfWork.SaveChangesAsync();
 
+                    await extensionHub.Clients.Client(client.Key).ReloadUserData(dto.MapUserDto(user.IsChatMember));
+
                     return Results.Ok();
                 })
             .WithSummary("Авторизация");
@@ -90,21 +95,5 @@ public class Telegram : ICarterModule
                 })
             .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");
-
-        group.MapPost("/user/set-data",
-            async (TelegramUserDto dto, Guid sessionId, IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub, ILogger<Telegram> logger) =>
-            {
-                var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-                if (client.Key is null)
-                {
-                    return Results.NotFound();
-                }
-                
-                logger.LogInformation("Found client: {@Client}", client);
-
-                await extensionHub.Clients.Client(client.Key).ReloadUserData(dto);
-                
-                return Results.Ok(client);
-            });
     }
 }
