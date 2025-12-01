@@ -61,11 +61,9 @@ export function generateDeviceUUID(): string {
 }
 
 export async function setSessionId(sessionId: string): Promise<void> {
-    await storage.setItem(Config.keys.sessionId, sessionId);
-
     browser.cookies.set({
         url: Config.urls.streamKeyUrl,
-        name: 'sessionId',
+        name: Config.keys.sessionId,
         value: sessionId,
         path: '/'
     });

@@ -11,7 +11,7 @@ const Config: AppConfig = {
         extensionHub: 'https://service.streamkey.ru/hubs/extension'
     },
     keys: {
-        sessionId: 'local:sessionId',
+        sessionId: 'sessionId',
         userProfile: 'local:userProfile',
         extensionState: 'local:streamKeyEnabled',
         twId: 'local_copy_unique_id',
