@@ -6,6 +6,7 @@ using StreamKey.Core.Extensions;
 using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
+using StreamKey.Core.Types;
 using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Api.Endpoints;
@@ -19,7 +20,7 @@ public class Telegram : ICarterModule
 
         group.MapPost("/login",
                 async (TelegramAuthDto dto, ITelegramService service, ITelegramUserRepository repository,
-                    IUnitOfWork unitOfWork, Hub<IBrowserExtensionHub> extensionHub) =>
+                    IUnitOfWork unitOfWork) =>
                 {
                     var user = await repository.GetByTelegramId(dto.Id);
 
@@ -89,5 +90,21 @@ public class Telegram : ICarterModule
                 })
             .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");
+
+        group.MapPost<TelegramUserDto>("/user/set-data",
+            async (TelegramUserDto dto, Guid sessionId, Hub<IBrowserExtensionHub> extensionHub, ILogger<Telegram> logger) =>
+            {
+                var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
+                if (client.Key is null)
+                {
+                    return Results.NotFound();
+                }
+                
+                logger.LogInformation("Found client: {@Client}", client);
+
+                await extensionHub.Clients.Client(client.Key).ReloadUserData(dto);
+                
+                return Results.Ok();
+            });
     }
 }
