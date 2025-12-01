@@ -30,10 +30,12 @@ class BrowserExtensionClient {
 
             clearTimeout(this.registrationTimeoutHandle);
 
+            console.log('EntranceUserData', userData);
             await this.connection.invoke('EntranceUserData', userData);
         });
 
         this.connection.on('ReloadUserData', async (user: TelegramUser) : Promise<void> => {
+            console.log('ReloadUserData', user);
             await utils.initUserProfile(user);
         });
 

@@ -1,24 +1,67 @@
 import Config from './config';
-import {TelegramUser} from './types';
+import {DeviceInfo, TelegramUser} from './types';
 
-export function generateSessionId(): string {
+export function getDeviceInfo() : DeviceInfo {
+    return {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        platform: navigator.platform || null,
+        product: navigator.product || null,
+        appName: navigator.appName || null,
+        appCodeName: navigator.appCodeName || null,
+        hardwareConcurrency: navigator.hardwareConcurrency || null,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        deviceMemory: (navigator as any).deviceMemory || null,
+    };
+}
+
+export function getDeviceHash(): string {
+    const deviceInfo = getDeviceInfo();
+    const deviceString = Object.values(deviceInfo).join('|');
+
+    let hash = 2166136261n; // FNV offset basis (32-bit)
+
+    for (let i = 0; i < deviceString.length; i++) {
+        hash ^= BigInt(deviceString.charCodeAt(i));
+        hash *= 16777619n; // FNV prime
+        hash &= 0xffffffffn; // Keep 32-bit
+    }
+
+    let result = hash.toString(16).padStart(8, '0');
+
+    for (let round = 0; round < 7; round++) {
+        hash = 2166136261n;
+        const input = result + deviceString + round;
+        for (let i = 0; i < input.length; i++) {
+            hash ^= BigInt(input.charCodeAt(i));
+            hash *= 16777619n;
+            hash &= 0xffffffffn;
+        }
+        result += hash.toString(16).padStart(8, '0');
+    }
+
+    return result;
+}
+
+export function generateDeviceUUID(): string {
     const timestamp = Date.now();
     const tsHex = timestamp.toString(16).padStart(12, '0');
-    let rand = '';
-    for (let i = 0; i < 19; i++) {
-        rand += Math.floor(Math.random() * 16).toString(16);
-    }
+
+    const deviceHash = getDeviceHash();
+
+    const devicePart = deviceHash.substring(0, 19);
+
     return [
-        tsHex.substring(0, 8),                // 8 символов времени
-        tsHex.substring(8, 12),               // 4 символа времени
-        '7' + rand.substring(0, 3),           // версия 7 + часть рандома
-        (parseInt(rand.substring(3, 4), 16) & 0x3 | 0x8).toString(16) + rand.substring(4, 7), // вариант 10xx + 3 символа
-        rand.substring(7, 19)                 // оставшиеся 12 символов
+        tsHex.substring(0, 8),
+        tsHex.substring(8, 12),
+        '7' + devicePart.substring(0, 3),
+        (parseInt(devicePart.substring(3, 4), 16) & 0x3 | 0x8).toString(16) + devicePart.substring(4, 7),
+        devicePart.substring(7, 19)
     ].join('-');
 }
 
 export async function createNewSession(): Promise<string> {
-    const sessionId = generateSessionId();
+    const sessionId = generateDeviceUUID();
 
     await storage.setItem(Config.keys.sessionId, sessionId);
     console.log('Сгенерирован ID сессии:', sessionId);

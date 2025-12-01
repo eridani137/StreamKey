@@ -77,3 +77,15 @@ export interface UserData {
 export interface UserActivity extends UserData {
     UserId: string;
 }
+
+export interface DeviceInfo {
+    userAgent: string;
+    language: string;
+    platform: string | null;
+    product: string | null;
+    appName: string | null;
+    appCodeName: string | null;
+    hardwareConcurrency: number | null;
+    timezone: string;
+    deviceMemory: number | null;
+}

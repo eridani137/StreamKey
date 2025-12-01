@@ -4,7 +4,6 @@ import extensionClient from "@/entrypoints/BrowserExtensionClient";
 
 export default defineBackground(() => {
     browser.runtime.onInstalled.addListener(async () => {
-        console.log('Расширение установлено. Устанавливаем состояние по умолчанию');
         const sessionId = await utils.createNewSession();
         await storage.setItem(Config.keys.extensionState, true);
         await utils.enableRuleset();
