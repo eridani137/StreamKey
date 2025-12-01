@@ -91,20 +91,20 @@ public class Telegram : ICarterModule
             .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");
 
-        group.MapPost<TelegramUserDto>("/user/set-data",
-            async (TelegramUserDto dto, Guid sessionId, Hub<IBrowserExtensionHub> extensionHub, ILogger<Telegram> logger) =>
-            {
-                var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-                if (client.Key is null)
-                {
-                    return Results.NotFound();
-                }
-                
-                logger.LogInformation("Found client: {@Client}", client);
-
-                await extensionHub.Clients.Client(client.Key).ReloadUserData(dto);
-                
-                return Results.Ok();
-            });
+        // group.MapPost<TelegramUserDto>("/user/set-data",
+        //     async (TelegramUserDto dto, Guid sessionId, Hub<IBrowserExtensionHub> extensionHub, ILogger<Telegram> logger) =>
+        //     {
+        //         var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
+        //         if (client.Key is null)
+        //         {
+        //             return Results.NotFound();
+        //         }
+        //         
+        //         logger.LogInformation("Found client: {@Client}", client);
+        //
+        //         await extensionHub.Clients.Client(client.Key).ReloadUserData(dto);
+        //         
+        //         return Results.Ok();
+        //     });
     }
 }
