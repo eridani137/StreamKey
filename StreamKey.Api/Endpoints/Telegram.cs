@@ -17,14 +17,10 @@ public class Telegram : ICarterModule
             .WithTags("Взаимодействие с Telegram");
 
         group.MapPost("/login",
-                async (TelegramAuthDto dto, Guid sessionId, ITelegramService service, ITelegramUserRepository repository, IUnitOfWork unitOfWork, IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub) =>
+                async (TelegramAuthDto dto, Guid sessionId, ITelegramService service,
+                    ITelegramUserRepository repository, IUnitOfWork unitOfWork,
+                    IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub) =>
                 {
-                    var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-                    if (client.Key is null)
-                    {
-                        return Results.NotFound("client not found by sessionId");
-                    }
-                    
                     var user = await repository.GetByTelegramId(dto.Id);
 
                     var isNewUser = false;
@@ -63,13 +59,19 @@ public class Telegram : ICarterModule
 
                     await unitOfWork.SaveChangesAsync();
 
-                    await extensionHub.Clients.Client(client.Key).ReloadUserData(dto.MapUserDto(user.IsChatMember));
+                    var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
+                    if (client.Key is not null)
+                    {
+                        await extensionHub.Clients.Client(client.Key).ReloadUserData(dto.MapUserDto(user.IsChatMember));
+                    }
 
                     return Results.Ok();
                 })
             .WithSummary("Авторизация");
 
-        group.MapGet("/user/{id:long}/{hash}",
+        var userGroup = app.MapGroup("/user");
+
+        userGroup.MapGet("/{id:long}/{hash}",
                 async (long id, string hash, ITelegramUserRepository repository) =>
                 {
                     var user = await repository.GetByTelegramIdNotTracked(id);
@@ -85,7 +87,7 @@ public class Telegram : ICarterModule
             .Produces<TelegramAuthDto>()
             .WithSummary("Получение данных о пользователе");
 
-        group.MapGet("/user/check-member/{id:long}",
+        userGroup.MapGet("/{id:long}",
                 async (long id, ITelegramService service) =>
                 {
                     var getChatMemberResponse = await service.GetChatMember(id);
