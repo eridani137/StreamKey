@@ -1,17 +1,17 @@
 <template>
   <div class="popup-window">
     <div class="circle-logo" @click="handleLogoClick">
-      <StreamKeyLogo v-if="!showVideo"/>
+      <StreamKeyLogo v-if="!showVideo" />
       <video
-          v-else
-          ref="videoPlayer"
-          class="logo-video"
-          :src="currentVideo"
-          :loop="isVideoLooped"
-          autoplay
-          muted
-          playsinline
-          @ended="handleVideoEnd"
+        v-else
+        ref="videoPlayer"
+        class="logo-video"
+        :src="currentVideo"
+        :loop="isVideoLooped"
+        autoplay
+        muted
+        playsinline
+        @ended="handleVideoEnd"
       />
     </div>
 
@@ -23,16 +23,16 @@
     </div>
 
     <ActivateButton
-        v-if="telegramStatus === TelegramStatus.NotAuthorized"
-        label="Подключить 1440p"
-        @click="openTelegramAuthentication"
+      v-if="telegramStatus === TelegramStatus.NotAuthorized"
+      label="Подключить 1440p"
+      @click="openTelegramAuthentication"
     />
     <ActivateButton
-        v-else-if="telegramStatus === TelegramStatus.NotMember"
-        label="Подписаться на канал"
-        @click="openTelegramChannel"
+      v-else-if="telegramStatus === TelegramStatus.NotMember"
+      label="Подписаться на канал"
+      @click="openTelegramChannel"
     />
-    <QAButton v-else label="Не работает!" @click="openQA"/>
+    <QAButton v-else label="Не работает!" @click="openQA" />
 
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
@@ -41,7 +41,7 @@
       <span v-if="!telegramUser">*перейдите в меню выбора качества</span>
       <div v-else class="profile-block">
         <div class="avatar">
-          <img :src="telegramUser.photo_url" alt="avatar" class="avatar-img"/>
+          <img :src="telegramUser.photo_url" alt="avatar" class="avatar-img" />
         </div>
         <div class="info">
           <div class="nickname">{{ telegramUser.username }}</div>
@@ -49,17 +49,21 @@
         </div>
       </div>
 
-      <button class="telegram-button" @click="openTelegramChannel" aria-label="Open Telegram">
-        <TelegramCircle/>
+      <button
+        class="telegram-button"
+        @click="openTelegramChannel"
+        aria-label="Open Telegram"
+      >
+        <TelegramCircle />
       </button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import Config from '@/config';
-import {TelegramStatus, TelegramUser} from '@/types';
+import { TelegramStatus, TelegramUser } from '@/types';
 import * as utils from '@/utils';
 
 import StreamKeyLogo from '@/components/StreamKeyLogo.vue';
@@ -71,7 +75,6 @@ import EnableVideo from '~/assets/enable.webm';
 import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
 
-
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
 const isLoading = ref(false);
@@ -82,13 +85,21 @@ const showVideo = computed(() => currentVideo.value !== undefined);
 const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
 
 const STATUS_MAP = {
-  [TelegramStatus.NotAuthorized]: {text: 'Не активирован*', class: 'status-inactive'},
-  [TelegramStatus.NotMember]: {text: 'Нужно подписаться', class: 'status-inactive'},
-  [TelegramStatus.Ok]: {text: 'Активирован', class: 'status-active'},
+  [TelegramStatus.NotAuthorized]: {
+    text: 'Не активирован*',
+    class: 'status-inactive',
+  },
+  [TelegramStatus.NotMember]: {
+    text: 'Нужно подписаться',
+    class: 'status-inactive',
+  },
+  [TelegramStatus.Ok]: { text: 'Активирован', class: 'status-active' },
 } as const;
 
 const statusText = computed(() => STATUS_MAP[telegramStatus.value]?.text || '');
-const statusColorClass = computed(() => STATUS_MAP[telegramStatus.value]?.class || '');
+const statusColorClass = computed(
+  () => STATUS_MAP[telegramStatus.value]?.class || ''
+);
 
 function handleVideoEnd() {
   if (currentVideo.value === EnableVideo) {
@@ -124,15 +135,15 @@ async function handleLogoClick() {
 }
 
 function openTelegramChannel() {
-  browser.tabs.create({url: Config.urls.telegramChannelUrl});
+  browser.tabs.create({ url: Config.urls.telegramChannelUrl });
 }
 
 function openTelegramAuthentication() {
-  browser.tabs.create({url: Config.urls.extensionAuthorizationUrl});
+  browser.tabs.create({ url: Config.urls.extensionAuthorizationUrl });
 }
 
 function openQA() {
-  browser.tabs.create({url: Config.urls.streamKeyQAUrl});
+  browser.tabs.create({ url: Config.urls.streamKeyQAUrl });
 }
 
 async function initializeExtension() {
@@ -149,7 +160,9 @@ async function initializeExtension() {
 
 async function loadUserProfile() {
   try {
-    const userData = await storage.getItem<TelegramUser>(Config.keys.userProfile);
+    const userData = await storage.getItem<TelegramUser>(
+      Config.keys.userProfile
+    );
 
     console.log('received user data', userData);
 
@@ -177,7 +190,6 @@ onMounted(async () => {
   await initializeExtension();
   await loadUserProfile();
 });
-
 </script>
 
 <style scoped>
