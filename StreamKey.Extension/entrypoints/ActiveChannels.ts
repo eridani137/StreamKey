@@ -1,6 +1,6 @@
 import Config from '@/config';
 import {ChannelData} from '@/types';
-import {sleep} from '@/utils';
+import {sleep, getTwitchUserId} from '@/utils';
 
 export class ActiveChannels {
     private ctx: any = null;
@@ -229,8 +229,7 @@ export class ActiveChannels {
 
                 try {
                     const sessionId = await storage.getItem(Config.keys.sessionId);
-                    const userIdRaw = localStorage.getItem(Config.keys.twId);
-                    const userId = userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
+                    const userId = getTwitchUserId();
                     if (sessionId && userId) {
                         const response = await fetch(
                             `${Config.urls.apiUrl}/channels/click`,

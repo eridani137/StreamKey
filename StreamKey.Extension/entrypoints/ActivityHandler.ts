@@ -1,5 +1,6 @@
 import Config from '@/config';
 import {sendMessage} from "@/messaging";
+import {getTwitchUserId} from "@/utils";
 
 export class ActivityHandler {
     private ctx: any = null;
@@ -14,8 +15,7 @@ export class ActivityHandler {
 
     async updateActivity() {
         const sessionId = await storage.getItem(Config.keys.sessionId);
-        const userIdRaw = localStorage.getItem(Config.keys.twId);
-        const userId = userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
+        const userId = getTwitchUserId();
 
         console.log('Обновление активности');
         console.log('sessionId', sessionId);

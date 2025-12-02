@@ -38,14 +38,14 @@
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
 
     <div class="authentication-block">
-      <span v-if="!tgUser">*перейдите в меню выбора качества</span>
+      <span v-if="!telegramUser">*перейдите в меню выбора качества</span>
       <div v-else class="profile-block">
         <div class="avatar">
-          <img :src="tgUser.photo_url" alt="avatar" class="avatar-img"/>
+          <img :src="telegramUser.photo_url" alt="avatar" class="avatar-img"/>
         </div>
         <div class="info">
-          <div class="nickname">{{ tgUser.username }}</div>
-          <div class="id">{{ tgUser.id }}</div>
+          <div class="nickname">{{ telegramUser.username }}</div>
+          <div class="id">{{ telegramUser.id }}</div>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
 const isLoading = ref(false);
 const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotAuthorized);
-const tgUser = ref<TelegramUser | undefined>(undefined);
+const telegramUser = ref<TelegramUser | undefined>(undefined);
 
 const showVideo = computed(() => currentVideo.value !== undefined);
 const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
@@ -154,7 +154,7 @@ async function loadUserProfile() {
     console.log('received user data', userData);
 
     if (userData) {
-      tgUser.value = userData;
+      telegramUser.value = userData;
 
       if (userData.is_chat_member) {
         telegramStatus.value = TelegramStatus.Ok;
@@ -163,12 +163,12 @@ async function loadUserProfile() {
       }
     } else {
       console.log('No valid user data received');
-      tgUser.value = undefined;
+      telegramUser.value = undefined;
       telegramStatus.value = TelegramStatus.NotAuthorized;
     }
   } catch (error) {
     console.error('Error loading user profile:', error);
-    tgUser.value = undefined;
+    telegramUser.value = undefined;
     telegramStatus.value = TelegramStatus.NotAuthorized;
   }
 }
