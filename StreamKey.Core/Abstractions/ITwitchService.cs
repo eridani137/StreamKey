@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Http;
 using StreamKey.Core.DTOs.TwitchGraphQL;
 
 namespace StreamKey.Core.Abstractions;
 
 public interface ITwitchService
 {
-    Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username);
-    Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string username);
+    Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username, HttpContext context);
+    Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string username, HttpContext context);
 }

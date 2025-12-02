@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -7,7 +6,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs.TwitchGraphQL;
-using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Shared;
 
@@ -21,16 +19,16 @@ public class UsherService(
 {
     public async Task<Result<string>> GetStreamPlaylist(string username, HttpContext context)
     {
-        if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
-        {
-            tokenResponse = await twitchService.GetStreamAccessToken(username);
-            if (tokenResponse is not null)
-            {
-                cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
-            }
-        }
+        // if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        // {
+        //     tokenResponse = await twitchService.GetStreamAccessToken(username);
+        //     if (tokenResponse is not null)
+        //     {
+        //         cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
+        //     }
+        // }
 
-        // var tokenResponse = await twitchService.GetStreamAccessToken(username);
+        var tokenResponse = await twitchService.GetStreamAccessToken(username, context);
 
         if (tokenResponse?.Data is null)
         {
@@ -59,9 +57,6 @@ public class UsherService(
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            // var request = new HttpRequestMessage(HttpMethod.Get, url);
-            // context.Request.Query.AddQueryAuth(request);
-            // var response = await client.SendAsync(request);
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -101,16 +96,16 @@ public class UsherService(
 
     public async Task<Result<string>> GetVodPlaylist(string vodId, HttpContext context)
     {
-        if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
-        {
-            tokenResponse = await twitchService.GetVodAccessToken(vodId);
-            if (tokenResponse is not null)
-            {
-                cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(1));
-            }
-        }
+        // if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        // {
+        //     tokenResponse = await twitchService.GetVodAccessToken(vodId);
+        //     if (tokenResponse is not null)
+        //     {
+        //         cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(1));
+        //     }
+        // }
 
-        // var tokenResponse = await twitchService.GetVodAccessToken(vodId);
+        var tokenResponse = await twitchService.GetVodAccessToken(vodId, context);
 
         if (tokenResponse?.Data is null)
         {
@@ -140,9 +135,6 @@ public class UsherService(
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            // var request = new HttpRequestMessage(HttpMethod.Get, url);
-            // context.Request.Query.AddQueryAuth(request);
-            // var response = await client.SendAsync(request);
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
