@@ -14,12 +14,6 @@ export default defineContentScript({
 
 async function runScripts(ctx: any) {
     await activeChannels.init(ctx);
-    console.log('Поиск плеера');
-    const videoPlayer = await waitForElement("//div[@data-a-target='video-player']");
-    if (videoPlayer) {
-        await qualityMenu.init(ctx);
-        await activityHandler.init(ctx);
-    } else {
-        console.log('Плеер не найден');
-    }
+    await qualityMenu.init(ctx);
+    await activityHandler.init(ctx);
 }

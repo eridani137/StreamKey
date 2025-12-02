@@ -13,7 +13,7 @@ public class BrowserExtensionHub
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _registrationTimeouts = new();
     private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan AddingTime = TimeSpan.FromMinutes(3);
+    private static readonly TimeSpan AddingTime = TimeSpan.FromMinutes(1);
 
     public override async Task OnConnectedAsync()
     {
@@ -50,8 +50,7 @@ public class BrowserExtensionHub
         var session = new UserSession()
         {
             SessionId = userData.SessionId,
-            StartedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.MinValue
+            StartedAt = DateTimeOffset.UtcNow
         };
 
         if (!Users.TryAdd(connectionId, session))
@@ -80,7 +79,7 @@ public class BrowserExtensionHub
         
         session.UserId ??= activityRequest.UserId;
 
-        if (session.UpdatedAt != DateTimeOffset.MinValue && session.UpdatedAt >= now.Add(-AddingTime))
+        if (session.UpdatedAt >= now.Add(-AddingTime))
         {
             session.UpdatedAt = now;
             session.AccumulatedTime += AddingTime;
