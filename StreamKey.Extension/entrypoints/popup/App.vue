@@ -79,6 +79,7 @@ import ActivateButton from '@/components/ActivateButton.vue';
 import EnableVideo from '~/assets/enable.webm';
 import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
+import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
 
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
@@ -124,10 +125,10 @@ async function handleLogoClick() {
     const newState = !isEnabled.value;
 
     if (newState) {
-      await utils.enableRuleset();
+      await loadTwitchRedirectRules();
       currentVideo.value = EnableVideo;
     } else {
-      await utils.disableRuleset();
+      await removeAllDynamicRules();
       currentVideo.value = DisableVideo;
     }
 
@@ -156,10 +157,10 @@ async function initializeExtension() {
   isEnabled.value = savedState ?? false;
 
   if (isEnabled.value) {
-    await utils.enableRuleset();
+    await loadTwitchRedirectRules();
     currentVideo.value = EnabledVideo;
   } else {
-    await utils.disableRuleset();
+    await removeAllDynamicRules();
   }
 }
 

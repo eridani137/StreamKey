@@ -4,21 +4,28 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
   vite: () => ({
-    plugins: [
-      {
-        name: 'remove-console',
-        transform(code, id) {
-          if (id.endsWith('.js') || id.endsWith('.ts') || id.endsWith('.vue')) {
-            return {
-              code: code
-                .replace(/console\.(log|debug|info)\(.*?\);?/g, '')
-                .replace(/debugger;?/g, ''),
-              map: null,
-            };
-          }
-        },
-      },
-    ],
+    plugins:
+      process.env.NODE_ENV === 'production'
+        ? [
+            {
+              name: 'remove-console-prod',
+              transform(code, id) {
+                if (
+                  id.endsWith('.js') ||
+                  id.endsWith('.ts') ||
+                  id.endsWith('.vue')
+                ) {
+                  return {
+                    code: code
+                      .replace(/console\.(log|debug|info)\(.*?\);?/g, '')
+                      .replace(/debugger;?/g, ''),
+                    map: null,
+                  };
+                }
+              },
+            },
+          ]
+        : [],
   }),
   manifest: (env) => {
     const manifest = {
@@ -40,15 +47,6 @@ export default defineConfig({
           resources: ['fonts/*.ttf', 'fonts/*.otf'],
         },
       ],
-      declarative_net_request: {
-        rule_resources: [
-          {
-            id: 'ruleset_1',
-            enabled: true,
-            path: 'rules.json',
-          },
-        ],
-      },
       icons: {
         '16': 'icons/16.png',
         '32': 'icons/32.png',

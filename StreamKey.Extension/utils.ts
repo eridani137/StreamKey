@@ -82,44 +82,6 @@ export async function createNewSession(): Promise<string> {
   return sessionId;
 }
 
-export async function enableRuleset(): Promise<void> {
-  try {
-    if (
-      browser.declarativeNetRequest &&
-      browser.declarativeNetRequest.updateEnabledRulesets
-    ) {
-      await browser.declarativeNetRequest.updateEnabledRulesets({
-        enableRulesetIds: ['ruleset_1'],
-        disableRulesetIds: [],
-      });
-      console.log('Правила перенаправления активированы');
-    } else {
-      console.warn('declarativeNetRequest не поддерживается в этом браузере');
-    }
-  } catch (err) {
-    console.error('Ошибка активации правил:', err);
-  }
-}
-
-export async function disableRuleset(): Promise<void> {
-  try {
-    if (
-      browser.declarativeNetRequest &&
-      browser.declarativeNetRequest.updateEnabledRulesets
-    ) {
-      await browser.declarativeNetRequest.updateEnabledRulesets({
-        enableRulesetIds: [],
-        disableRulesetIds: ['ruleset_1'],
-      });
-      console.log('Правила перенаправления деактивированы');
-    } else {
-      console.warn('declarativeNetRequest не поддерживается в этом браузере');
-    }
-  } catch (err) {
-    console.error('Ошибка деактивации правил:', err);
-  }
-}
-
 export async function getCookieValue(
   url: string,
   name: string
