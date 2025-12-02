@@ -1,6 +1,6 @@
 import * as utils from '@/utils';
 import Config from '@/config';
-import extensionClient from '@/entrypoints/BrowserExtensionClient';
+import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
 
 export default defineBackground(() => {

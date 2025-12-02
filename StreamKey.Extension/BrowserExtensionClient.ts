@@ -29,6 +29,7 @@ class BrowserExtensionClient {
         transport: HttpTransportType.WebSockets,
       })
       .withHubProtocol(new MessagePackHubProtocol())
+      .configureLogging(LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
 
