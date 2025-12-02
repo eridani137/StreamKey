@@ -41,7 +41,12 @@
       <span v-if="!telegramUser">*перейдите в меню выбора качества</span>
       <div v-else class="profile-block">
         <div class="avatar">
-          <img :src="telegramUser.photo_url" alt="avatar" class="avatar-img" />
+          <img
+            v-if="telegramUser.photo_url"
+            :src="telegramUser.photo_url"
+            alt="avatar"
+            class="avatar-img"
+          />
         </div>
         <div class="info">
           <div class="nickname">{{ telegramUser.username }}</div>
