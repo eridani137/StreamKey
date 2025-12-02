@@ -10,18 +10,18 @@ public static class QueryExtensions
     {
         public void AddQueryAuth(HttpRequestMessage request)
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue(
-                "OAuth",
-                query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-                    ? auth
-                    : ApplicationConstants.DefaultAuthorization
-            );
-            
-            request.Headers.Add("x-device-id",
-                query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
-                    ? deviceId
-                    : ApplicationConstants.DefaultDeviceId
-            );
+            // request.Headers.Authorization = new AuthenticationHeaderValue(
+            //     "OAuth",
+            //     query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+            //         ? auth
+            //         : ApplicationConstants.DefaultAuthorization
+            // );
+            //
+            // request.Headers.Add("x-device-id",
+            //     query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
+            //         ? deviceId
+            //         : ApplicationConstants.DefaultDeviceId
+            // );
         }
     }
 }
