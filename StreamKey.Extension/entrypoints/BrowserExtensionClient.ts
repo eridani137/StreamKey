@@ -1,6 +1,6 @@
 import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
 import {MessagePackHubProtocol} from '@microsoft/signalr-protocol-msgpack';
-import {TelegramUser, UserActivity, UserData} from "@/types";
+import {ActivityRequest, TelegramUser, UserData} from "@/types";
 import Config from "@/config";
 import * as utils from "@/utils";
 
@@ -49,7 +49,7 @@ class BrowserExtensionClient {
     }
 
     async updateActivity(userId: string): Promise<void> {
-        const userActivity: UserActivity = {
+        const userActivity: ActivityRequest = {
             SessionId: this.sessionId,
             UserId: userId,
         };

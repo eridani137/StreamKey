@@ -74,7 +74,7 @@ export interface UserData {
     SessionId: string;
 }
 
-export interface UserActivity extends UserData {
+export interface ActivityRequest extends UserData {
     UserId: string;
 }
 

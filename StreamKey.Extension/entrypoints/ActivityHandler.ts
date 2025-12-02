@@ -4,16 +4,14 @@ import {sendMessage} from "@/messaging";
 export class ActivityHandler {
     private ctx: any = null;
 
-    init(ctx: any) {
+    async init(ctx: any) {
         this.ctx = ctx;
 
-        this.ctx.setTimeout(async () => {
-            await this.updateActivity();
-        }, 5000);
+        await this.updateActivity();
 
         this.ctx.setInterval(async () => {
             await this.updateActivity();
-        }, 10000);
+        }, 180000);
     }
 
     async updateActivity() {

@@ -1,19 +1,19 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
+using StreamKey.Core.DTOs;
 using StreamKey.Core.Types;
 
 namespace StreamKey.Core.Hubs;
 
-public class BrowserExtensionHub(
-    ILogger<BrowserExtensionHub> logger)
+public class BrowserExtensionHub
     : Hub<IBrowserExtensionHub>
 {
     public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _registrationTimeouts = new();
-    private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(7);
+    private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan AddingTime = TimeSpan.FromMinutes(3);
 
     public override async Task OnConnectedAsync()
     {
@@ -49,9 +49,10 @@ public class BrowserExtensionHub(
 
         var session = new UserSession()
         {
-            SessionId = userData.SessionId
+            SessionId = userData.SessionId,
+            StartedAt = DateTimeOffset.UtcNow
         };
-        
+
         if (!Users.TryAdd(connectionId, session))
         {
             // logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
@@ -70,12 +71,19 @@ public class BrowserExtensionHub(
         cancellationTokenSource.Dispose();
     }
 
-    public Task UpdateActivity(UserSession userSession)
+    public Task UpdateActivity(ActivityRequest activityRequest)
     {
         if (!Users.TryGetValue(Context.ConnectionId, out var session)) return Task.CompletedTask;
+
+        var now = DateTimeOffset.UtcNow;
         
-        session.UserId ??= userSession.UserId;
-        session.AccumulatedTime += TimeSpan.FromMinutes(1);
+        session.UserId ??= activityRequest.UserId;
+
+        if (session.UpdatedAt >= now.Add(-AddingTime))
+        {
+            session.UpdatedAt = now;
+            session.AccumulatedTime += AddingTime;
+        }
 
         return Task.CompletedTask;
     }
