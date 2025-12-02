@@ -97,3 +97,7 @@ export interface DeviceInfo {
   timezone: string;
   deviceMemory: number | null;
 }
+
+export type Rule = Awaited<
+  ReturnType<typeof browser.declarativeNetRequest.getDynamicRules>
+>[number];

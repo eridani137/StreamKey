@@ -170,7 +170,7 @@ async function loadUserProfile() {
       Config.keys.userProfile
     );
 
-    console.log('received user data', userData);
+    console.log('Загрузка профиля', userData);
 
     if (userData) {
       telegramUser.value = userData;
@@ -181,12 +181,12 @@ async function loadUserProfile() {
         telegramStatus.value = TelegramStatus.NotMember;
       }
     } else {
-      console.log('No valid user data received');
+      console.warn('Профиль не загружен');
       telegramUser.value = undefined;
       telegramStatus.value = TelegramStatus.NotAuthorized;
     }
   } catch (error) {
-    console.error('Error loading user profile:', error);
+    console.error('Ошибка при загрузке профиля', error);
     telegramUser.value = undefined;
     telegramStatus.value = TelegramStatus.NotAuthorized;
   }
