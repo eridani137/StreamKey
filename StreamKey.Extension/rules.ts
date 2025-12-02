@@ -60,8 +60,8 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
 }
 
 export async function loadTwitchRedirectRules(): Promise<void> {
-  const auth = await getCookieValue('https://www.twitch.tv/', 'auth-token') || '';
-  const device = await getCookieValue('https://www.twitch.tv/', 'unique_id') || '';
+  const auth = (await browser.cookies.get({url: 'https://www.twitch.tv/', name: 'auth-token'}))?.value || '';
+  const device = (await browser.cookies.get({url: 'https://www.twitch.tv/', name: 'unique_id'}))?.value || '';
 
   console.log('auth', auth);
   console.log('device', device);

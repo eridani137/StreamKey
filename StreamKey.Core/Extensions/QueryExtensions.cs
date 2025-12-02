@@ -8,24 +8,20 @@ public static class QueryExtensions
 {
     extension(IQueryCollection query)
     {
-        public void AddQueryAuth(HttpClient client)
+        public void AddQueryAuth(HttpRequestMessage request)
         {
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", ApplicationConstants.DefaultAuthorization);
+            request.Headers.Authorization = new AuthenticationHeaderValue(
+                "OAuth",
+                query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+                    ? auth
+                    : ApplicationConstants.DefaultAuthorization
+            );
             
-            // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            //     "OAuth",
-            //     query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-            //         ? auth
-            //         : ApplicationConstants.DefaultAuthorization
-            // );
-            
-            client.DefaultRequestHeaders.Add("x-device-id", ApplicationConstants.DefaultDeviceId);
-
-            // client.DefaultRequestHeaders.Add("x-device-id",
-            //     query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
-            //         ? deviceId
-            //         : ApplicationConstants.DefaultDeviceId
-            // );
+            request.Headers.Add("x-device-id",
+                query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
+                    ? deviceId
+                    : ApplicationConstants.DefaultDeviceId
+            );
         }
     }
 }

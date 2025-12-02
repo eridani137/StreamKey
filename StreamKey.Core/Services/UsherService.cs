@@ -59,8 +59,9 @@ public class UsherService(
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            context.Request.Query.AddQueryAuth(client);
-            var response = await client.GetAsync(url);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            context.Request.Query.AddQueryAuth(request);
+            var response = await client.SendAsync(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -138,8 +139,9 @@ public class UsherService(
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            context.Request.Query.AddQueryAuth(client);
-            var response = await client.GetAsync(url);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            context.Request.Query.AddQueryAuth(request);
+            var response = await client.SendAsync(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
