@@ -1,6 +1,7 @@
 import Config from '@/config';
-import {ChannelData} from '@/types';
+import {ChannelData, ClickChannel} from '@/types';
 import {sleep, getTwitchUserId} from '@/utils';
+import {sendMessage} from "@/messaging";
 
 export class ActiveChannels {
     private ctx: any = null;
@@ -228,26 +229,10 @@ export class ActiveChannels {
                 event.stopPropagation && event.stopPropagation();
 
                 try {
-                    const sessionId = await storage.getItem(Config.keys.sessionId);
                     const userId = getTwitchUserId();
-                    if (sessionId && userId) {
-                        const response = await fetch(
-                            `${Config.urls.apiUrl}/channels/click`,
-                            {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    channelName: item.channelName,
-                                    userId: userId,
-                                }),
-                            }
-                        );
-
-                        if (!response.ok) {
-                            console.warn('Сервер вернул ошибку: ' + response.status);
-                        }
+                    if (userId) {
+                        await sendMessage('clickChannel', { ChannelName: item.channelName, UserId: userId } as ClickChannel);
+                        console.log('Клик на канал', userId);
                     }
                 } finally {
                     window.location.href = `/${nickname}`;

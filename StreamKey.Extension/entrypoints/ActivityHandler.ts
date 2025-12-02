@@ -1,6 +1,7 @@
 import Config from '@/config';
 import {sendMessage} from "@/messaging";
 import {getTwitchUserId} from "@/utils";
+import {WithUserId} from "@/types";
 
 export class ActivityHandler {
     private ctx: any = null;
@@ -22,9 +23,9 @@ export class ActivityHandler {
         console.log('userId', userId);
 
         if (sessionId && userId) {
-            await sendMessage('updateActivity', userId);
+            await sendMessage('updateActivity', { UserId: userId } as WithUserId);
 
-            console.log('Активность обновлена');
+            console.log('Активность обновлена', userId);
         }
     }
 }
