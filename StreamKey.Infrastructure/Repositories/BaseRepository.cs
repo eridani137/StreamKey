@@ -17,6 +17,11 @@ public abstract class BaseRepository<TEntity>(ApplicationDbContext context)
         await GetSet().AddAsync(entity); 
     }
 
+    public async Task AddRange(IEnumerable<TEntity> entities)
+    {
+        await GetSet().AddRangeAsync(entities);
+    }
+
     public void Update(TEntity entity)
     {
         GetSet().Update(entity);

@@ -1,9 +1,12 @@
+using System.Collections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Hubs;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.BackgroundServices;
 
@@ -107,7 +110,9 @@ public class StatisticHandler(
                     .WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
             }
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException)
+        {
+        }
         catch (TimeoutException)
         {
             logger.LogWarning("Превышен таймаут при остановке фоновых задач");
@@ -174,7 +179,20 @@ public class StatisticHandler(
             {
                 userIds = statisticService.OnlineUsers.Keys.ToList();
             }
-            
+
+            var disconnectedUsers = BrowserExtensionHub.DisconnectedUsers.Values.Select(v =>
+                    new UserSessionEntity()
+                    {
+                        UserId = v.UserId!,
+                        SessionId = v.SessionId,
+                        StartedAt = v.StartedAt,
+                        UpdatedAt = v.UpdatedAt,
+                        AccumulatedTime = v.AccumulatedTime,
+                    })
+                .ToList();
+
+            await RemoveAndSaveDisconnectedUserSessions(disconnectedUsers, repository, unitOfWork);
+
             await RemoveAndSaveUserSessions(userIds, repository, unitOfWork);
         }
         catch (Exception e)
@@ -187,28 +205,38 @@ public class StatisticHandler(
         IUnitOfWork unitOfWork)
     {
         var minimumSessionDuration = TimeSpan.FromSeconds(45);
-        
+
         var processed = 0;
-        
+
         foreach (var offlineUserId in userIds)
         {
-            if (statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser))
-            {
-                var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
-                
-                if (sessionDuration >= minimumSessionDuration)
-                {
-                    await repository.Add(offlineUser);
-                    processed++;
-                }
-            }
+            if (!statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser)) continue;
+            var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
+
+            if (sessionDuration < minimumSessionDuration) continue;
+            await repository.Add(offlineUser);
+            processed++;
         }
 
         await unitOfWork.SaveChangesAsync();
-        
+
         if (processed > 0)
         {
             logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
+        }
+    }
+
+    private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
+        UserSessionRepository repository, IUnitOfWork unitOfWork)
+    {
+        await repository.AddRange(entities);
+
+        await unitOfWork.SaveChangesAsync();
+
+        if (entities.Count != 0)
+        {
+            logger.LogInformation("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
+                entities.Count);
         }
     }
 
@@ -236,7 +264,7 @@ public class StatisticHandler(
             }
 
             await unitOfWork.SaveChangesAsync();
-            
+
             if (processed > 0)
             {
                 logger.LogInformation("Сохранено {RecordsProcessedCount} записей кликов на каналы", processed);

@@ -18,7 +18,11 @@ export default defineBackground(() => {
         await extensionClient.start(sessionId);
     });
 
-    onMessage('updateActivity', async ({data: userId}) => {
-        await extensionClient.updateActivity(userId);
+    onMessage('updateActivity', async (message) => {
+        await extensionClient.updateActivity(message.data);
+    });
+
+    onMessage('clickChannel', async (message) => {
+        await extensionClient.clickChannel(message.data);
     });
 });

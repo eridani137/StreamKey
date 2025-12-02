@@ -7,6 +7,7 @@ public interface IBaseRepository<TEntity> where TEntity : BaseEntity
 {
     DbSet<TEntity> GetSet();
     Task Add(TEntity entity);
+    Task AddRange(IEnumerable<TEntity> entities);
     void Update(TEntity entity);
     void Delete(TEntity entity);
 }

@@ -1,6 +1,6 @@
 import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
 import {MessagePackHubProtocol} from '@microsoft/signalr-protocol-msgpack';
-import {ActivityRequest, TelegramUser, UserData} from "@/types";
+import {ActivityRequest, ClickChannel, TelegramUser, WithSessionId, WithUserId} from "@/types";
 import Config from "@/config";
 import * as utils from "@/utils";
 
@@ -22,12 +22,12 @@ class BrowserExtensionClient {
             .build();
 
         this.connection.on('RequestUserData', async () : Promise<void> => {
-            const userData: UserData = {
+            const requestUserData: WithSessionId = {
                 SessionId: this.sessionId,
             };
 
-            console.log('EntranceUserData', userData);
-            await this.connection.invoke('EntranceUserData', userData);
+            console.log('EntranceUserData', requestUserData);
+            await this.connection.invoke('EntranceUserData', requestUserData);
         });
 
         this.connection.on('ReloadUserData', async (user: TelegramUser) : Promise<void> => {
@@ -48,13 +48,17 @@ class BrowserExtensionClient {
         await this.connection.start();
     }
 
-    async updateActivity(userId: string): Promise<void> {
+    async updateActivity(payload: WithUserId): Promise<void> {
         const userActivity: ActivityRequest = {
             SessionId: this.sessionId,
-            UserId: userId,
+            UserId: payload.UserId,
         };
 
         await this.connection.invoke('UpdateActivity', userActivity)
+    }
+
+    async clickChannel(payload: ClickChannel): Promise<void> {
+        await this.connection.invoke('ClickChannel', payload);
     }
 
     async stop() {

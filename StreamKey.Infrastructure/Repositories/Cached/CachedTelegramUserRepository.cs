@@ -36,6 +36,12 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
         return Repository.Add(entity);
     }
 
+    public Task AddRange(IEnumerable<TelegramUserEntity> entities)
+    {
+        InvalidateCache();
+        return Repository.AddRange(entities);
+    }
+
     public void Update(TelegramUserEntity entity)
     {
         InvalidateCache(entity.TelegramId.ToString());

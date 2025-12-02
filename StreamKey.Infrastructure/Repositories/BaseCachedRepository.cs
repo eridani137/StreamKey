@@ -11,14 +11,14 @@ public abstract class BaseCachedRepository<TEntity, TRepository>(TRepository rep
     protected readonly TRepository Repository = repository;
     protected abstract string CacheKeyPrefix { get; }
 
-    protected string GetCacheKey(string suffix = "")
+    protected string GetCacheKey(string? suffix = null)
     {
-        return string.IsNullOrEmpty(suffix)
+        return suffix is null
             ? CacheKeyPrefix
             : $"{CacheKeyPrefix}:{suffix}";
     }
 
-    protected void InvalidateCache(string? suffix)
+    protected void InvalidateCache(string? suffix = null)
     {
         InvalidateKeyCache();
         if (suffix is not null)

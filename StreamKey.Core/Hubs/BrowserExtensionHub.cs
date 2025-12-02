@@ -1,8 +1,11 @@
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Services;
 using StreamKey.Core.Types;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Hubs;
 
@@ -14,6 +17,8 @@ public class BrowserExtensionHub
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _registrationTimeouts = new();
     private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan AddingTime = TimeSpan.FromMinutes(1);
+    
+    public static ConcurrentDictionary<string, UserSession> DisconnectedUsers { get; } = new();
 
     public override async Task OnConnectedAsync()
     {
@@ -88,14 +93,31 @@ public class BrowserExtensionHub
         return Task.CompletedTask;
     }
 
+    public Task ClickChannel(ClickChannelDto dto, [FromServices] StatisticService service)
+    {
+        service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
+        {
+            ChannelName = dto.ChannelName,
+            UserId = dto.UserId,
+            DateTime = DateTime.UtcNow
+        });
+        
+        return Task.CompletedTask;
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connectionId = Context.ConnectionId;
 
         CancelRegistrationTimeout(connectionId);
 
-        Users.TryRemove(connectionId, out var userSession);
-        // TODO
+        if (Users.TryRemove(connectionId, out var userSession))
+        {
+            if (userSession.UserId is not null)
+            {
+                DisconnectedUsers.TryAdd(connectionId, userSession);
+            }
+        }
 
         await base.OnDisconnectedAsync(exception);
     }

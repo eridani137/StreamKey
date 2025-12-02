@@ -46,6 +46,12 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
         return Repository.Add(entity);
     }
 
+    public Task AddRange(IEnumerable<ChannelEntity> entities)
+    {
+        InvalidateCache();
+        return Repository.AddRange(entities);
+    }
+
     public void Update(ChannelEntity entity)
     {
         InvalidateCache(entity.Id.ToString());
