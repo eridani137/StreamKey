@@ -48,15 +48,15 @@ public static class ServiceExtensions
         var authorization = builder.Configuration.GetSection("Authorization");
         if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
         {
-            // ApplicationConstants.Headers.Add("Authorization", authorization.Value);
-            ApplicationConstants.DefaultAuthorization = authorization.Value;
+            ApplicationConstants.Headers.Add("Authorization", authorization.Value);
+            // ApplicationConstants.DefaultAuthorization = authorization.Value;
         }
 
         var deviceId = builder.Configuration.GetSection("DeviceId");
         if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
         {
-            // ApplicationConstants.Headers.Add("x-device-id", deviceId.Value);
-            ApplicationConstants.DefaultDeviceId = deviceId.Value;
+            ApplicationConstants.Headers.Add("x-device-id", deviceId.Value);
+            // ApplicationConstants.DefaultDeviceId = deviceId.Value;
         }
     }
 
