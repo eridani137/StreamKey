@@ -49,18 +49,7 @@ class BrowserExtensionClient {
       }
     );
 
-    this.connection.onreconnected((connectionId) => {
-      console.log('Переподключено, ID:', connectionId);
-      if (this.sessionId) {
-        this.connection.invoke('EntranceUserData', {
-          SessionId: this.sessionId,
-        });
-      }
-    });
-
-    this.connection.onclose(() => {
-      console.warn('Connection closed');
-    });
+    this.setupConnectionHandlers();
 
     this.stateCheckInterval = setInterval(async () => {
       if (this.connection.state === HubConnectionState.Disconnected && this.sessionId) {
@@ -68,6 +57,27 @@ class BrowserExtensionClient {
         await this.start(this.sessionId);
       }
     }, 10000);
+  }
+
+  private setupConnectionHandlers(): void {
+    this.connection.onreconnecting((error) => {
+      console.log('Переподключение...', error);
+    });
+
+    this.connection.onreconnected((connectionId) => {
+      console.log('Переподключено, ID:', connectionId);
+      if (this.sessionId) {
+        this.connection.invoke('EntranceUserData', { SessionId: this.sessionId });
+      }
+    });
+
+    this.connection.onclose((error) => {
+      console.warn('Соединение закрыто:', error);
+    });
+  }
+
+  public get connectionState(): HubConnectionState {
+    return this.connection.state;
   }
 
   async ping(): Promise<boolean> {

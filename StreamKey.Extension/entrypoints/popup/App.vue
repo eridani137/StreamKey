@@ -1,8 +1,8 @@
 <template>
   <div class="popup-window">
-    <div class="status-container">
+    <!-- <div class="status-container">
       <StatusLabel />
-    </div>
+    </div> -->
     <div class="circle-logo" @click="handleLogoClick">
       <StreamKeyLogo v-if="!showVideo" />
       <video
