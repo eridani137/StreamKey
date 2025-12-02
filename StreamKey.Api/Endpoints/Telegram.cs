@@ -16,7 +16,7 @@ public class Telegram : ICarterModule
         var group = app.MapGroup("/telegram")
             .WithTags("Взаимодействие с Telegram");
 
-        group.MapPost("/login",
+        group.MapPost("/login/{sessionId:guid}",
                 async (TelegramAuthDto dto, Guid sessionId, ITelegramService service,
                     ITelegramUserRepository repository, IUnitOfWork unitOfWork,
                     IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub) =>
