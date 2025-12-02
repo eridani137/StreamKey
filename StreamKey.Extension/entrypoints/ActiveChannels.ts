@@ -229,7 +229,8 @@ export class ActiveChannels {
 
                 try {
                     const sessionId = await storage.getItem(Config.keys.sessionId);
-                    const userId = localStorage.getItem(Config.keys.twId);
+                    const userIdRaw = localStorage.getItem(Config.keys.twId);
+                    const userId = userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
                     if (sessionId && userId) {
                         const response = await fetch(
                             `${Config.urls.apiUrl}/channels/click`,

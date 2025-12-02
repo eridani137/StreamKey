@@ -94,7 +94,8 @@ public class BrowserExtensionHub
 
         CancelRegistrationTimeout(connectionId);
 
-        Users.TryRemove(connectionId, out _);
+        Users.TryRemove(connectionId, out var userSession);
+        // TODO
 
         await base.OnDisconnectedAsync(exception);
     }

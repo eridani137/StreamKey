@@ -14,27 +14,14 @@ export class ActivityHandler {
 
     async updateActivity() {
         const sessionId = await storage.getItem(Config.keys.sessionId);
-        const userId = localStorage.getItem(Config.keys.twId);
+        const userIdRaw = localStorage.getItem(Config.keys.twId);
+        const userId = userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
 
         console.log('Обновление активности');
         console.log('sessionId', sessionId);
         console.log('userId', userId);
 
         if (sessionId && userId) {
-            // const updateActivity = await fetch(
-            //     `${Config.urls.apiUrl}/activity/update`,
-            //     {
-            //         method: 'POST',
-            //         headers: {'Content-Type': 'application/json'},
-            //         body: JSON.stringify({sessionId: sessionId, userId: userId}),
-            //     }
-            // );
-            //
-            // if (!updateActivity.ok) {
-            //     console.error('Сервер вернул ошибку:', updateActivity.status);
-            //     return undefined;
-            // }
-
             await sendMessage('updateActivity', userId);
 
             console.log('Активность обновлена');
