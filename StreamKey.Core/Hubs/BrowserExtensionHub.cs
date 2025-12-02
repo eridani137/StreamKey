@@ -108,6 +108,11 @@ public class BrowserExtensionHub
         
         return Task.CompletedTask;
     }
+    
+    public Task Ping()
+    {
+        return Task.CompletedTask;
+    }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
