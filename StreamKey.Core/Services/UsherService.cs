@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -6,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs.TwitchGraphQL;
+using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Shared;
 
@@ -44,6 +46,7 @@ public class UsherService(
 
         foreach (var (key, value) in context.Request.Query)
         {
+            if (key.Equals("auth") || key.Equals("device")) continue;
             query[key] = value;
         }
 
@@ -56,6 +59,7 @@ public class UsherService(
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+            context.Request.Query.AddQueryAuth(client);
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -120,6 +124,7 @@ public class UsherService(
         
         foreach (var (key, value) in context.Request.Query)
         {
+            if (key.Equals("vod_id")) continue;
             query[key] = value;
         }
         
@@ -133,6 +138,7 @@ public class UsherService(
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+            context.Request.Query.AddQueryAuth(client);
             var response = await client.GetAsync(url);
 
             if (response.StatusCode == HttpStatusCode.NotFound)

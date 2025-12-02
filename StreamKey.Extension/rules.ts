@@ -1,4 +1,5 @@
 import { Rule } from './types';
+import { getCookieValue } from './utils';
 
 export async function getDynamicRules(): Promise<Rule[]> {
   try {
@@ -50,7 +51,8 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
       removeRuleIds: ruleIdsToRemove,
       addRules: newRules,
     });
-    console.log('Динамические правила обновлены');
+    const rules = await getDynamicRules();
+    console.log('Динамические правила обновлены', rules);
   } catch (err) {
     console.error('Ошибка обновления динамических правил:', err);
     throw err;
@@ -58,6 +60,12 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
 }
 
 export async function loadTwitchRedirectRules(): Promise<void> {
+  const auth = await getCookieValue('https://www.twitch.tv/', 'auth-token') || '';
+  const device = await getCookieValue('https://www.twitch.tv/', 'unique_id') || '';
+
+  console.log('auth', auth);
+  console.log('device', device);
+
   const rules: Rule[] = [
     {
       id: 1,
@@ -65,7 +73,7 @@ export async function loadTwitchRedirectRules(): Promise<void> {
       action: {
         type: 'redirect',
         redirect: {
-          regexSubstitution: 'https://service.streamkey.ru/playlist/?\\1',
+          regexSubstitution: `https://service.streamkey.ru/playlist/?auth=${auth}&device=${device}&\\1`,
         },
       },
       condition: {
@@ -80,7 +88,7 @@ export async function loadTwitchRedirectRules(): Promise<void> {
       action: {
         type: 'redirect',
         redirect: {
-          regexSubstitution: 'https://service.streamkey.ru/playlist/?\\1',
+          regexSubstitution: `https://service.streamkey.ru/playlist/?auth=${auth}&device=${device}&\\1`,
         },
       },
       condition: {
@@ -96,7 +104,7 @@ export async function loadTwitchRedirectRules(): Promise<void> {
         type: 'redirect',
         redirect: {
           regexSubstitution:
-            'https://service.streamkey.ru/playlist/vod/?vod_id=\\1&\\2',
+            `https://service.streamkey.ru/playlist/vod/?vod_id=\\1&auth=${auth}&device=${device}&\\2`,
         },
       },
       condition: {

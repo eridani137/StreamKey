@@ -29,8 +29,6 @@ public static class ServiceExtensions
 
             services.AddMemoryCache();
 
-            services.AddSingleton<ISettingsStorage, InMemorySettingsStorage>();
-
             services.AddScoped<TelegramUserRepository>();
             services.AddScoped<ITelegramUserRepository, CachedTelegramUserRepository>();
             

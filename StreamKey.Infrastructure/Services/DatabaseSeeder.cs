@@ -8,8 +8,7 @@ namespace StreamKey.Infrastructure.Services;
 
 public class DatabaseSeeder(
     UserManager<ApplicationUser> userManager,
-    ILogger<DatabaseSeeder> logger,
-    ISettingsStorage settings
+    ILogger<DatabaseSeeder> logger
 ) : IDatabaseSeeder
 {
     public async Task Seed()
@@ -34,8 +33,5 @@ public class DatabaseSeeder(
             
             logger.LogInformation("root пользователь успешно создан");
         }
-        
-        await settings.SetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false);
-        await settings.SetBoolSettingAsync(ApplicationConstants.RemoveAds, true);
     }
 }

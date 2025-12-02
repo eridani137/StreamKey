@@ -3,30 +3,30 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
-  vite: () => ({
-    plugins:
-      process.env.NODE_ENV === 'production'
-        ? [
-            {
-              name: 'remove-console-prod',
-              transform(code, id) {
-                if (
-                  id.endsWith('.js') ||
-                  id.endsWith('.ts') ||
-                  id.endsWith('.vue')
-                ) {
-                  return {
-                    code: code
-                      .replace(/console\.(log|debug|info)\(.*?\);?/g, '')
-                      .replace(/debugger;?/g, ''),
-                    map: null,
-                  };
-                }
-              },
-            },
-          ]
-        : [],
-  }),
+  // vite: () => ({
+  //   plugins:
+  //     process.env.NODE_ENV === 'production'
+  //       ? [
+  //           {
+  //             name: 'remove-console-prod',
+  //             transform(code, id) {
+  //               if (
+  //                 id.endsWith('.js') ||
+  //                 id.endsWith('.ts') ||
+  //                 id.endsWith('.vue')
+  //               ) {
+  //                 return {
+  //                   code: code
+  //                     .replace(/console\.(log|debug|info)\(.*?\);?/g, '')
+  //                     .replace(/debugger;?/g, ''),
+  //                   map: null,
+  //                 };
+  //               }
+  //             },
+  //           },
+  //         ]
+  //       : [],
+  // }),
   manifest: (env) => {
     const manifest = {
       name: 'Твич 1080 | Твич качество 1080 от STREAM KEY',

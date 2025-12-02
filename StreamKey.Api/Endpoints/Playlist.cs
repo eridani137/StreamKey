@@ -21,9 +21,8 @@ public class Playlist : ICarterModule
                     HttpContext context,
                     IUsherService usherService,
                     StatisticService statisticService,
-                    ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetStreamPlaylist(context, usherService, statisticService, settings, logger))
+                await GetStreamPlaylist(context, usherService, statisticService, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
@@ -34,9 +33,8 @@ public class Playlist : ICarterModule
         group.MapGet("/vod", async (
                     HttpContext context,
                     IUsherService usherService,
-                    ISettingsStorage settings,
                     ILogger<Playlist> logger) =>
-                await GetVodPlaylist(context, usherService, settings, logger))
+                await GetVodPlaylist(context, usherService, logger))
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
@@ -49,7 +47,6 @@ public class Playlist : ICarterModule
         HttpContext context,
         IUsherService usherService,
         StatisticService statisticService,
-        ISettingsStorage settings,
         ILogger<Playlist> logger)
     {
         try
@@ -85,11 +82,6 @@ public class Playlist : ICarterModule
                 }
             }
 
-            if (await settings.GetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false))
-            {
-                logger.LogInformation("{Playlist}", result.Value);
-            }
-
             return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);
         }
         catch (Exception e)
@@ -102,7 +94,6 @@ public class Playlist : ICarterModule
     private static async Task<IResult> GetVodPlaylist(
         HttpContext context,
         IUsherService usherService,
-        ISettingsStorage settings,
         ILogger<Playlist> logger)
     {
         try
@@ -134,11 +125,6 @@ public class Playlist : ICarterModule
                         logger.LogWarning("{Error}: {VodId}", result.Error.Message, vodId.ToString());
                         return Results.InternalServerError(result.Error.Message);
                 }
-            }
-            
-            if (await settings.GetBoolSettingAsync(ApplicationConstants.LoggingPlaylists, false))
-            {
-                logger.LogInformation("{Playlist}", result.Value);
             }
             
             return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);

@@ -5,9 +5,6 @@ public static class ApplicationConstants
     public const string UsherClientName = "UsherClient";
     public const string ServerClientName = "ServerClient";
     
-    public const string LoggingPlaylists = "LoggingPlaylists";
-    public const string RemoveAds = "RemoveAds";
-    
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     
     public static readonly Uri UsherUrl = new("https://usher.ttvnw.net");
@@ -20,6 +17,9 @@ public static class ApplicationConstants
     public static readonly Uri TelegramUrl = new ("https://api.telegram.org");
     public const string TelegramClientName = "TelegramClient";
     public const long TelegramChatId = -1001578482756;
+    
+    public static string? DefaultAuthorization { get; set; }
+    public static string? DefaultDeviceId { get; set; }
     
     public static Dictionary<string, string> Headers { get; } = new()
     {
