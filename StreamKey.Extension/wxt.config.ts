@@ -26,7 +26,7 @@ export default defineConfig({
   //           },
   //         ]
   //       : [],
-  // }),
+  // }), // TODO
   manifest: (env) => {
     const manifest = {
       name: 'Твич 1080 | Твич качество 1080 от STREAM KEY',

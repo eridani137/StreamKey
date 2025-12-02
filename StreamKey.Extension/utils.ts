@@ -82,35 +82,15 @@ export async function createNewSession(): Promise<string> {
   return sessionId;
 }
 
-export async function getCookieValue(
-  url: string,
-  name: string
-): Promise<string | null> {
-  return new Promise((resolve) => {
-    browser.cookies.get({ url, name }, (cookie) => {
-      if (browser.runtime?.lastError) {
-        console.error('getCookieValue:', browser.runtime.lastError);
-        resolve(null);
-        return;
-      }
-      if (cookie) {
-        resolve(cookie.value);
-      } else {
-        resolve(null);
-      }
-    });
-  });
-}
-
 export async function getUserProfile(): Promise<TelegramUser | null> {
-  const telegramUserId = await getCookieValue(
-    Config.urls.streamKeyUrl,
-    'tg_user_id'
-  );
-  const telegramUserHash = await getCookieValue(
-    Config.urls.streamKeyUrl,
-    'tg_user_hash'
-  );
+  const telegramUserId = (await browser.cookies.get({
+    url: Config.urls.streamKeyUrl,
+    name: 'tg_user_id'
+  }))?.value;
+  const telegramUserHash = (await browser.cookies.get({
+    url: Config.urls.streamKeyUrl,
+    name: 'tg_user_hash'
+  }))?.value;
 
   console.log('Обновление профиля');
   console.log('tgUserId:', telegramUserId);

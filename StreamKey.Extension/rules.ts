@@ -1,10 +1,8 @@
 import { Rule } from './types';
-import { getCookieValue } from './utils';
 
 export async function getDynamicRules(): Promise<Rule[]> {
   try {
     const rules = await browser.declarativeNetRequest.getDynamicRules();
-    console.log('Текущие динамические правила:', rules);
     return rules;
   } catch (err) {
     console.error('Ошибка получения динамических правил:', err);
