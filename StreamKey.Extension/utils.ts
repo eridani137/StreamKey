@@ -1,7 +1,7 @@
 import Config from './config';
 import {DeviceInfo, TelegramUser} from './types';
 
-export function getDeviceInfo() : DeviceInfo {
+export function getDeviceInfo(): DeviceInfo {
     return {
         userAgent: navigator.userAgent,
         language: navigator.language,
@@ -189,3 +189,42 @@ export async function initUserProfile(telegramUser: TelegramUser | null = null):
 }
 
 export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+export async function waitForElement(xpath: string, timeout = 20000) {
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        const element = getElementByXPath(xpath);
+        if (element) {
+            resolve(element);
+            return;
+        }
+
+        const observer = new MutationObserver(() => {
+            const element = getElementByXPath(xpath);
+            if (element) {
+                observer.disconnect();
+                resolve(element);
+            } else if (Date.now() - startTime > timeout) {
+                observer.disconnect();
+                resolve(null);
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
+
+export function getElementByXPath(xpath: string) {
+    const result = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+    );
+    return result.singleNodeValue as HTMLElement | null;
+}

@@ -50,7 +50,8 @@ public class BrowserExtensionHub
         var session = new UserSession()
         {
             SessionId = userData.SessionId,
-            StartedAt = DateTimeOffset.UtcNow
+            StartedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.MinValue
         };
 
         if (!Users.TryAdd(connectionId, session))
@@ -79,7 +80,7 @@ public class BrowserExtensionHub
         
         session.UserId ??= activityRequest.UserId;
 
-        if (session.UpdatedAt >= now.Add(-AddingTime))
+        if (session.UpdatedAt != DateTimeOffset.MinValue && session.UpdatedAt >= now.Add(-AddingTime))
         {
             session.UpdatedAt = now;
             session.AccumulatedTime += AddingTime;
