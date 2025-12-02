@@ -2,7 +2,6 @@ import './style.css';
 import qualityMenu from '@/QualityMenu';
 import activeChannels from '@/ActiveChannels';
 import activityHandler from '@/ActivityHandler';
-import { loadTwitchRedirectRules } from '@/rules';
 
 export default defineContentScript({
   matches: ['https://*.twitch.tv/*'],
@@ -13,7 +12,7 @@ export default defineContentScript({
 });
 
 async function runScripts(ctx: any) {
-  await loadTwitchRedirectRules();
+  // await loadTwitchRedirectRules();
   await activeChannels.init(ctx);
   await qualityMenu.init(ctx);
   await activityHandler.init(ctx);
