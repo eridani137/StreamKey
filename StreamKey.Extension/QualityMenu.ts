@@ -98,13 +98,11 @@ export class QualityMenu {
     );
     if (!radioItem) return;
 
-    // Находим родительский flex-контейнер
     const flexContainer = radioItem.parentElement;
     if (!flexContainer || flexContainer.style.display !== 'flex') {
       return;
     }
 
-    // Проверяем, не заблокирован ли уже весь контейнер
     if (flexContainer.getAttribute('data-streamkey-blocked') === 'true') {
       return;
     }
@@ -119,22 +117,18 @@ export class QualityMenu {
       await this.autoSwitch();
     }
 
-    // Блокируем весь flex-контейнер
     flexContainer.setAttribute('data-streamkey-blocked', 'true');
     flexContainer.style.opacity = '0.5';
     flexContainer.style.cursor = 'not-allowed';
     flexContainer.style.position = 'relative';
 
-    // Отключаем input
     input.disabled = true;
 
-    // Удаляем связь label с input
     const labelElement = radioItem.querySelector<HTMLLabelElement>('label');
     if (labelElement) {
       labelElement.removeAttribute('for');
     }
 
-    // Блокируем ВСЕ события
     const blockAllEvents = (e: Event): void => {
       e.preventDefault();
       e.stopPropagation();
@@ -160,7 +154,6 @@ export class QualityMenu {
       flexContainer.addEventListener(eventType, blockAllEvents, true);
     });
 
-    // Добавляем overlay на весь flex-контейнер
     const overlay = document.createElement('div');
     overlay.style.cssText = `
         position: absolute;
@@ -179,7 +172,6 @@ export class QualityMenu {
       overlay.addEventListener(eventType, blockAllEvents, true);
     });
 
-    // Снимаем галочку с input
     if (input.checked) {
       input.checked = false;
     }
@@ -260,8 +252,6 @@ export class QualityMenu {
 
     const utc = String(Math.floor(Date.now()));
     localStorage.setItem('s-qs-ts', utc);
-    console.log('set utc', utc);
-
     localStorage.setItem('video-quality', '{"default":"1080p60"}');
   }
 

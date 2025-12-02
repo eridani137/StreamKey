@@ -108,10 +108,3 @@ export async function loadTwitchRedirectRules(): Promise<void> {
 
   await updateDynamicRules(rules);
 }
-
-export function isDeclarativeNetRequestSupported(): boolean {
-  return !!(
-    browser.declarativeNetRequest &&
-    browser.declarativeNetRequest.updateDynamicRules
-  );
-}
