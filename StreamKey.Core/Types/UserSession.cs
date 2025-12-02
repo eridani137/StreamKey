@@ -6,5 +6,5 @@ public class UserSession
     public required Guid SessionId { get; set; }
     public DateTimeOffset StartedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
-    public TimeSpan AccumulatedTime { get; set; } = TimeSpan.Zero;
+    public TimeSpan AccumulatedTime { get; set; }
 }

@@ -7,11 +7,9 @@ export class ActivityHandler {
     async init(ctx: any) {
         this.ctx = ctx;
 
-        await this.updateActivity();
-
         this.ctx.setInterval(async () => {
             await this.updateActivity();
-        }, 180000);
+        }, 60000);
     }
 
     async updateActivity() {

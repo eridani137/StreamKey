@@ -79,7 +79,7 @@ public class BrowserExtensionHub
         
         session.UserId ??= activityRequest.UserId;
 
-        if (session.UpdatedAt >= now.Add(-AddingTime))
+        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-AddingTime))
         {
             session.UpdatedAt = now;
             session.AccumulatedTime += AddingTime;
