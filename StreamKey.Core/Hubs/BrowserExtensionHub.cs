@@ -86,6 +86,10 @@ public class BrowserExtensionHub
 
         if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-AddingTime))
         {
+            if (session.UpdatedAt == DateTimeOffset.MinValue)
+            {
+                session.StartedAt = now;
+            }
             session.UpdatedAt = now;
             session.AccumulatedTime += AddingTime;
         }
