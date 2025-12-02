@@ -1,4 +1,3 @@
-using System.Collections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -132,11 +131,12 @@ public class StatisticHandler(
 
             var processed = 0;
 
-            while (statisticService.ViewStatisticQueue.TryDequeue(out var data))
+            var entities = new List<ViewStatisticEntity>();
+            while (statisticService.ViewStatisticQueue.TryDequeue(out var entity))
             {
                 try
                 {
-                    await repository.Add(data);
+                    entities.Add(entity);
                     processed++;
                 }
                 catch (Exception e)
@@ -144,6 +144,8 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при добавлении записи просмотра");
                 }
             }
+
+            await repository.AddRange(entities);
 
             await unitOfWork.SaveChangesAsync();
 
@@ -250,11 +252,12 @@ public class StatisticHandler(
 
             var processed = 0;
 
-            while (statisticService.ChannelActivityQueue.TryDequeue(out var data))
+            var entities = new List<ClickChannelEntity>();
+            while (statisticService.ChannelActivityQueue.TryDequeue(out var entity))
             {
                 try
                 {
-                    await repository.Add(data);
+                    entities.Add(entity);
                     processed++;
                 }
                 catch (Exception e)
@@ -262,6 +265,8 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при добавлении записи клика на канал");
                 }
             }
+            
+            await repository.AddRange(entities);
 
             await unitOfWork.SaveChangesAsync();
 
