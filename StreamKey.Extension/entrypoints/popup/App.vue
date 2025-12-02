@@ -1,5 +1,8 @@
 <template>
   <div class="popup-window">
+    <div class="status-container">
+      <StatusLabel />
+    </div>
     <div class="circle-logo" @click="handleLogoClick">
       <StreamKeyLogo v-if="!showVideo" />
       <video
@@ -68,13 +71,13 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import Config from '@/config';
-import { TelegramStatus, TelegramUser } from '@/types';
-import * as utils from '@/utils';
+import { StatusType, TelegramStatus, TelegramUser } from '@/types';
 
 import StreamKeyLogo from '@/components/StreamKeyLogo.vue';
 import TelegramCircle from '@/components/TelegramCircle.vue';
 import QAButton from '@/components/QAButton.vue';
 import ActivateButton from '@/components/ActivateButton.vue';
+import StatusLabel from '@/components/StatusLabel.vue';
 
 import EnableVideo from '~/assets/enable.webm';
 import EnabledVideo from '~/assets/enabled.webm';
@@ -329,5 +332,14 @@ onMounted(async () => {
   font-size: 12px;
   color: #888;
   margin-top: 2px;
+}
+
+.status-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0px 0px 8px 0px;
+  margin-left: 8px;
+  width: 100%;
 }
 </style>

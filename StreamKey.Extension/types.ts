@@ -101,3 +101,8 @@ export interface DeviceInfo {
 export type Rule = Awaited<
   ReturnType<typeof browser.declarativeNetRequest.getDynamicRules>
 >[number];
+
+export enum StatusType {
+  WORKING = 'working',
+  MAINTENANCE = 'maintenance'
+}
