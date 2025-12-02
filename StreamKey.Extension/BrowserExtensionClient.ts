@@ -19,17 +19,16 @@ import * as utils from '@/utils';
 class BrowserExtensionClient {
   private connection: HubConnection;
   private sessionId: string;
+  private stateCheckInterval: NodeJS.Timeout;
 
   constructor() {
     this.sessionId = '';
     this.connection = new HubConnectionBuilder()
       .withUrl(Config.urls.extensionHub, {
-        withCredentials: true,
-        skipNegotiation: true,
         transport: HttpTransportType.WebSockets,
       })
       .withHubProtocol(new MessagePackHubProtocol())
-      .configureLogging(LogLevel.Warning)
+      .configureLogging(LogLevel.Debug)
       .withAutomaticReconnect()
       .build();
 
@@ -50,17 +49,48 @@ class BrowserExtensionClient {
       }
     );
 
+    this.connection.onreconnected((connectionId) => {
+      console.log('Переподключено, ID:', connectionId);
+      if (this.sessionId) {
+        this.connection.invoke('EntranceUserData', {
+          SessionId: this.sessionId,
+        });
+      }
+    });
+
     this.connection.onclose(() => {
       console.warn('Connection closed');
     });
+
+    this.stateCheckInterval = setInterval(async () => {
+      if (this.connection.state === HubConnectionState.Disconnected && this.sessionId) {
+        console.log('Disconnected, auto-restarting...');
+        await this.start(this.sessionId);
+      }
+    }, 10000);
+  }
+
+  async ping(): Promise<boolean> {
+    try {
+      await this.connection.invoke('Ping');
+      return true;
+    } catch (error) {
+      console.warn('Ping failed:', error);
+      return false;
+    }
   }
 
   async start(sessionId: string): Promise<void> {
-    if (this.connection.state === HubConnectionState.Connected) return;
-
     this.sessionId = sessionId;
 
-    await this.connection.start();
+    if (this.connection.state === HubConnectionState.Disconnected) {
+      try {
+        await this.connection.start();
+      } catch (error) {
+        console.error('Ошибка соединения:', error);
+        setTimeout(() => this.start(sessionId), 5000);
+      }
+    }
   }
 
   async updateActivity(payload: WithUserId): Promise<void> {
