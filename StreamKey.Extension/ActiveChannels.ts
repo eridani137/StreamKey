@@ -9,7 +9,7 @@ export class ActiveChannels {
   private channelData: ChannelData[] = [];
   private isDataReady: boolean = false;
   private tooltipObserver: MutationObserver | null = null;
-  private readonly minUpdateInterval: number = 180000;
+  private readonly minUpdateInterval: number = 60000;
   private pendingUpdate: NodeJS.Timeout | null = null;
 
   public init(ctx: any): void {
@@ -74,7 +74,6 @@ export class ActiveChannels {
 
   private async fetchAndUpdateChannels(): Promise<void> {
     const channels = await sendMessage('getChannels');
-    console.log('channels', channels);
 
     console.log(`[Channels] Fetch OK — received ${channels.length} items`);
 
