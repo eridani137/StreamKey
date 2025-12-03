@@ -1,5 +1,6 @@
 using Carter;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Hubs;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Types;
@@ -36,7 +37,7 @@ public class Statistic : ICarterModule
 
         group.MapGet("/online",
                 (StatisticService statisticService) =>
-                    Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count)))
+                    Results.Ok(new ActivityResponse(BrowserExtensionHub.Users.Count)))
             .WithSummary("Получить число онлайн пользователей")
             .RequireAuthorization()
             .Produces<ActivityResponse>();
@@ -68,13 +69,13 @@ public class Statistic : ICarterModule
         var activityGroup = app.MapGroup("/activity")
             .WithTags("Активность");
 
-        activityGroup.MapPost("/update",
-                (ActivityRequest activityRequest, StatisticService statisticService) =>
-                {
-                    statisticService.UpdateUserActivity(activityRequest);
-
-                    return Results.Ok();
-                })
-            .WithSummary("Обновление активности пользователя");
+        // activityGroup.MapPost("/update",
+        //         (ActivityRequest activityRequest, StatisticService statisticService) =>
+        //         {
+        //             statisticService.UpdateUserActivity(activityRequest);
+        //
+        //             return Results.Ok();
+        //         })
+        //     .WithSummary("Обновление активности пользователя"); // TODO
     }
 }

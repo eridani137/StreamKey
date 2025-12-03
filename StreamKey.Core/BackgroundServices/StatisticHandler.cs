@@ -57,7 +57,7 @@ public class StatisticHandler(
                 try
                 {
                     await Task.Delay(RemoveOfflineUsersInterval, _stoppingCts.Token);
-                    await RemoveOfflineUsers(false);
+                    await RemoveOfflineUsers();
                 }
                 catch (OperationCanceledException)
                 {
@@ -96,7 +96,7 @@ public class StatisticHandler(
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await SaveViewStatistic();
-        await RemoveOfflineUsers(true);
+        await RemoveOfflineUsers();
         await SaveChannelClickStatistic();
 
         await _stoppingCts.CancelAsync();
@@ -160,7 +160,7 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveOfflineUsers(bool shutdown)
+    private async Task RemoveOfflineUsers()
     {
         try
         {
@@ -168,19 +168,19 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            List<string> userIds;
-            if (!shutdown)
-            {
-                var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
-                userIds = statisticService.OnlineUsers
-                    .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
-                    .Select(s => s.Key)
-                    .ToList();
-            }
-            else
-            {
-                userIds = statisticService.OnlineUsers.Keys.ToList();
-            }
+            // List<string> userIds;
+            // if (!shutdown)
+            // {
+            //     var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
+            //     userIds = statisticService.OnlineUsers
+            //         .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
+            //         .Select(s => s.Key)
+            //         .ToList();
+            // }
+            // else
+            // {
+            //     userIds = statisticService.OnlineUsers.Keys.ToList();
+            // } // TODO
 
             var disconnectedUsers = BrowserExtensionHub.DisconnectedUsers.Values.Select(v =>
                     new UserSessionEntity()
@@ -195,7 +195,7 @@ public class StatisticHandler(
 
             await RemoveAndSaveDisconnectedUserSessions(disconnectedUsers, repository, unitOfWork);
 
-            await RemoveAndSaveUserSessions(userIds, repository, unitOfWork);
+            // await RemoveAndSaveUserSessions(userIds, repository, unitOfWork);
         }
         catch (Exception e)
         {
@@ -203,30 +203,30 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository,
-        IUnitOfWork unitOfWork)
-    {
-        var minimumSessionDuration = TimeSpan.FromSeconds(45);
-
-        var processed = 0;
-
-        foreach (var offlineUserId in userIds)
-        {
-            if (!statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser)) continue;
-            var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
-
-            if (sessionDuration < minimumSessionDuration) continue;
-            await repository.Add(offlineUser);
-            processed++;
-        }
-
-        await unitOfWork.SaveChangesAsync();
-
-        if (processed > 0)
-        {
-            logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
-        }
-    }
+    // private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository,
+    //     IUnitOfWork unitOfWork)
+    // {
+    //     var minimumSessionDuration = TimeSpan.FromSeconds(45);
+    //
+    //     var processed = 0;
+    //
+    //     foreach (var offlineUserId in userIds)
+    //     {
+    //         if (!statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser)) continue;
+    //         var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
+    //
+    //         if (sessionDuration < minimumSessionDuration) continue;
+    //         await repository.Add(offlineUser);
+    //         processed++;
+    //     }
+    //
+    //     await unitOfWork.SaveChangesAsync();
+    //
+    //     if (processed > 0)
+    //     {
+    //         logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
+    //     }
+    // }
 
     private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
         UserSessionRepository repository, IUnitOfWork unitOfWork)
