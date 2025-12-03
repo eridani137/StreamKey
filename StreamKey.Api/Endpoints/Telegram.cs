@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Carter;
 using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
@@ -6,6 +8,7 @@ using StreamKey.Core.Extensions;
 using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -21,6 +24,12 @@ public class Telegram : ICarterModule
                     ITelegramUserRepository repository, IUnitOfWork unitOfWork,
                     IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub) =>
                 {
+                    var checkHash = CheckHash(dto);
+                    if (!string.IsNullOrEmpty(checkHash))
+                    {
+                        return Results.BadRequest(checkHash);
+                    }
+                    
                     var user = await repository.GetByTelegramId(dto.Id);
 
                     var isNewUser = false;
@@ -97,5 +106,49 @@ public class Telegram : ICarterModule
                 })
             .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");
+    }
+
+    private static string CheckHash(TelegramAuthDto dto)
+    {
+        var dataCheckList = new List<string>();
+
+        if (dto.Id > 0) dataCheckList.Add($"id={dto.Id}");
+
+        if (dto.AuthDate > 0) dataCheckList.Add($"auth_date={dto.AuthDate}");
+
+        if (!string.IsNullOrEmpty(dto.FirstName)) dataCheckList.Add($"first_name={dto.FirstName}");
+
+        if (!string.IsNullOrEmpty(dto.Username)) dataCheckList.Add($"username={dto.Username}");
+
+        if (!string.IsNullOrEmpty(dto.PhotoUrl)) dataCheckList.Add($"photo_url={dto.PhotoUrl}");
+
+        dataCheckList.Sort();
+
+        var dataCheckString = string.Join("\n", dataCheckList);
+
+        var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(ApplicationConstants.TelegramBotToken));
+
+        byte[] hashBytes;
+        using (var hmac = new HMACSHA256(secretKey))
+        {
+            hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataCheckString));
+        }
+
+        var hash = Convert.ToHexStringLower(hashBytes);
+
+        if (!hash.Equals(dto.Hash, StringComparison.Ordinal))
+        {
+            return "Хеш недействителен";
+        }
+
+        var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        const long seconds = 86400;
+                    
+        if (currentTime - dto.AuthDate > seconds)
+        {
+            return "Срок действия истек";
+        }
+
+        return string.Empty;
     }
 }
