@@ -19,6 +19,4 @@ public class TelegramUserEntity : BaseIntEntity
     public DateTime AuthorizedAt { get; set; }
     
     public DateTime UpdatedAt { get; set; }
-    
-    // public DateTime UsedAt { get; set; } // TODO
 }
