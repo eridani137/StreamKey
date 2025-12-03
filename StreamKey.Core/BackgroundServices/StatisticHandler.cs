@@ -180,6 +180,8 @@ public class StatisticHandler(
                 .ToList();
 
             await RemoveAndSaveDisconnectedUserSessions(disconnectedUsers, repository, unitOfWork);
+            
+            BrowserExtensionHub.DisconnectedUsers.Clear();
         }
         catch (Exception e)
         {
