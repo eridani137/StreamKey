@@ -78,9 +78,19 @@ export interface WithUserId {
   UserId: string;
 }
 
+export interface WithNumberUserId {
+  UserId: number;
+}
+
+export interface WithUserHash {
+  UserHash: string;
+}
+
 export interface WithChannelName {
   ChannelName: string;
 }
+
+export interface TelegramUserResponse extends WithNumberUserId, WithUserHash {}
 
 export interface ActivityRequest extends WithSessionId, WithUserId {}
 

@@ -37,3 +37,9 @@ public class TelegramUserDto
     [JsonPropertyName("is_chat_member")]
     public bool IsChatMember { get; set; }
 }
+
+public class TelegramUserRequest
+{
+    public required long UserId { get; set; }
+    public required string UserHash { get; set; }
+}

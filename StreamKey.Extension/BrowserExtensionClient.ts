@@ -10,6 +10,7 @@ import {
   ActivityRequest,
   ClickChannel,
   TelegramUser,
+  TelegramUserResponse,
   WithSessionId,
   WithUserId,
 } from '@/types';
@@ -61,11 +62,6 @@ class BrowserExtensionClient {
 
     this.connection.onreconnected(async () => {
       console.log('Переподключено');
-      // if (this.sessionId) {
-      //   this.connection.invoke('EntranceUserData', {
-      //     SessionId: this.sessionId,
-      //   });
-      // }
       await sendMessage('setConnectionState', this.connectionState);
     });
 
@@ -109,6 +105,10 @@ class BrowserExtensionClient {
     };
 
     await this.connection.invoke('UpdateActivity', userActivity);
+  }
+
+  async getTelegramUser(payload: TelegramUserResponse): Promise<TelegramUser> {
+    return await this.connection.invoke('GetTelegramUser', payload);
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {

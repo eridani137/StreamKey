@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Core.Types;
+using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Hubs;
@@ -108,10 +110,18 @@ public class BrowserExtensionHub
         
         return Task.CompletedTask;
     }
-    
-    public Task Ping()
+
+    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request, [FromServices] ITelegramUserRepository repository)
     {
-        return Task.CompletedTask;
+        var user = await repository.GetByTelegramIdNotTracked(request.UserId);
+        if (user is null) return null;
+        
+        if (!string.Equals(request.UserHash, user.Hash, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return user.MapUserDto();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

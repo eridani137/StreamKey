@@ -1,5 +1,6 @@
 import Config from './config';
-import { DeviceInfo, TelegramUser } from './types';
+import { sendMessage } from './messaging';
+import { DeviceInfo, TelegramUser, TelegramUserResponse } from './types';
 
 export function getDeviceInfo(): DeviceInfo {
   return {
@@ -93,31 +94,26 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
   }))?.value;
 
   console.log('Обновление профиля');
+
   console.log('tgUserId:', telegramUserId);
   console.log('tgUserHash:', telegramUserHash);
 
   if (telegramUserId && telegramUserHash) {
     try {
-      const response = await fetch(
-        `${Config.urls.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      const responseData : TelegramUserResponse = {
+        UserId: Number(telegramUserId),
+        UserHash: telegramUserHash
+      }
 
-      if (!response.ok) {
-        console.log('Сервер вернул ошибку: ' + response.status);
+      const response = await sendMessage('getTelegramUser', responseData);
+      if (response) {
+        console.log("Сервер не вернул пользователя");
         return null;
       }
 
-      const text = await response.text();
+      console.log('Сервер вернул пользователя', response);
 
-      const data = text ? JSON.parse(text) : null;
-
-      console.log(data);
-
-      return data;
+      return response;
     } catch (err) {
       console.error(err);
       return null;

@@ -30,4 +30,8 @@ export default defineBackground(() => {
   onMessage('getConnectionState', async () => {
     return extensionClient.connectionState;
   })
+
+  onMessage('getTelegramUser', async (message) => {
+    return extensionClient.getTelegramUser(message.data);
+  })
 });
