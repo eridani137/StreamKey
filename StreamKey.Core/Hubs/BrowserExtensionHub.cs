@@ -152,9 +152,9 @@ public class BrowserExtensionHub
             
             repository.Update(user);
             await unitOfWork.SaveChangesAsync();
-            
-            await Clients.Caller.ReloadUserData(user.MapUserDto());
         }
+        
+        await Clients.Caller.ReloadUserData(user.MapUserDto());
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
