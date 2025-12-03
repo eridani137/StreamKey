@@ -5,7 +5,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs.TwitchGraphQL;
 using StreamKey.Core.Results;
 using StreamKey.Shared;
 
@@ -13,21 +12,11 @@ namespace StreamKey.Core.Services;
 
 public class UsherService(
     IHttpClientFactory clientFactory,
-    ITwitchService twitchService,
-    IMemoryCache cache
+    ITwitchService twitchService
 ) : IUsherService
 {
     public async Task<Result<string>> GetStreamPlaylist(string username, HttpContext context)
     {
-        // if (!cache.TryGetValue(username, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
-        // {
-        //     tokenResponse = await twitchService.GetStreamAccessToken(username, context);
-        //     if (tokenResponse is not null)
-        //     {
-        //         cache.Set(username, tokenResponse, TimeSpan.FromMinutes(1));
-        //     }
-        // } // TODO
-
         var tokenResponse = await twitchService.GetStreamAccessToken(username, context);
 
         if (tokenResponse?.Data is null)
@@ -96,15 +85,6 @@ public class UsherService(
 
     public async Task<Result<string>> GetVodPlaylist(string vodId, HttpContext context)
     {
-        // if (!cache.TryGetValue(vodId, out VideoPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
-        // {
-        //     tokenResponse = await twitchService.GetVodAccessToken(vodId, context);
-        //     if (tokenResponse is not null)
-        //     {
-        //         cache.Set(vodId, tokenResponse, TimeSpan.FromMinutes(1));
-        //     }
-        // } // TODO
-
         var tokenResponse = await twitchService.GetVodAccessToken(vodId, context);
 
         if (tokenResponse?.Data is null)

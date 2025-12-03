@@ -65,17 +65,5 @@ public class Statistic : ICarterModule
                 })
             .Produces<ChannelClicksStatistic>()
             .WithSummary("Получение числа кликов на канал");
-
-        var activityGroup = app.MapGroup("/activity")
-            .WithTags("Активность");
-
-        // activityGroup.MapPost("/update",
-        //         (ActivityRequest activityRequest, StatisticService statisticService) =>
-        //         {
-        //             statisticService.UpdateUserActivity(activityRequest);
-        //
-        //             return Results.Ok();
-        //         })
-        //     .WithSummary("Обновление активности пользователя"); // TODO
     }
 }

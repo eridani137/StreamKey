@@ -14,38 +14,6 @@ public class Channel : ICarterModule
         var group = app.MapGroup("/channels")
             .WithTags("Работа с каналами")
             .RequireAuthorization();
-        
-        // group.MapPost("/click",
-        //         (ClickChannelDto dto, StatisticService service) =>
-        //         {
-        //             service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
-        //             {
-        //                 ChannelName = dto.ChannelName,
-        //                 UserId = dto.UserId,
-        //                 DateTime = DateTime.UtcNow
-        //             });
-        //         })
-        //     .AllowAnonymous()
-        //     .WithSummary("Клик на канал"); // TODO
-
-        group.MapGet("/refresh",
-                async (ILogger<Channel> logger, IChannelRepository repository, IChannelService service) =>
-                {
-                    var channels = await repository.GetAll();
-                    foreach (var channel in channels)
-                    {
-                        try
-                        {
-                            await service.UpdateChannelInfo(channel);
-                        }
-                        catch (Exception e)
-                        {
-                            logger.LogError(e, "Ошибка при обновлении информации канала {@Channel}", channel);
-                        }
-                    }
-                })
-            .Produces(StatusCodes.Status200OK)
-            .WithSummary("Запуск обновления каналов");
 
         group.MapGet("/all",
                 async (IChannelService service) =>

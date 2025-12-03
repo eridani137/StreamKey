@@ -43,19 +43,17 @@ public static class ServiceExtensions
         }
     }
 
-    public static void AddAdditionHeaders(this IHostApplicationBuilder builder)
+    public static void AddDefaultAuthorization(this IHostApplicationBuilder builder)
     {
         var authorization = builder.Configuration.GetSection("Authorization");
         if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
         {
-            // ApplicationConstants.Headers.Add("Authorization", authorization.Value); // TODO
             ApplicationConstants.DefaultAuthorization = authorization.Value;
         }
 
         var deviceId = builder.Configuration.GetSection("DeviceId");
         if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
         {
-            // ApplicationConstants.Headers.Add("x-device-id", deviceId.Value); // TODO
             ApplicationConstants.DefaultDeviceId = deviceId.Value;
         }
     }
