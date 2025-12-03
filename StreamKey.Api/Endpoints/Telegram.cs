@@ -137,7 +137,7 @@ public class Telegram : ICarterModule
 
         var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         const long seconds = 86400;
-                    
+
         if (currentTime - dto.AuthDate > seconds)
         {
             return "Срок действия истек";

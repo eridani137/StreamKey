@@ -1,7 +1,7 @@
 import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
-import { onMessage } from '@/messaging';
+import { onMessage, sendMessage } from '@/messaging';
 import { loadTwitchRedirectRules } from '@/rules';
 
 export default defineBackground(() => {
@@ -26,4 +26,8 @@ export default defineBackground(() => {
   onMessage('clickChannel', async (message) => {
     await extensionClient.clickChannel(message.data);
   });
+  
+  onMessage('getConnectionState', () => {
+    return extensionClient.connectionState;
+  })
 });

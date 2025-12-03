@@ -6,14 +6,28 @@
 </template>
 
 <script setup lang="ts">
-import extensionClient from '@/BrowserExtensionClient';
+import { ref, computed, onMounted } from 'vue';
+import { sendMessage } from '@/messaging';
 import { StatusType } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr';
 
-const signalrStatus = computed(() => {
-  const state = extensionClient.connectionState;
-  if (state === HubConnectionState.Connected) return StatusType.WORKING;
-  return StatusType.MAINTENANCE;
+const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
+
+async function updateStatus() {
+  try {
+    const state = await sendMessage('getConnectionState');
+    console.log('state', state);
+    signalrStatus.value =
+      state === HubConnectionState.Connected
+        ? StatusType.WORKING
+        : StatusType.MAINTENANCE;
+  } catch (error) {
+    signalrStatus.value = StatusType.MAINTENANCE;
+  }
+}
+
+onMounted(async () => {
+  await updateStatus();
 });
 
 const statusClass = computed(() =>

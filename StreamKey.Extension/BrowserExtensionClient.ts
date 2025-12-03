@@ -19,7 +19,6 @@ import * as utils from '@/utils';
 class BrowserExtensionClient {
   private connection: HubConnection;
   private sessionId: string;
-  private stateCheckInterval: NodeJS.Timeout;
 
   constructor() {
     this.sessionId = '';
@@ -50,13 +49,6 @@ class BrowserExtensionClient {
     );
 
     this.setupConnectionHandlers();
-
-    this.stateCheckInterval = setInterval(async () => {
-      if (this.connection.state === HubConnectionState.Disconnected && this.sessionId) {
-        console.log('Disconnected, auto-restarting...');
-        await this.start(this.sessionId);
-      }
-    }, 10000);
   }
 
   private setupConnectionHandlers(): void {
@@ -67,7 +59,9 @@ class BrowserExtensionClient {
     this.connection.onreconnected((connectionId) => {
       console.log('Переподключено, ID:', connectionId);
       if (this.sessionId) {
-        this.connection.invoke('EntranceUserData', { SessionId: this.sessionId });
+        this.connection.invoke('EntranceUserData', {
+          SessionId: this.sessionId,
+        });
       }
     });
 
