@@ -174,6 +174,7 @@ async function checkMember() {
   console.log('userId', userId);
 
   await sendMessage('checkMember', { UserId: Number(userId) } as CheckMemberResponse);
+  await loadUserProfile();
 }
 
 async function initializeExtension() {
