@@ -15,6 +15,7 @@ import {
 } from '@/types';
 import Config from '@/config';
 import * as utils from '@/utils';
+import { sendMessage } from './messaging';
 
 class BrowserExtensionClient {
   private connection: HubConnection;
@@ -24,10 +25,11 @@ class BrowserExtensionClient {
     this.sessionId = '';
     this.connection = new HubConnectionBuilder()
       .withUrl(Config.urls.extensionHub, {
+        skipNegotiation: true,
         transport: HttpTransportType.WebSockets,
       })
       .withHubProtocol(new MessagePackHubProtocol())
-      .configureLogging(LogLevel.Warning) // TODO
+      .configureLogging(LogLevel.Debug) // TODO
       .withAutomaticReconnect()
       .build();
 
@@ -52,21 +54,24 @@ class BrowserExtensionClient {
   }
 
   private setupConnectionHandlers(): void {
-    this.connection.onreconnecting((error) => {
+    this.connection.onreconnecting(async (error) => {
       console.log('Переподключение...', error);
+      await sendMessage('setConnectionState', this.connectionState);
     });
 
-    this.connection.onreconnected((connectionId) => {
-      console.log('Переподключено, ID:', connectionId);
-      if (this.sessionId) {
-        this.connection.invoke('EntranceUserData', {
-          SessionId: this.sessionId,
-        });
-      }
+    this.connection.onreconnected(async () => {
+      console.log('Переподключено');
+      // if (this.sessionId) {
+      //   this.connection.invoke('EntranceUserData', {
+      //     SessionId: this.sessionId,
+      //   });
+      // }
+      await sendMessage('setConnectionState', this.connectionState);
     });
 
-    this.connection.onclose((error) => {
+    this.connection.onclose(async (error) => {
       console.warn('Соединение закрыто:', error);
+      await sendMessage('setConnectionState', this.connectionState);
     });
   }
 

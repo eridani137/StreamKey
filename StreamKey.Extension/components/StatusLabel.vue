@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { sendMessage } from '@/messaging';
+import { onMessage, sendMessage } from '@/messaging';
 import { StatusType } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr';
 
@@ -16,18 +16,25 @@ const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
 async function updateStatus() {
   try {
     const state = await sendMessage('getConnectionState');
-    console.log('state', state);
-    signalrStatus.value =
-      state === HubConnectionState.Connected
-        ? StatusType.WORKING
-        : StatusType.MAINTENANCE;
+    setState(state);
   } catch (error) {
     signalrStatus.value = StatusType.MAINTENANCE;
   }
 }
 
+function setState(state: HubConnectionState) {
+  signalrStatus.value =
+      state === HubConnectionState.Connected
+        ? StatusType.WORKING
+        : StatusType.MAINTENANCE;
+}
+
 onMounted(async () => {
   await updateStatus();
+
+  onMessage('setConnectionState', async (message) => {
+    setState(message.data);
+  });
 });
 
 const statusClass = computed(() =>
@@ -41,7 +48,7 @@ const circleClass = computed(() =>
 );
 
 const statusText = computed(() =>
-  signalrStatus.value === StatusType.WORKING ? 'Работаем' : 'Ведем тех. работы'
+  signalrStatus.value === StatusType.WORKING ? 'Онлайн' : 'Оффлайн'
 );
 </script>
 

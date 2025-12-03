@@ -27,7 +27,7 @@ export default defineBackground(() => {
     await extensionClient.clickChannel(message.data);
   });
   
-  onMessage('getConnectionState', () => {
+  onMessage('getConnectionState', async () => {
     return extensionClient.connectionState;
   })
 });
