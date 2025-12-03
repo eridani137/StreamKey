@@ -1,7 +1,7 @@
 <template>
   <div class="popup-window">
     <div class="status-container">
-      <StatusLabel />
+      <StatusLabel @update-state="onStateUpdate" />
     </div>
     <div class="circle-logo" @click="handleLogoClick">
       <StreamKeyLogo v-if="!showVideo" />
@@ -36,7 +36,7 @@
       @click="openTelegramChannel"
     />
     <ActivateButton
-    style="margin-top: 8px; width: 166.36px;"
+      style="margin-top: 8px; width: 166.36px"
       v-if="telegramStatus === TelegramStatus.NotMember"
       color="#059669"
       color_hover="#07a674"
@@ -80,7 +80,12 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import Config from '@/config';
-import { CheckMemberResponse, TelegramStatus, TelegramUser } from '@/types';
+import {
+  CheckMemberResponse,
+  StatusType,
+  TelegramStatus,
+  TelegramUser,
+} from '@/types';
 
 import StreamKeyLogo from '@/components/StreamKeyLogo.vue';
 import TelegramCircle from '@/components/TelegramCircle.vue';
@@ -99,6 +104,7 @@ const isEnabled = ref(false);
 const isLoading = ref(false);
 const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotMember);
 const telegramUser = ref<TelegramUser | undefined>(undefined);
+const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
 
 const showVideo = computed(() => currentVideo.value !== undefined);
 const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
@@ -131,6 +137,8 @@ function handleVideoEnd() {
 
 async function handleLogoClick() {
   if (isLoading.value) return;
+
+  if (signalrStatus.value !== StatusType.WORKING) return;
 
   isLoading.value = true;
 
@@ -166,27 +174,37 @@ function openQA() {
 }
 
 async function checkMember() {
-  const userId = (await browser.cookies.get({
-    url: Config.urls.streamKeyUrl,
-    name: 'tg_user_id'
-  }))?.value;
+  const userId = (
+    await browser.cookies.get({
+      url: Config.urls.streamKeyUrl,
+      name: 'tg_user_id',
+    })
+  )?.value;
 
   console.log('userId', userId);
 
-  await sendMessage('checkMember', { UserId: Number(userId) } as CheckMemberResponse);
+  await sendMessage('checkMember', {
+    UserId: Number(userId),
+  } as CheckMemberResponse);
   await loadUserProfile();
 }
 
-async function initializeExtension() {
+async function onStateUpdate(state: StatusType) {
+  signalrStatus.value = state;
+  await initializeExtension(state);
+}
+
+async function initializeExtension(state: StatusType | null = null) {
   const savedState = await storage.getItem<boolean>(Config.keys.extensionState);
   isEnabled.value = savedState ?? false;
 
-  if (isEnabled.value) {
-    await loadTwitchRedirectRules();
-    currentVideo.value = EnabledVideo;
-  } else {
+  if (!isEnabled.value || state !== StatusType.WORKING) {
     await removeAllDynamicRules();
+    currentVideo.value = undefined;
+    return;
   }
+
+  currentVideo.value = EnabledVideo;
 }
 
 async function loadUserProfile() {

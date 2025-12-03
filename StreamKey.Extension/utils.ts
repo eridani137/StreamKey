@@ -1,6 +1,7 @@
+import { HubConnectionState } from '@microsoft/signalr/dist/esm/HubConnection';
 import extensionClient from './BrowserExtensionClient';
 import Config from './config';
-import { DeviceInfo, TelegramUser, TelegramUserResponse } from './types';
+import { DeviceInfo, StatusType, TelegramUser, TelegramUserResponse } from './types';
 
 export function getDeviceInfo(): DeviceInfo {
   return {
@@ -182,4 +183,10 @@ export function getElementByXPath(xpath: string) {
     null
   );
   return result.singleNodeValue as HTMLElement | null;
+}
+
+export function getStateClass(state: HubConnectionState) {
+  return state === HubConnectionState.Connected
+    ? StatusType.WORKING
+    : StatusType.MAINTENANCE;
 }

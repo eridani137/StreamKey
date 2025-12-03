@@ -19,6 +19,7 @@ import {
 import Config from '@/config';
 import * as utils from '@/utils';
 import { sendMessage } from './messaging';
+import { loadTwitchRedirectRules, removeAllDynamicRules } from './rules';
 
 class BrowserExtensionClient {
   private connection: HubConnection;
@@ -32,7 +33,7 @@ class BrowserExtensionClient {
         transport: HttpTransportType.WebSockets,
       })
       .withHubProtocol(new MessagePackHubProtocol())
-      .configureLogging(LogLevel.Debug) // TODO
+      .configureLogging(LogLevel.Error) // TODO
       .withAutomaticReconnect()
       .build();
 
@@ -60,16 +61,22 @@ class BrowserExtensionClient {
     this.connection.onreconnecting(async (error) => {
       console.log('Переподключение...', error);
       await sendMessage('setConnectionState', this.connectionState);
+      await removeAllDynamicRules();
     });
 
     this.connection.onreconnected(async () => {
       console.log('Переподключено');
       await sendMessage('setConnectionState', this.connectionState);
+      const isEnabled = await storage.getItem(Config.keys.extensionState);
+      if (isEnabled) {
+        await loadTwitchRedirectRules();
+      }
     });
 
     this.connection.onclose(async (error) => {
       console.warn('Соединение закрыто:', error);
       await sendMessage('setConnectionState', this.connectionState);
+      await removeAllDynamicRules();
     });
   }
 
@@ -99,7 +106,9 @@ class BrowserExtensionClient {
     await this.connection.invoke('UpdateActivity', userActivity);
   }
 
-  async getTelegramUser(payload: TelegramUserResponse): Promise<TelegramUser | null> {
+  async getTelegramUser(
+    payload: TelegramUserResponse
+  ): Promise<TelegramUser | null> {
     return await this.connection.invoke('GetTelegramUser', payload);
   }
 

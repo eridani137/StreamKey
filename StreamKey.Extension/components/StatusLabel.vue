@@ -6,10 +6,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, defineEmits } from 'vue';
 import { onMessage, sendMessage } from '@/messaging';
 import { StatusType } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr';
+import { getStateClass } from '@/utils';
+
+const emit = defineEmits(['updateState']);
 
 const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
 
@@ -23,10 +26,8 @@ async function updateStatus() {
 }
 
 function setState(state: HubConnectionState) {
-  signalrStatus.value =
-      state === HubConnectionState.Connected
-        ? StatusType.WORKING
-        : StatusType.MAINTENANCE;
+  signalrStatus.value = getStateClass(state);
+  emit('updateState', signalrStatus.value);
 }
 
 onMounted(async () => {
