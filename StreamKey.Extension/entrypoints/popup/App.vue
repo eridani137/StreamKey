@@ -35,16 +35,17 @@
       label="Подписаться на канал"
       @click="openTelegramChannel"
     />
+    <QAButton v-else label="Не работает!" @click="openQA" />
+
     <ActivateButton
-      style="margin-top: 8px; width: 166.36px"
       v-if="telegramStatus === TelegramStatus.NotMember"
+      style="margin-top: 8px; width: 166.36px"
       color="#059669"
       color_hover="#07a674"
       color_active="#05825b"
       label="Проверить подписку"
       @click="checkMember"
     />
-    <QAButton v-else label="Не работает!" @click="openQA" />
 
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
@@ -198,13 +199,13 @@ async function initializeExtension(state: StatusType | null = null) {
   const savedState = await storage.getItem<boolean>(Config.keys.extensionState);
   isEnabled.value = savedState ?? false;
 
-  if (!isEnabled.value || state !== StatusType.WORKING) {
+  if (isEnabled.value && state === StatusType.WORKING) {
+    await loadTwitchRedirectRules();
+    currentVideo.value = EnabledVideo;
+  } else {
     await removeAllDynamicRules();
     currentVideo.value = undefined;
-    return;
   }
-
-  currentVideo.value = EnabledVideo;
 }
 
 async function loadUserProfile() {
