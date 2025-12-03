@@ -1,5 +1,5 @@
+import extensionClient from './BrowserExtensionClient';
 import Config from './config';
-import { sendMessage } from './messaging';
 import { DeviceInfo, TelegramUser, TelegramUserResponse } from './types';
 
 export function getDeviceInfo(): DeviceInfo {
@@ -105,8 +105,8 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
         UserHash: telegramUserHash
       }
 
-      const response = await sendMessage('getTelegramUser', responseData);
-      if (response) {
+      const response = await extensionClient.getTelegramUser(responseData);
+      if (!response) {
         console.log("Сервер не вернул пользователя");
         return null;
       }

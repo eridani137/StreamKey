@@ -87,7 +87,6 @@ public class Telegram : ICarterModule
 
                     return Results.Ok(user.MapUserDto());
                 })
-            .Produces<TelegramAuthDto>()
             .WithSummary("Получение данных о пользователе");
 
         userGroup.MapGet("/{id:long}",

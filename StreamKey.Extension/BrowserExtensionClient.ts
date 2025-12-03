@@ -75,16 +75,6 @@ class BrowserExtensionClient {
     return this.connection.state;
   }
 
-  async ping(): Promise<boolean> {
-    try {
-      await this.connection.invoke('Ping');
-      return true;
-    } catch (error) {
-      console.warn('Ping failed:', error);
-      return false;
-    }
-  }
-
   async start(sessionId: string): Promise<void> {
     this.sessionId = sessionId;
 
@@ -107,7 +97,7 @@ class BrowserExtensionClient {
     await this.connection.invoke('UpdateActivity', userActivity);
   }
 
-  async getTelegramUser(payload: TelegramUserResponse): Promise<TelegramUser> {
+  async getTelegramUser(payload: TelegramUserResponse): Promise<TelegramUser | null> {
     return await this.connection.invoke('GetTelegramUser', payload);
   }
 

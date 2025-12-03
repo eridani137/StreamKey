@@ -7,7 +7,6 @@ interface ProtocolMap {
   clickChannel(payload: ClickChannel): Promise<void>;
   getConnectionState(): Promise<HubConnectionState>;
   setConnectionState(payload: HubConnectionState): Promise<void>;
-  getTelegramUser(payload: TelegramUserResponse): Promise<TelegramUser>;
 }
 
 export const { sendMessage, onMessage } =
