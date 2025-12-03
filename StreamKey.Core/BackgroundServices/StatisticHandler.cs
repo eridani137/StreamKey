@@ -178,10 +178,10 @@ public class StatisticHandler(
                         AccumulatedTime = v.AccumulatedTime,
                     })
                 .ToList();
-
-            await RemoveAndSaveDisconnectedUserSessions(disconnectedUsers, repository, unitOfWork);
             
             BrowserExtensionHub.DisconnectedUsers.Clear();
+
+            await RemoveAndSaveDisconnectedUserSessions(disconnectedUsers, repository, unitOfWork);
         }
         catch (Exception e)
         {
