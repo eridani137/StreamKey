@@ -1,5 +1,5 @@
 import { defineExtensionMessaging } from '@webext-core/messaging';
-import { ClickChannel, TelegramUser, TelegramUserResponse, WithUserId } from '@/types';
+import { ChannelData, ClickChannel, WithUserId } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr/dist/esm/HubConnection';
 
 interface ProtocolMap {
@@ -7,6 +7,7 @@ interface ProtocolMap {
   clickChannel(payload: ClickChannel): Promise<void>;
   getConnectionState(): Promise<HubConnectionState>;
   setConnectionState(payload: HubConnectionState): Promise<void>;
+  getChannels(): Promise<ChannelData[]>;
 }
 
 export const { sendMessage, onMessage } =

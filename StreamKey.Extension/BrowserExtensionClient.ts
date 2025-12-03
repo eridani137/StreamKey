@@ -8,6 +8,7 @@ import {
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 import {
   ActivityRequest,
+  ChannelData,
   ClickChannel,
   TelegramUser,
   TelegramUserResponse,
@@ -99,6 +100,10 @@ class BrowserExtensionClient {
 
   async getTelegramUser(payload: TelegramUserResponse): Promise<TelegramUser | null> {
     return await this.connection.invoke('GetTelegramUser', payload);
+  }
+
+  async getChannels(): Promise<ChannelData[]> {
+    return await this.connection.invoke('GetChannels');
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {

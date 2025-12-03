@@ -124,6 +124,12 @@ public class BrowserExtensionHub
         return user.MapUserDto();
     }
 
+    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service)
+    {
+        var channels = await service.GetChannels();
+        return channels.Map();
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connectionId = Context.ConnectionId;

@@ -33,4 +33,8 @@ export function registerMessageHandlers() {
   onMessage('getConnectionState', async () => {
     return extensionClient.connectionState;
   });
+
+  onMessage('getChannels', async () => {
+    return extensionClient.getChannels();
+  });
 }

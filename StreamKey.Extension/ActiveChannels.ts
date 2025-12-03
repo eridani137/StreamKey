@@ -9,17 +9,16 @@ export class ActiveChannels {
   private channelData: ChannelData[] = [];
   private isDataReady: boolean = false;
   private tooltipObserver: MutationObserver | null = null;
-  private lastUpdateTime: number = 0;
-  private readonly minUpdateInterval: number = 60000;
+  private readonly minUpdateInterval: number = 180000;
   private pendingUpdate: NodeJS.Timeout | null = null;
 
-  public async init(ctx: any): Promise<void> {
+  public init(ctx: any): void {
     this.ctx = ctx;
     this.setupTooltipHandler();
-    await this.fetchAndUpdateChannels();
+    this.fetchAndUpdateChannels();
     this.updateInterval = ctx.setInterval(
       () => this.fetchAndUpdateChannels(),
-      60000
+      this.minUpdateInterval
     );
   }
 
@@ -74,49 +73,35 @@ export class ActiveChannels {
   }
 
   private async fetchAndUpdateChannels(): Promise<void> {
-    const now = Date.now();
-    const timeSinceLastFetch = now - this.lastUpdateTime;
+    // const getChannels = await fetch(Config.urls.apiUrl + '/channels').catch(
+    //   (err) => {
+    //     console.error('[Channels] Fetch error:', err);
+    //     return null;
+    //   }
+    // );
 
-    if (timeSinceLastFetch < 60000) {
-      console.log(
-        `[Channels] Fetch skipped (${timeSinceLastFetch}ms < 60000ms)`
-      );
-      return;
-    }
+    // if (!getChannels || !getChannels.ok) {
+    //   console.error(
+    //     `[Channels] API request failed with status ${getChannels?.status}`
+    //   );
+    //   return;
+    // }
 
-    console.log(
-      `[Channels] Performing fetch... (last was ${timeSinceLastFetch}ms ago)`
-    );
+    // let error: Error | null = null;
+    // const data = (await getChannels.json().catch((err: Error) => {
+    //   error = err;
+    //   return null;
+    // })) as ChannelData[] | null;
 
-    this.lastUpdateTime = now;
+    // if (error || !data) {
+    //   return console.error('[Channels] Failed to parse JSON:', error);
+    // }
 
-    const getChannels = await fetch(Config.urls.apiUrl + '/channels').catch(
-      (err) => {
-        console.error('[Channels] Fetch error:', err);
-        return null;
-      }
-    );
+    const channels = await sendMessage('getChannels');
 
-    if (!getChannels || !getChannels.ok) {
-      console.error(
-        `[Channels] API request failed with status ${getChannels?.status}`
-      );
-      return;
-    }
+    console.log(`[Channels] Fetch OK — received ${channels.length} items`);
 
-    let error: Error | null = null;
-    const data = (await getChannels.json().catch((err: Error) => {
-      error = err;
-      return null;
-    })) as ChannelData[] | null;
-
-    if (error || !data) {
-      return console.error('[Channels] Failed to parse JSON:', error);
-    }
-
-    console.log(`[Channels] Fetch OK — received ${data.length} items`);
-
-    this.channelData = data;
+    this.channelData = channels;
     this.isDataReady = true;
 
     await this.waitForChannelsAndReplace();
@@ -144,28 +129,6 @@ export class ActiveChannels {
     }
 
     console.log(`Found ${channelCards.length} channel cards, checking...`);
-    await this.scheduleUpdate();
-  }
-
-  private async scheduleUpdate(): Promise<void> {
-    const now = Date.now();
-    const timeSinceLastUpdate = now - this.lastUpdateTime;
-
-    if (timeSinceLastUpdate < this.minUpdateInterval) {
-      if (this.pendingUpdate) {
-        clearTimeout(this.pendingUpdate);
-      }
-
-      const remainingTime = this.minUpdateInterval - timeSinceLastUpdate;
-      this.pendingUpdate = this.ctx.setTimeout(async () => {
-        await this.updateChannels();
-        this.pendingUpdate = null;
-      }, remainingTime);
-
-      console.log(`Update scheduled in ${remainingTime}ms`);
-      return;
-    }
-
     await this.updateChannels();
   }
 
@@ -254,8 +217,6 @@ export class ActiveChannels {
   }
 
   private async updateChannels(): Promise<void> {
-    this.lastUpdateTime = Date.now();
-
     if (!this.channelData || this.channelData.length === 0) {
       return;
     }
@@ -302,7 +263,7 @@ export class ActiveChannels {
     }
 
     if (updated) {
-      console.log('Channels updated successfully from API.');
+      console.log('Channels successfully updated');
     }
   }
 
