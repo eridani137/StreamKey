@@ -35,6 +35,6 @@ export function registerMessageHandlers() {
   });
 
   onMessage('getChannels', async () => {
-    return extensionClient.getChannels();
+    return await extensionClient.getChannels();
   });
 }

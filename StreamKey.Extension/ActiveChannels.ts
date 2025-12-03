@@ -73,31 +73,8 @@ export class ActiveChannels {
   }
 
   private async fetchAndUpdateChannels(): Promise<void> {
-    // const getChannels = await fetch(Config.urls.apiUrl + '/channels').catch(
-    //   (err) => {
-    //     console.error('[Channels] Fetch error:', err);
-    //     return null;
-    //   }
-    // );
-
-    // if (!getChannels || !getChannels.ok) {
-    //   console.error(
-    //     `[Channels] API request failed with status ${getChannels?.status}`
-    //   );
-    //   return;
-    // }
-
-    // let error: Error | null = null;
-    // const data = (await getChannels.json().catch((err: Error) => {
-    //   error = err;
-    //   return null;
-    // })) as ChannelData[] | null;
-
-    // if (error || !data) {
-    //   return console.error('[Channels] Failed to parse JSON:', error);
-    // }
-
     const channels = await sendMessage('getChannels');
+    console.log('channels', channels);
 
     console.log(`[Channels] Fetch OK — received ${channels.length} items`);
 
