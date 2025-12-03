@@ -35,6 +35,15 @@
       label="Подписаться на канал"
       @click="openTelegramChannel"
     />
+    <ActivateButton
+    style="margin-top: 8px; width: 166.36px;"
+      v-if="telegramStatus === TelegramStatus.NotMember"
+      color="#059669"
+      color_hover="#07a674"
+      color_active="#05825b"
+      label="Проверить подписку"
+      @click="checkMember"
+    />
     <QAButton v-else label="Не работает!" @click="openQA" />
 
     <h1 class="stream-key-title">STREAM KEY</h1>
@@ -71,7 +80,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import Config from '@/config';
-import { StatusType, TelegramStatus, TelegramUser } from '@/types';
+import { CheckMemberResponse, TelegramStatus, TelegramUser } from '@/types';
 
 import StreamKeyLogo from '@/components/StreamKeyLogo.vue';
 import TelegramCircle from '@/components/TelegramCircle.vue';
@@ -83,11 +92,12 @@ import EnableVideo from '~/assets/enable.webm';
 import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
 import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
+import { sendMessage } from '@/messaging';
 
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
 const isLoading = ref(false);
-const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotAuthorized);
+const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotMember);
 const telegramUser = ref<TelegramUser | undefined>(undefined);
 
 const showVideo = computed(() => currentVideo.value !== undefined);
@@ -155,6 +165,17 @@ function openQA() {
   browser.tabs.create({ url: Config.urls.streamKeyQAUrl });
 }
 
+async function checkMember() {
+  const userId = (await browser.cookies.get({
+    url: Config.urls.streamKeyUrl,
+    name: 'tg_user_id'
+  }))?.value;
+
+  console.log('userId', userId);
+
+  await sendMessage('checkMember', { UserId: Number(userId) } as CheckMemberResponse);
+}
+
 async function initializeExtension() {
   const savedState = await storage.getItem<boolean>(Config.keys.extensionState);
   isEnabled.value = savedState ?? false;
@@ -172,12 +193,9 @@ async function loadUserProfile() {
     const userData = await storage.getItem<TelegramUser>(
       Config.keys.userProfile
     );
-
     console.log('Загрузка профиля', userData);
-
     if (userData) {
       telegramUser.value = userData;
-
       if (userData.is_chat_member) {
         telegramStatus.value = TelegramStatus.Ok;
       } else {
@@ -286,8 +304,8 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   gap: 34px;
-  margin-top: 8px;
   padding: 8px;
+  margin-top: 8px;
   margin-left: 14px;
   font-family: 'Manrope', sans-serif;
   font-size: 10px;

@@ -1,5 +1,5 @@
 <template>
-  <button class="activate-button">
+  <button class="activate-button" :style="buttonStyle">
     <svg
       fill="currentColor"
       width="16px"
@@ -30,14 +30,23 @@
 <script setup lang="ts">
 const props = defineProps<{
   label?: string;
+  color?: string;
+  color_hover?: string;
+  color_active?: string;
 }>();
+
+const buttonStyle = {
+  '--button-bg': props.color ?? '#23b7ec',
+  '--button-hover-bg': props.color_hover ?? '#58bbdf',
+  '--button-active-bg': props.color_active ?? '#1d92bd'
+};
 </script>
 
 <style>
 .activate-button {
   display: flex;
   align-items: center;
-  background: #23b7ec;
+  background: var(--button-bg);
   border: none;
   border-radius: 7px;
   padding: 0 10px;
@@ -48,11 +57,11 @@ const props = defineProps<{
 }
 
 .activate-button:hover {
-  background: #58bbdf !important;
+  background: var(--button-hover-bg) !important;
   cursor: pointer;
 }
 
 .activate-button:active {
-  background: #1d92bd !important;
+  background: var(--button-active-bg) !important;
 }
 </style>

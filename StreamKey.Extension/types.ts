@@ -96,6 +96,8 @@ export interface ActivityRequest extends WithSessionId, WithUserId {}
 
 export interface ClickChannel extends WithUserId, WithChannelName {}
 
+export interface CheckMemberResponse extends WithNumberUserId {}
+
 export interface DeviceInfo {
   userAgent: string;
   language: string;

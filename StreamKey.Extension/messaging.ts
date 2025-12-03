@@ -1,5 +1,5 @@
 import { defineExtensionMessaging } from '@webext-core/messaging';
-import { ChannelData, ClickChannel, WithUserId } from '@/types';
+import { ChannelData, CheckMemberResponse, ClickChannel, WithUserId } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr/dist/esm/HubConnection';
 
 interface ProtocolMap {
@@ -8,6 +8,7 @@ interface ProtocolMap {
   getConnectionState(): Promise<HubConnectionState>;
   setConnectionState(payload: HubConnectionState): Promise<void>;
   getChannels(): Promise<ChannelData[]>;
+  checkMember(payload: CheckMemberResponse): Promise<void>;
 }
 
 export const { sendMessage, onMessage } =

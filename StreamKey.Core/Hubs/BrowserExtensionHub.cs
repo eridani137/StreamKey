@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
+using StreamKey.Core.Extensions;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Core.Types;
@@ -19,7 +20,7 @@ public class BrowserExtensionHub
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _registrationTimeouts = new();
     private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan AddingTime = TimeSpan.FromMinutes(1);
-    
+
     public static ConcurrentDictionary<string, UserSession> DisconnectedUsers { get; } = new();
 
     public override async Task OnConnectedAsync()
@@ -83,7 +84,7 @@ public class BrowserExtensionHub
         if (!Users.TryGetValue(Context.ConnectionId, out var session)) return Task.CompletedTask;
 
         var now = DateTimeOffset.UtcNow;
-        
+
         session.UserId ??= activityRequest.UserId;
 
         if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-AddingTime))
@@ -92,6 +93,7 @@ public class BrowserExtensionHub
             {
                 session.StartedAt = now;
             }
+
             session.UpdatedAt = now;
             session.AccumulatedTime += AddingTime;
         }
@@ -107,15 +109,16 @@ public class BrowserExtensionHub
             UserId = dto.UserId,
             DateTime = DateTime.UtcNow
         });
-        
+
         return Task.CompletedTask;
     }
 
-    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request, [FromServices] ITelegramUserRepository repository)
+    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
+        [FromServices] ITelegramUserRepository repository)
     {
         var user = await repository.GetByTelegramIdNotTracked(request.UserId);
         if (user is null) return null;
-        
+
         if (!string.Equals(request.UserHash, user.Hash, StringComparison.Ordinal))
         {
             return null;
@@ -128,6 +131,30 @@ public class BrowserExtensionHub
     {
         var channels = await service.GetChannels();
         return channels.Map();
+    }
+
+    public async Task CheckMember(CheckMemberRequest request, 
+        [FromServices] ITelegramUserRepository repository,
+        [FromServices] ITelegramService service,
+        [FromServices] IUnitOfWork unitOfWork)
+    {
+        var user = await repository.GetByTelegramId(request.UserId);
+        if (user is null) return;
+
+        var getChatMemberResponse = await service.GetChatMember(request.UserId);
+        if (getChatMemberResponse is null) return;
+
+        var isChatMember = getChatMemberResponse.IsChatMember();
+        if (user.IsChatMember != isChatMember)
+        {
+            user.IsChatMember = isChatMember;
+            user.UpdatedAt = DateTime.UtcNow;
+            
+            repository.Update(user);
+            await unitOfWork.SaveChangesAsync();
+            
+            await Clients.Caller.ReloadUserData(user.MapUserDto());
+        }
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

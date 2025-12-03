@@ -1,4 +1,3 @@
-import Config from '@/config';
 import { ChannelData, ClickChannel } from '@/types';
 import { sleep, getTwitchUserId } from '@/utils';
 import { sendMessage } from '@/messaging';

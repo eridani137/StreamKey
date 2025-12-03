@@ -2,24 +2,34 @@ import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
-import { loadTwitchRedirectRules } from '@/rules';
+import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
 
 export default defineBackground(() => {
   registerMessageHandlers();
   browser.runtime.onInstalled.addListener(async () => {
-    const sessionId = await utils.createNewSession();
-    await extensionClient.start(sessionId);
-    await storage.setItem(Config.keys.extensionState, true);
-    await loadTwitchRedirectRules();
-    await utils.initUserProfile();
+    await onStartup();
+    await onInstalled();
   });
 
   browser.runtime.onStartup.addListener(async () => {
-    const sessionId = await utils.createNewSession();
-    await extensionClient.start(sessionId);
-    await utils.initUserProfile();
+    await onStartup();
   });
 });
+
+export async function onInstalled() {
+  await storage.setItem(Config.keys.extensionState, true);
+  await loadTwitchRedirectRules();
+}
+
+export async function onStartup() {
+  const sessionId = await utils.createNewSession();
+  await extensionClient.start(sessionId);
+  await utils.initUserProfile();
+  const isEnabled = await storage.getItem(Config.keys.extensionState);
+  if (isEnabled) {
+    await loadTwitchRedirectRules();
+  }
+}
 
 export function registerMessageHandlers() {
   onMessage('updateActivity', async (message) => {
@@ -37,4 +47,8 @@ export function registerMessageHandlers() {
   onMessage('getChannels', async () => {
     return await extensionClient.getChannels();
   });
+
+  onMessage('checkMember', async (message) => {
+    await extensionClient.checkMember(message.data);
+  })
 }

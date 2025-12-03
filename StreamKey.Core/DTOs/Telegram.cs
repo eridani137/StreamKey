@@ -43,3 +43,8 @@ public class TelegramUserRequest
     public required long UserId { get; set; }
     public required string UserHash { get; set; }
 }
+
+public class CheckMemberRequest
+{
+    public required long UserId { get; set; }
+}
