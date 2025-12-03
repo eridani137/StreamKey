@@ -24,12 +24,6 @@ public class Telegram : ICarterModule
                     ITelegramUserRepository repository, IUnitOfWork unitOfWork,
                     IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub) =>
                 {
-                    var checkHash = CheckHash(dto);
-                    if (!string.IsNullOrEmpty(checkHash))
-                    {
-                        return Results.BadRequest(checkHash);
-                    }
-                    
                     var user = await repository.GetByTelegramId(dto.Id);
 
                     var isNewUser = false;
