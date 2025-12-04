@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +9,7 @@ using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
-public class TwitchService(HttpClient client, ILogger<TwitchService> logger) : ITwitchService
+public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchService> logger) : ITwitchService
 {
     public async Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username, HttpContext context)
     {
@@ -30,9 +29,13 @@ public class TwitchService(HttpClient client, ILogger<TwitchService> logger) : I
             }
         };
 
-        // context.Request.Query.AddQueryAuth(client);
-        
-        using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, tokenRequest);
+        using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
+        {
+            Content = JsonContent.Create(tokenRequest)
+        };
+        context.Request.Query.AddQueryAuth(requestMessage);
+        using var response = await client.SendAsync(requestMessage);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
         var accessTokenResponse =
             await JsonSerializer.DeserializeAsync<StreamPlaybackAccessTokenResponse>(contentStream);
@@ -67,9 +70,13 @@ public class TwitchService(HttpClient client, ILogger<TwitchService> logger) : I
             }
         };
 
-        // context.Request.Query.AddQueryAuth(client);
-        
-        using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, tokenRequest);
+        using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
+        {
+            Content = JsonContent.Create(tokenRequest)
+        };
+        context.Request.Query.AddQueryAuth(requestMessage);
+        using var response = await client.SendAsync(requestMessage);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
         var accessTokenResponse =
             await JsonSerializer.DeserializeAsync<VideoPlaybackAccessTokenResponse>(contentStream);

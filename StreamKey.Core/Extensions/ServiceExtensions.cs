@@ -50,7 +50,7 @@ public static class ServiceExtensions
         if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
         {
             ApplicationConstants.DefaultAuthorization = authorization.Value;
-            ApplicationConstants.Headers.Add("Authorization", authorization.Value); // TODO
+            // ApplicationConstants.Headers.Add("Authorization", authorization.Value); // TODO
             Log.Information("Default authorization {Authorization}", ApplicationConstants.DefaultAuthorization);
         }
 
@@ -58,7 +58,7 @@ public static class ServiceExtensions
         if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
         {
             ApplicationConstants.DefaultDeviceId = deviceId.Value;
-            ApplicationConstants.Headers.Add("device-id", deviceId.Value); // TODO
+            // ApplicationConstants.Headers.Add("device-id", deviceId.Value); // TODO
             Log.Information("Default DeviceId {DeviceId}", ApplicationConstants.DefaultDeviceId);
         }
     }
@@ -79,7 +79,7 @@ public static class ServiceExtensions
             })
             .AddHttpMessageHandler<FilterNotFoundHandler>();
 
-        services.AddHttpClient<ITwitchService, TwitchService>((_, client) =>
+        services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client) =>
             {
                 client.BaseAddress = ApplicationConstants.QqlUrl;
                 client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;

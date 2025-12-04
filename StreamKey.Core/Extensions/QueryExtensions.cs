@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 using StreamKey.Shared;
 
@@ -10,39 +9,32 @@ public static class QueryExtensions
     {
         public void AddQueryAuth(HttpRequestMessage request)
         {
-            // request.Headers.Authorization =
-            //     new AuthenticationHeaderValue("OAuth", ApplicationConstants.DefaultAuthorization);
-            //
-            // request.Headers.Add("device-id", ApplicationConstants.DefaultDeviceId);
-
-            request.Headers.Authorization = new AuthenticationHeaderValue(
-                "OAuth",
-                query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-                    ? auth
-                    : ApplicationConstants.DefaultAuthorization
-            );
-
-            request.Headers.Add("device-id",
-                query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
-                    ? deviceId
-                    : ApplicationConstants.DefaultDeviceId
-            );
+            var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+                ? auth.ToString()
+                : ApplicationConstants.DefaultAuthorization;
+            
+            request.Headers.Add("Authorization", $"OAuth {authorization}");
+            
+            var deviceId = query.TryGetValue("device-id", out var device) && !string.IsNullOrEmpty(device)
+                ? device.ToString()
+                : ApplicationConstants.DefaultDeviceId;
+            
+            request.Headers.Add("device-id", deviceId);
         }
 
         public void AddQueryAuth(HttpClient client)
         {
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                "OAuth",
-                query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-                    ? auth
-                    : ApplicationConstants.DefaultAuthorization
-            );
+            var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+                ? auth.ToString()
+                : ApplicationConstants.DefaultAuthorization;
 
-            client.DefaultRequestHeaders.Add("device-id",
-                query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
-                    ? deviceId
-                    : ApplicationConstants.DefaultDeviceId
-            );
+            client.DefaultRequestHeaders.Add("Authorization", $"OAuth {authorization}");
+
+            var deviceId = query.TryGetValue("device-id", out var device) && !string.IsNullOrEmpty(device)
+                ? device.ToString()
+                : ApplicationConstants.DefaultDeviceId;
+
+            client.DefaultRequestHeaders.Add("device-id", deviceId);
         }
     }
 }
