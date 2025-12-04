@@ -28,5 +28,21 @@ public static class QueryExtensions
                     : ApplicationConstants.DefaultDeviceId
             );
         }
+
+        public void AddQueryAuth(HttpClient client)
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "OAuth",
+                query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+                    ? auth
+                    : ApplicationConstants.DefaultAuthorization
+            );
+
+            client.DefaultRequestHeaders.Add("device-id",
+                query.TryGetValue("device-id", out var deviceId) && !string.IsNullOrEmpty(deviceId)
+                    ? deviceId
+                    : ApplicationConstants.DefaultDeviceId
+            );
+        }
     }
 }

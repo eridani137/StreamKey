@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -9,14 +10,15 @@ using StreamKey.Shared;
 
 namespace StreamKey.Core.Services;
 
-public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchService> logger) : ITwitchService
+public class TwitchService(HttpClient client, ILogger<TwitchService> logger) : ITwitchService
 {
     public async Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username, HttpContext context)
     {
         var tokenRequest = new PlaybackAccessTokenRequest
         {
             OperationName = "PlaybackAccessToken_Template",
-            Query = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
+            Query =
+                "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
             Variables = new Variables
             {
                 IsLive = true,
@@ -28,16 +30,12 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
-        using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
-        // var requestMessage = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
-        // {
-        //     Content = JsonContent.Create(tokenRequest)
-        // };
-        // context.Request.Query.AddQueryAuth(requestMessage);
-        // using var response = await client.SendAsync(requestMessage);
+        context.Request.Query.AddQueryAuth(client);
+        
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, tokenRequest);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var accessTokenResponse = await JsonSerializer.DeserializeAsync<StreamPlaybackAccessTokenResponse>(contentStream);
+        var accessTokenResponse =
+            await JsonSerializer.DeserializeAsync<StreamPlaybackAccessTokenResponse>(contentStream);
 
         if (accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             accessTokenResponse.Data?.StreamPlaybackAccessToken?.Value is null)
@@ -56,7 +54,8 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         var tokenRequest = new PlaybackAccessTokenRequest
         {
             OperationName = "PlaybackAccessToken_Template",
-            Query = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
+            Query =
+                "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
             Variables = new Variables
             {
                 IsLive = false,
@@ -67,17 +66,13 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
                 Platform = "web"
             }
         };
+
+        context.Request.Query.AddQueryAuth(client);
         
-        using var client = clientFactory.CreateClient(ApplicationConstants.ServerClientName);
-        // var requestMessage = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
-        // {
-        //     Content = JsonContent.Create(tokenRequest)
-        // };
-        // context.Request.Query.AddQueryAuth(requestMessage);
-        // using var response = await client.SendAsync(requestMessage);
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, tokenRequest);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var accessTokenResponse = await JsonSerializer.DeserializeAsync<VideoPlaybackAccessTokenResponse>(contentStream);
+        var accessTokenResponse =
+            await JsonSerializer.DeserializeAsync<VideoPlaybackAccessTokenResponse>(contentStream);
 
         if (accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             accessTokenResponse.Data?.VideoPlaybackAccessToken?.Value is null)
