@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
@@ -13,14 +12,16 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Hubs;
 
-public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
+public class BrowserExtensionHub(
+    // ILogger<BrowserExtensionHub> logger
+)
     : Hub<IBrowserExtensionHub>
 {
     public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
     public static ConcurrentDictionary<string, UserSession> DisconnectedUsers { get; } = new();
 
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
-    
+
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
 
@@ -28,10 +29,10 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
     {
         var context = Context;
         var connectionId = context.ConnectionId;
-        
+
         var cts = new CancellationTokenSource();
         RegistrationTimeouts.TryAdd(connectionId, cts);
-        
+
         _ = Task.Run(async () =>
         {
             try
@@ -40,7 +41,7 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
 
                 if (!Users.ContainsKey(connectionId))
                 {
-                    logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
+                    // logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
                     context.Abort();
                 }
             }
@@ -66,26 +67,26 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
 
         if (!Users.TryAdd(connectionId, session))
         {
-            logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
+            // logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
             Context.Abort();
             return Task.CompletedTask;
         }
-        
-        logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
-        
+
+        // logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
+
         CancelRegistrationTimeout(connectionId);
 
         return Task.CompletedTask;
     }
-    
+
     private void CancelRegistrationTimeout(string connectionId)
     {
         if (!RegistrationTimeouts.TryRemove(connectionId, out var cts)) return;
-        
+
         cts.Cancel();
         cts.Dispose();
     }
-    
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connectionId = Context.ConnectionId;
@@ -98,8 +99,8 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
             {
                 DisconnectedUsers.TryAdd(connectionId, userSession);
             }
-            
-            logger.LogWarning("Пользователь отключен: {@Session}", userSession);
+
+            // logger.LogWarning("Пользователь отключен: {@Session}", userSession);
         }
 
         await base.OnDisconnectedAsync(exception);
@@ -159,7 +160,7 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
         return channels.Map();
     }
 
-    public async Task CheckMember(CheckMemberRequest request, 
+    public async Task CheckMember(CheckMemberRequest request,
         [FromServices] ITelegramUserRepository repository,
         [FromServices] ITelegramService service,
         [FromServices] IUnitOfWork unitOfWork)
@@ -175,11 +176,11 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
         {
             user.IsChatMember = isChatMember;
             user.UpdatedAt = DateTime.UtcNow;
-            
+
             repository.Update(user);
             await unitOfWork.SaveChangesAsync();
         }
-        
+
         await Clients.Caller.ReloadUserData(user.MapUserDto());
     }
 }
