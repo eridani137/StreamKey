@@ -9,6 +9,7 @@ interface ProtocolMap {
   setConnectionState(payload: HubConnectionState): Promise<void>;
   getChannels(): Promise<ChannelData[]>;
   checkMember(payload: CheckMemberResponse): Promise<void>;
+  wakeConnection(): Promise<void>;
 }
 
 export const { sendMessage, onMessage } =

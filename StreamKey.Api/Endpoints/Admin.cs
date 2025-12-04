@@ -1,4 +1,6 @@
 using Carter;
+using Microsoft.AspNetCore.SignalR;
+using StreamKey.Core.Abstractions;
 using StreamKey.Core.Hubs;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;

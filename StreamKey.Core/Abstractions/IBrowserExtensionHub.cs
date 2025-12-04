@@ -7,6 +7,4 @@ public interface IBrowserExtensionHub
     Task RequestUserData();
 
     Task ReloadUserData(TelegramUserDto user);
-
-    // Task Abort();
 }

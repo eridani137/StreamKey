@@ -31,6 +31,8 @@ function setState(state: HubConnectionState) {
 }
 
 onMounted(async () => {
+  await sendMessage('wakeConnection');
+
   await updateStatus();
 
   onMessage('setConnectionState', async (message) => {

@@ -22,7 +22,7 @@
       seq:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5555/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:5555/health || exit 1" ]
       interval: 5s
       timeout: 3s
       retries: 5
