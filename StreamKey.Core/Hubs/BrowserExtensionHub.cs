@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
@@ -12,41 +13,43 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Hubs;
 
-public class BrowserExtensionHub
+public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
     public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
-
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _registrationTimeouts = new();
-    private static readonly TimeSpan RegistrationTimeout = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan AddingTime = TimeSpan.FromMinutes(1);
-
     public static ConcurrentDictionary<string, UserSession> DisconnectedUsers { get; } = new();
+
+    private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
+    
+    private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
 
     public override async Task OnConnectedAsync()
     {
         var context = Context;
-        var connectionId = Context.ConnectionId;
+        var connectionId = context.ConnectionId;
+        
+        var cts = new CancellationTokenSource();
+        RegistrationTimeouts.TryAdd(connectionId, cts);
+        
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(ConnectionTimeout, cts.Token);
+
+                if (!Users.ContainsKey(connectionId))
+                {
+                    logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
+                    context.Abort();
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+        }, cts.Token);
 
         await Clients.Caller.RequestUserData();
-
-        var cancellationTokenSource = new CancellationTokenSource();
-        _registrationTimeouts[connectionId] = cancellationTokenSource;
-
-        _ = Task.Delay(RegistrationTimeout, cancellationTokenSource.Token)
-            .ContinueWith(task =>
-            {
-                if (task.IsCanceled) return;
-
-                if (Users.ContainsKey(connectionId)) return;
-
-                // logger.LogWarning(
-                //     "Пользователь не предоставил свои данные в течение {Timeout} секунд. Отключение: {ConnectionId}",
-                //     RegistrationTimeout.TotalSeconds, connectionId);
-
-                context.Abort();
-                _registrationTimeouts.TryRemove(connectionId, out _);
-            }, cancellationTokenSource.Token);
 
         await base.OnConnectedAsync();
     }
@@ -63,20 +66,43 @@ public class BrowserExtensionHub
 
         if (!Users.TryAdd(connectionId, session))
         {
-            // logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
+            logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
             Context.Abort();
             return Task.CompletedTask;
         }
-
+        
+        logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
+        
         CancelRegistrationTimeout(connectionId);
+
         return Task.CompletedTask;
     }
-
+    
     private void CancelRegistrationTimeout(string connectionId)
     {
-        if (!_registrationTimeouts.TryRemove(connectionId, out var cancellationTokenSource)) return;
-        cancellationTokenSource.Cancel();
-        cancellationTokenSource.Dispose();
+        if (!RegistrationTimeouts.TryRemove(connectionId, out var cts)) return;
+        
+        cts.Cancel();
+        cts.Dispose();
+    }
+    
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var connectionId = Context.ConnectionId;
+
+        CancelRegistrationTimeout(connectionId);
+
+        if (Users.TryRemove(connectionId, out var userSession))
+        {
+            if (userSession.UserId is not null)
+            {
+                DisconnectedUsers.TryAdd(connectionId, userSession);
+            }
+            
+            logger.LogWarning("Пользователь отключен: {@Session}", userSession);
+        }
+
+        await base.OnDisconnectedAsync(exception);
     }
 
     public Task UpdateActivity(ActivityRequest activityRequest)
@@ -87,7 +113,7 @@ public class BrowserExtensionHub
 
         session.UserId ??= activityRequest.UserId;
 
-        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-AddingTime))
+        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-MinimumSessionTime))
         {
             if (session.UpdatedAt == DateTimeOffset.MinValue)
             {
@@ -95,7 +121,7 @@ public class BrowserExtensionHub
             }
 
             session.UpdatedAt = now;
-            session.AccumulatedTime += AddingTime;
+            session.AccumulatedTime += MinimumSessionTime;
         }
 
         return Task.CompletedTask;
@@ -155,22 +181,5 @@ public class BrowserExtensionHub
         }
         
         await Clients.Caller.ReloadUserData(user.MapUserDto());
-    }
-
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        var connectionId = Context.ConnectionId;
-
-        CancelRegistrationTimeout(connectionId);
-
-        if (Users.TryRemove(connectionId, out var userSession))
-        {
-            if (userSession.UserId is not null)
-            {
-                DisconnectedUsers.TryAdd(connectionId, userSession);
-            }
-        }
-
-        await base.OnDisconnectedAsync(exception);
     }
 }

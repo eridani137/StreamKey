@@ -14,8 +14,8 @@
       - DOTNET_EnableDiagnostics:0
     env_file:
       - .env
-    #    ports:
-    #      - "5555:5555" # TODO
+#    ports:
+#      - "5555:5555" # TODO
     depends_on:
       postgres:
         condition: service_healthy

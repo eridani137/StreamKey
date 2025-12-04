@@ -40,16 +40,16 @@ public static class ConfigureLogging
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.SignalR", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Warning)
-            .Filter.ByExcluding(logEvent =>
-            {
-                if (!logEvent.Properties.TryGetValue("RequestPath", out var value))
-                {
-                    return false;
-                }
-
-                var path = value.ToString().Trim('"');
-                return excludedPaths.Any(x => path.StartsWith(x, StringComparison.OrdinalIgnoreCase));
-            })
+            // .Filter.ByExcluding(logEvent =>
+            // {
+            //     if (!logEvent.Properties.TryGetValue("RequestPath", out var value))
+            //     {
+            //         return false;
+            //     }
+            //
+            //     var path = value.ToString().Trim('"');
+            //     return excludedPaths.Any(x => path.StartsWith(x, StringComparison.OrdinalIgnoreCase));
+            // })
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()

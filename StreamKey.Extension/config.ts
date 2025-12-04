@@ -8,7 +8,8 @@ const Config: AppConfig = {
     telegramChannelUrl: 'https://t.me/streamkey',
     extensionAuthorizationUrl: 'https://streamkey.ru/extension-authorization/',
     extensionStateKeyName: 'streamKeyEnabled',
-    extensionHub: 'https://service.streamkey.ru/hubs/extension',
+    // extensionHub: 'https://service.streamkey.ru/hubs/extension', // TODO
+    extensionHub: 'http://localhost:5555/hubs/extension'
   },
   keys: {
     sessionId: 'local:sessionId',
