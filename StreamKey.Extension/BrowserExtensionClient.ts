@@ -135,6 +135,9 @@ class BrowserExtensionClient {
       return;
     }
     if (this.connection.state === HubConnectionState.Connected) return;
+    if (this.connection.state !== HubConnectionState.Disconnected) {
+      this.waitForState(HubConnectionState.Disconnected);
+    }
 
     await this.connection.start();
     this.resetInactivityTimer();
@@ -153,17 +156,17 @@ class BrowserExtensionClient {
       state === HubConnectionState.Reconnecting
     ) {
       console.log('Ожидаю завершения соединения...');
-      await this.waitForConnection();
+      await this.waitForState(HubConnectionState.Connected);
     }
 
     this.resetInactivityTimer();
     return await this.connection.invoke(method, ...args);
   }
 
-  private waitForConnection(): Promise<void> {
+  public waitForState(state: HubConnectionState): Promise<void> {
     return new Promise((resolve) => {
       const check = () => {
-        if (this.connection.state === HubConnectionState.Connected) {
+        if (this.connection.state === state) {
           resolve();
         } else {
           setTimeout(check, 100);

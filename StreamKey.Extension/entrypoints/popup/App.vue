@@ -222,7 +222,6 @@ async function loadUserProfile() {
         telegramStatus.value = TelegramStatus.NotMember;
       }
     } else {
-      console.warn('Профиль не загружен');
       telegramUser.value = undefined;
       telegramStatus.value = TelegramStatus.NotAuthorized;
     }
