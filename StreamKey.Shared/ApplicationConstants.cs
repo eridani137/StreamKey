@@ -3,7 +3,6 @@ namespace StreamKey.Shared;
 public static class ApplicationConstants
 {
     public const string UsherClientName = "UsherClient";
-    public const string ServerClientName = "ServerClient";
     
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     

@@ -75,7 +75,7 @@ public static class ServiceExtensions
             })
             .AddHttpMessageHandler<FilterNotFoundHandler>();
 
-        services.AddHttpClient(ApplicationConstants.ServerClientName, (_, client) =>
+        services.AddHttpClient<TwitchService>((_, client) =>
             {
                 client.BaseAddress = ApplicationConstants.QqlUrl;
                 client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;

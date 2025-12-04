@@ -20,8 +20,6 @@ public static class QueryExtensions
                 : ApplicationConstants.DefaultDeviceId;
             
             request.Headers.Add("device-id", deviceId);
-            
-            request.Headers.Referrer = ApplicationConstants.TwitchUrl;
         }
 
         public void AddQueryAuth(HttpClient client)
