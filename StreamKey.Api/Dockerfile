@@ -8,6 +8,7 @@ RUN apt-get update && \
     dpkg-reconfigure -f noninteractive tzdata && \
     apt-get install -y --no-install-recommends \
         libgssapi-krb5-2 \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
