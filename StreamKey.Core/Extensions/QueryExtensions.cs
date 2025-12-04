@@ -9,17 +9,20 @@ public static class QueryExtensions
     {
         public void AddQueryAuth(HttpRequestMessage request)
         {
-            var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-                ? auth.ToString()
-                : ApplicationConstants.DefaultAuthorization;
-
-            request.Headers.Add("Authorization", authorization);
-
-            var deviceId = query.TryGetValue("device-id", out var device) && !string.IsNullOrEmpty(device)
-                ? device.ToString()
-                : ApplicationConstants.DefaultDeviceId;
-
-            request.Headers.Add("device-id", deviceId);
+            // var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+            //     ? auth.ToString()
+            //     : ApplicationConstants.DefaultAuthorization;
+            //
+            // request.Headers.Add("Authorization", authorization);
+            //
+            // var deviceId = query.TryGetValue("device-id", out var device) && !string.IsNullOrEmpty(device)
+            //     ? device.ToString()
+            //     : ApplicationConstants.DefaultDeviceId;
+            //
+            // request.Headers.Add("device-id", deviceId);
+            
+            request.Headers.Add("Authorization", ApplicationConstants.DefaultAuthorization);
+            request.Headers.Add("device-id", ApplicationConstants.DefaultDeviceId);
         }
 
         public void AddQueryAuth(HttpClient client)
