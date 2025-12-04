@@ -25,7 +25,8 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 
 builder.Services.AddHealthChecks();
 
-builder.Services.AddSignalR().AddMessagePackProtocol();
+builder.Services.AddSignalR()
+    .AddMessagePackProtocol();
 
 builder.Services.AddApplication();
 
