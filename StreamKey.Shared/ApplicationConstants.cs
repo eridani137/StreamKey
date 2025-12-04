@@ -27,7 +27,8 @@ public static class ApplicationConstants
         { "Accept-Language", "en-US" },
         { "client-id", ClientId },
         { "Origin", TwitchUrl.AbsoluteUri },
-        { "sec-ch-ua", """Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138""" },
+        { "Referer", TwitchUrl.AbsoluteUri },
+        { "sec-ch-ua", """Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24""" },
         { "sec-ch-ua-mobile", "?0" },
         { "sec-ch-ua-platform", """Windows""" },
         { "Sec-Fetch-Dest", "empty" },
@@ -35,7 +36,7 @@ public static class ApplicationConstants
         { "Sec-Fetch-Site", "same-site" },
         {
             "User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
         },
     };
 }

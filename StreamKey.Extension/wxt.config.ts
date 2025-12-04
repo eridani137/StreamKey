@@ -29,7 +29,7 @@ export default defineConfig({
   }), // TODO
   manifest: (env) => {
     const manifest = {
-      name: 'Твич 1080 | Твич качество 1080 от STREAM KEY',
+      name: 'Твич 1080 и 1440 | Вернуть 1080/1440 на Твич от STREAM KEY (не ВПН)',
       permissions: [
         'cookies',
         'storage',
