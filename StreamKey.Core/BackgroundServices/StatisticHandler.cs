@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
-using StreamKey.Core.Types;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Entities;
@@ -170,33 +169,13 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            UserSessionEntity[] entities;
-            if (isShutdown)
-            {
-                var sessions = new UserSession[BrowserExtensionHub.Users.Count];
-                BrowserExtensionHub.Users.Values.CopyTo(sessions, 0);
-                entities = new UserSessionEntity[sessions.Length];
-
-                for (var i = 0; i < sessions.Length; i++)
-                {
-                    entities[i] = sessions[i].Map();
-                }
-            }
-            else
-            {
-                var sessions = new UserSession[BrowserExtensionHub.DisconnectedUsers.Count];
-                BrowserExtensionHub.DisconnectedUsers.Values.CopyTo(sessions, 0);
-                entities = new UserSessionEntity[sessions.Length];
-
-                for (var i = 0; i < sessions.Length; i++)
-                {
-                    entities[i] = sessions[i].Map();
-                }
-            }
+            var users = isShutdown 
+                ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
+                : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
 
             BrowserExtensionHub.DisconnectedUsers.Clear();
 
-            await RemoveAndSaveDisconnectedUserSessions(entities, repository, unitOfWork);
+            await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork);
         }
         catch (Exception e)
         {
@@ -204,17 +183,17 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveAndSaveDisconnectedUserSessions(UserSessionEntity[] entities,
+    private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
         UserSessionRepository repository, IUnitOfWork unitOfWork)
     {
         await repository.AddRange(entities);
 
         await unitOfWork.SaveChangesAsync();
 
-        if (entities.Length != 0)
+        if (entities.Count != 0)
         {
             logger.LogInformation("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
-                entities.Length);
+                entities.Count);
         }
     }
 
