@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Hubs;
+using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
@@ -57,7 +58,7 @@ public class StatisticHandler(
                 try
                 {
                     await Task.Delay(RemoveOfflineUsersInterval, _stoppingCts.Token);
-                    await RemoveOfflineUsers();
+                    await RemoveOfflineUsers(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -96,7 +97,7 @@ public class StatisticHandler(
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await SaveViewStatistic();
-        await RemoveOfflineUsers();
+        await RemoveOfflineUsers(true);
         await SaveChannelClickStatistic();
 
         await _stoppingCts.CancelAsync();
@@ -160,7 +161,7 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveOfflineUsers()
+    private async Task RemoveOfflineUsers(bool isShutdown)
     {
         try
         {
@@ -168,20 +169,13 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var disconnectedUsers = BrowserExtensionHub.DisconnectedUsers.Values.Select(v =>
-                    new UserSessionEntity()
-                    {
-                        UserId = v.UserId!,
-                        SessionId = v.SessionId,
-                        StartedAt = v.StartedAt,
-                        UpdatedAt = v.UpdatedAt,
-                        AccumulatedTime = v.AccumulatedTime,
-                    })
-                .ToList();
-            
+            var users = isShutdown 
+                ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
+                : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
+
             BrowserExtensionHub.DisconnectedUsers.Clear();
 
-            await RemoveAndSaveDisconnectedUserSessions(disconnectedUsers, repository, unitOfWork);
+            await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork);
         }
         catch (Exception e)
         {
@@ -226,7 +220,7 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при добавлении записи клика на канал");
                 }
             }
-            
+
             await repository.AddRange(entities);
 
             await unitOfWork.SaveChangesAsync();
