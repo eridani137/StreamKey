@@ -25,8 +25,8 @@ class BrowserExtensionClient {
   private connection: HubConnection;
   private sessionId: string;
 
-  private inactivityTimer: NodeJS.Timeout | null = null;
-  private readonly INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
+  // private inactivityTimer: NodeJS.Timeout | null = null;
+  // private readonly INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
 
   constructor() {
     this.sessionId = '';
@@ -40,12 +40,12 @@ class BrowserExtensionClient {
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds(retryContext) {
           const defaultDelays = [
-            0, 2000, 2000, 5000, 5000, 5000, 10000, 10000, 10000,
+            0, 2000, 2000, 5000, 5000, 5000, 10000, 10000, 10000, 20000, 20000, 20000
           ];
           if (retryContext.previousRetryCount < defaultDelays.length) {
             return defaultDelays[retryContext.previousRetryCount];
           } else {
-            return null;
+            return 30000;
           }
         },
       })
@@ -108,17 +108,17 @@ class BrowserExtensionClient {
 
   private resetInactivityTimer() {
     this.clearInactivityTimer();
-    this.inactivityTimer = setTimeout(async () => {
-      console.warn('Нет активности — останавливаю соединение');
-      await this.stop();
-    }, this.INACTIVITY_LIMIT_MS);
+    // this.inactivityTimer = setTimeout(async () => {
+    //   console.warn('Нет активности — останавливаю соединение');
+    //   await this.stop();
+    // }, this.INACTIVITY_LIMIT_MS);
   }
 
   private clearInactivityTimer() {
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-      this.inactivityTimer = null;
-    }
+    // if (this.inactivityTimer) {
+    //   clearTimeout(this.inactivityTimer);
+    //   this.inactivityTimer = null;
+    // }
   }
 
   public get connectionState(): HubConnectionState {

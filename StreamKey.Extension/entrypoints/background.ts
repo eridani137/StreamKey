@@ -56,7 +56,7 @@ export function registerMessageHandlers() {
     await extensionClient.checkMember(message.data);
   });
 
-  onMessage('wakeConnection', async () => {
-    await extensionClient.start();
-  });
+  // onMessage('wakeConnection', async () => {
+  //   await extensionClient.start();
+  // });
 }
