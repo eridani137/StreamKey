@@ -27,7 +27,7 @@ public static class ApplicationConstants
         { "Accept-Language", "en-US" },
         { "client-id", ClientId },
         { "Origin", TwitchUrl.AbsoluteUri },
-        { "Referer", TwitchUrl.AbsoluteUri },
+        // { "Referer", TwitchUrl.AbsoluteUri },
         { "sec-ch-ua", """Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24""" },
         { "sec-ch-ua-mobile", "?0" },
         { "sec-ch-ua-platform", """Windows""" },
