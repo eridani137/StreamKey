@@ -30,7 +30,7 @@ public class TwitchService(HttpClient client, ILogger<TwitchService> logger) : I
             }
         };
 
-        context.Request.Query.AddQueryAuth(client);
+        // context.Request.Query.AddQueryAuth(client);
         
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, tokenRequest);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
@@ -67,7 +67,7 @@ public class TwitchService(HttpClient client, ILogger<TwitchService> logger) : I
             }
         };
 
-        context.Request.Query.AddQueryAuth(client);
+        // context.Request.Query.AddQueryAuth(client);
         
         using var response = await client.PostAsJsonAsync(ApplicationConstants.QqlUrl, tokenRequest);
         await using var contentStream = await response.Content.ReadAsStreamAsync();
