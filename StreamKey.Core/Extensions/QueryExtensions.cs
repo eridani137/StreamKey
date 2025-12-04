@@ -11,7 +11,7 @@ public static class QueryExtensions
         {
             var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
                 ? auth.ToString()
-                : "undefined"; //: ApplicationConstants.DefaultAuthorization;
+                : ApplicationConstants.DefaultAuthorization;
 
             request.Headers.Add("Authorization", authorization);
 
