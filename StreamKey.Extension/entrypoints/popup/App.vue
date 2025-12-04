@@ -227,7 +227,6 @@ async function loadUserProfile() {
       telegramStatus.value = TelegramStatus.NotAuthorized;
     }
   } catch (error) {
-    console.error('Ошибка при загрузке профиля', error);
     telegramUser.value = undefined;
     telegramStatus.value = TelegramStatus.NotAuthorized;
   }

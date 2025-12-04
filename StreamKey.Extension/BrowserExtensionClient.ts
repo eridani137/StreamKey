@@ -26,7 +26,7 @@ class BrowserExtensionClient {
   private sessionId: string;
 
   private inactivityTimer: NodeJS.Timeout | null = null;
-  private readonly INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
+  private readonly INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
 
   constructor() {
     this.sessionId = '';
