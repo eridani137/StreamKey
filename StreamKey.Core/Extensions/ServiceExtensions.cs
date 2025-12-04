@@ -50,6 +50,7 @@ public static class ServiceExtensions
         if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
         {
             ApplicationConstants.DefaultAuthorization = authorization.Value;
+            ApplicationConstants.Headers.Add("Authorization", authorization.Value);
             Log.Information("Default authorization {Authorization}", ApplicationConstants.DefaultAuthorization);
         }
 
@@ -57,6 +58,7 @@ public static class ServiceExtensions
         if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
         {
             ApplicationConstants.DefaultDeviceId = deviceId.Value;
+            ApplicationConstants.Headers.Add("device-id", deviceId.Value);
             Log.Information("Default DeviceId {DeviceId}", ApplicationConstants.DefaultDeviceId);
         }
     }
