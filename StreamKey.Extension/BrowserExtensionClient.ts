@@ -34,7 +34,16 @@ class BrowserExtensionClient {
       })
       .withHubProtocol(new MessagePackHubProtocol())
       .configureLogging(LogLevel.Error) // TODO
-      .withAutomaticReconnect()
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds(retryContext) {
+          const defaultDelays = [0, 2000, 5000, 10000, 15000, 20000];
+          if (retryContext.previousRetryCount < defaultDelays.length) {
+            return defaultDelays[retryContext.previousRetryCount];
+          } else {
+            return 60000;
+          }
+        },
+      })
       .build();
 
     this.connection.on('RequestUserData', async (): Promise<void> => {

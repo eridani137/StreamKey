@@ -2,7 +2,7 @@ import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
-import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
+import { loadTwitchRedirectRules } from '@/rules';
 
 export default defineBackground(() => {
   registerMessageHandlers();
