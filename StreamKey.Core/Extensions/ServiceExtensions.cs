@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.Services;
@@ -49,12 +50,14 @@ public static class ServiceExtensions
         if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
         {
             ApplicationConstants.DefaultAuthorization = authorization.Value;
+            Log.Information("Default authorization {Authorization}", ApplicationConstants.DefaultAuthorization);
         }
 
         var deviceId = builder.Configuration.GetSection("DeviceId");
         if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
         {
             ApplicationConstants.DefaultDeviceId = deviceId.Value;
+            Log.Information("Default DeviceId {DeviceId}", ApplicationConstants.DefaultDeviceId);
         }
     }
 
