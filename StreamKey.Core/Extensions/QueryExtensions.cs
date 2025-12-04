@@ -35,6 +35,8 @@ public static class QueryExtensions
                 : ApplicationConstants.DefaultDeviceId;
 
             client.DefaultRequestHeaders.Add("device-id", deviceId);
+
+            client.DefaultRequestHeaders.Add("Client-ID", ApplicationConstants.ClientId);
         }
     }
 }
