@@ -14,7 +14,7 @@ public static class QueryExtensions
                 ? auth.ToString()
                 : ApplicationConstants.DefaultAuthorization;
             
-            request.Headers.Add("Authorization", $"OAuth {authorization}");
+            request.Headers.Add("Authorization", authorization);
             
             var deviceId = query.TryGetValue("device-id", out var device) && !string.IsNullOrEmpty(device)
                 ? device.ToString()
@@ -29,7 +29,7 @@ public static class QueryExtensions
                 ? auth.ToString()
                 : ApplicationConstants.DefaultAuthorization;
 
-            client.DefaultRequestHeaders.Add("Authorization", $"OAuth {authorization}");
+            client.DefaultRequestHeaders.Add("Authorization", authorization);
 
             var deviceId = query.TryGetValue("device-id", out var device) && !string.IsNullOrEmpty(device)
                 ? device.ToString()
