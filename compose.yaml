@@ -6,19 +6,26 @@
       dockerfile: StreamKey.Api/Dockerfile
     restart: unless-stopped
     environment:
-      - ASPNETCORE_URLS=http://+:5555
+      - ASPNETCORE_URLS=http://0.0.0.0:5555
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
+      - DOTNET_GCServer:1
+      - DOTNET_EnableDiagnostics:0
     env_file:
       - .env
-#    ports:
-#      - "5555:5555" # TODO
+    #    ports:
+    #      - "5555:5555" # TODO
     depends_on:
       postgres:
         condition: service_healthy
       seq:
         condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5555/health" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
     networks:
@@ -36,7 +43,7 @@
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -45,17 +52,17 @@
   
   camoufox:
     image: eridani137/camoufox:latest
-#    image: camoufox
-#    build:
-#      context: .
-#      dockerfile: Camoufox/Dockerfile
+    #    image: camoufox
+    #    build:
+    #      context: .
+    #      dockerfile: Camoufox/Dockerfile
     restart: unless-stopped
     expose:
       - "8080"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
-      interval: 30s
-      timeout: 10s
+      interval: 15s
+      timeout: 5s
       retries: 3
     networks:
       - internal
@@ -69,9 +76,6 @@
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - internal
 
@@ -84,13 +88,14 @@
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./files:/app/files
+      - ./files:/app/files:ro
     ulimits:
       nofile:
         soft: 30000
         hard: 60000
     depends_on:
-      - streamkey-api
+      streamkey-api:
+        condition: service_healthy
     networks:
       - internal
 
