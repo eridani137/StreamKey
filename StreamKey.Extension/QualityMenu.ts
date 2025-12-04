@@ -250,8 +250,7 @@ export class QualityMenu {
     const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile);
     if (tgUser?.is_chat_member) return;
 
-    const utc = String(Math.floor(Date.now()));
-    localStorage.setItem('s-qs-ts', utc);
+    localStorage.setItem('s-qs-ts', String(Math.floor(Date.now())));
     localStorage.setItem('video-quality', '{"default":"1080p60"}');
   }
 

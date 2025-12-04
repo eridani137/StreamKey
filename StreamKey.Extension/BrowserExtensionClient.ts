@@ -95,15 +95,7 @@ class BrowserExtensionClient {
 
   async start(sessionId: string): Promise<void> {
     this.sessionId = sessionId;
-
-    if (this.connection.state === HubConnectionState.Disconnected) {
-      try {
-        await this.connection.start();
-      } catch (error) {
-        console.error('Ошибка соединения:', error);
-        setTimeout(() => this.start(sessionId), 5000);
-      }
-    }
+    await this.connection.start();
   }
 
   async updateActivity(payload: WithUserId): Promise<void> {
