@@ -35,17 +35,17 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
-        var tokenResponse =
+        var result =
             await SendTwitchGqlRequest<StreamPlaybackAccessTokenResponse>(tokenRequest, context, "StreamAccessToken");
 
-        if (tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
-            tokenResponse.Data.StreamPlaybackAccessToken?.Value is null)
+        if (result?.Data?.Data?.StreamPlaybackAccessToken?.Signature is null ||
+            result?.Data.Data.StreamPlaybackAccessToken?.Value is null)
         {
-            logger.LogError("Twitch вернул неверный StreamAccessToken. Response: {@Response}", tokenResponse);
+            logger.LogError("Twitch вернул неверный StreamAccessToken. Body: {@Body}", result?.RawJson);
             return null;
         }
 
-        return tokenResponse;
+        return result.Data;
     }
 
     public async Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string vodId, HttpContext context)
@@ -72,19 +72,22 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
-        var tokenResponse = await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, context, "VodAccessToken");
+        var result = await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, context, "VodAccessToken");
 
-        if (tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
-            tokenResponse.Data?.VideoPlaybackAccessToken?.Value is null)
+        if (result?.Data?.Data?.VideoPlaybackAccessToken?.Signature is null ||
+            result?.Data.Data?.VideoPlaybackAccessToken?.Value is null)
         {
-            logger.LogError("Twitch вернул неверный VodAccessToken. Response: {@Response}", tokenResponse);
+            logger.LogError("Twitch вернул неверный VodAccessToken. Body: {@Body}", result.RawJson);
             return null;
         }
 
-        return tokenResponse;
+        return result.Data;
     }
 
-    private async Task<T?> SendTwitchGqlRequest<T>(object tokenRequest, HttpContext context, string logPrefix)
+    private async Task<TwitchResponseWrapper<T>?> SendTwitchGqlRequest<T>(
+        object tokenRequest,
+        HttpContext context,
+        string logPrefix)
         where T : class
     {
         using var client = clientFactory.CreateClient(ApplicationConstants.TwitchClientName);
@@ -100,21 +103,21 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogWarning("{Prefix} Twitch GQL error {Status}. Body: {Body}", logPrefix, response.StatusCode, body);
+            logger.LogWarning("{Prefix} Twitch GQL error {Status}. Body: {Body}",
+                logPrefix, response.StatusCode, body);
             return null;
         }
 
-        T? tokenResponse;
         try
         {
-            tokenResponse = JsonSerializer.Deserialize<T>(body);
+            var parsed = JsonSerializer.Deserialize<T>(body);
+            return new TwitchResponseWrapper<T>(parsed, body);
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "{Prefix} Ошибка десериализации Twitch JSON. Body: {Body}", logPrefix, body);
+            logger.LogError(ex, "{Prefix} Ошибка десериализации Twitch JSON. Body: {Body}",
+                logPrefix, body);
             return null;
         }
-
-        return tokenResponse;
     }
 }
