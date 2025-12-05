@@ -139,9 +139,9 @@ public class BrowserExtensionHub
     }
 
     public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
-        [FromServices] ITelegramUserRepository repository, CancellationToken cancellationToken = default)
+        [FromServices] ITelegramUserRepository repository)
     {
-        var user = await repository.GetByTelegramIdNotTracked(request.UserId, cancellationToken);
+        var user = await repository.GetByTelegramIdNotTracked(request.UserId, Context.ConnectionAborted);
         if (user is null) return null;
 
         if (!string.Equals(request.UserHash, user.Hash, StringComparison.Ordinal))
@@ -152,22 +152,21 @@ public class BrowserExtensionHub
         return user.MapUserDto();
     }
 
-    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service, CancellationToken cancellationToken = default)
+    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service)
     {
-        var channels = await service.GetChannels(cancellationToken);
+        var channels = await service.GetChannels(Context.ConnectionAborted);
         return channels.Map();
     }
 
     public async Task CheckMember(CheckMemberRequest request,
         [FromServices] ITelegramUserRepository repository,
         [FromServices] ITelegramService service,
-        [FromServices] IUnitOfWork unitOfWork,
-        CancellationToken cancellationToken = default)
+        [FromServices] IUnitOfWork unitOfWork)
     {
-        var user = await repository.GetByTelegramId(request.UserId, cancellationToken);
+        var user = await repository.GetByTelegramId(request.UserId, Context.ConnectionAborted);
         if (user is null) return;
 
-        var getChatMemberResponse = await service.GetChatMember(request.UserId, cancellationToken);
+        var getChatMemberResponse = await service.GetChatMember(request.UserId, Context.ConnectionAborted);
         if (getChatMemberResponse is null) return;
 
         var isChatMember = getChatMemberResponse.IsChatMember();
@@ -177,7 +176,7 @@ public class BrowserExtensionHub
             user.UpdatedAt = DateTime.UtcNow;
 
             repository.Update(user);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(Context.ConnectionAborted);
         }
 
         await Clients.Caller.ReloadUserData(user.MapUserDto());
