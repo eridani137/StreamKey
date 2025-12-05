@@ -18,12 +18,13 @@ public class StatisticHandler(
 {
     private static readonly TimeSpan SaveViewStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);
-    private static readonly TimeSpan UserOfflineTimeout = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan SaveClickChannelStatisticInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan LoggingOnlineInterval = TimeSpan.FromMinutes(30);
 
     private Task? _savingViewStatistic;
     private Task? _removeOfflineUsers;
     private Task? _savingChannelClick;
+    private Task? _loggingOnline;
     private CancellationTokenSource _stoppingCts = null!;
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -88,6 +89,15 @@ public class StatisticHandler(
                 {
                     logger.LogError(ex, "Ошибка в цикле сохранения кликов на каналы");
                 }
+            }
+        }, _stoppingCts.Token);
+        
+        _loggingOnline = Task.Run(async () =>
+        {
+            while (!_stoppingCts.Token.IsCancellationRequested)
+            {
+                await Task.Delay(LoggingOnlineInterval, _stoppingCts.Token);
+                logger.LogInformation("Текущий онлайн: {OnlineUsers}", BrowserExtensionHub.Users.Count);
             }
         }, _stoppingCts.Token);
 
@@ -239,6 +249,7 @@ public class StatisticHandler(
         _savingViewStatistic?.Dispose();
         _removeOfflineUsers?.Dispose();
         _savingChannelClick?.Dispose();
+        _loggingOnline?.Dispose();
         _stoppingCts.Dispose();
     }
 }
