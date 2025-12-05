@@ -23,6 +23,14 @@ public class BrowserExtensionHub
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
 
+    public static string? GetConnectionIdBySessionId(Guid sessionId)
+    {
+        var client = Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
+        return !string.IsNullOrEmpty(client.Key)
+            ? client.Key
+            : null;
+    }
+
     public override async Task OnConnectedAsync()
     {
         var context = Context;

@@ -1,5 +1,7 @@
+using System.Data;
 using Carter;
 using Microsoft.AspNetCore.SignalR;
+using Npgsql;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
@@ -22,41 +24,50 @@ public class Telegram : ICarterModule
                     IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub,
                     CancellationToken cancellationToken) =>
                 {
-                    var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
+                    await using var transaction =
+                        await unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-                    var isNewUser = user is null;
-                    user ??= dto.Map();
-
-                    var getChatMemberResponse = await service.GetChatMember(dto.Id, cancellationToken);
-                    if (getChatMemberResponse is null || cancellationToken.IsCancellationRequested)
-                        return Results.BadRequest("Chat member check failed");
-
-                    user.FirstName = dto.FirstName;
-                    user.Username = dto.Username;
-                    user.AuthDate = dto.AuthDate;
-                    user.PhotoUrl = dto.PhotoUrl;
-                    user.Hash = dto.Hash;
-                    user.IsChatMember = getChatMemberResponse.IsChatMember();
-                    user.AuthorizedAt = DateTime.UtcNow;
-
-                    if (isNewUser)
+                    try
                     {
-                        await repository.Add(user, cancellationToken);
+                        var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
+
+                        if (user is null)
+                        {
+                            user = dto.Map();
+                            await repository.Add(user, cancellationToken);
+                        }
+
+                        var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
+                        if (chatMember is null) return Results.BadRequest("Chat member check failed");
+
+                        user.FirstName = dto.FirstName;
+                        user.Username = dto.Username;
+                        user.AuthDate = dto.AuthDate;
+                        user.PhotoUrl = dto.PhotoUrl;
+                        user.Hash = dto.Hash;
+                        user.IsChatMember = chatMember.IsChatMember();
+                        user.AuthorizedAt = DateTime.UtcNow;
+
+                        await unitOfWork.SaveChangesAsync(cancellationToken);
+                        await transaction.CommitAsync(cancellationToken);
+
+                        if (BrowserExtensionHub.GetConnectionIdBySessionId(sessionId) is { } connectionId)
+                        {
+                            await extensionHub.Clients.Client(connectionId)
+                                .ReloadUserData(dto.MapUserDto(user.IsChatMember));
+                        }
+
+                        return Results.Ok();
                     }
-                    else
+                    catch (PostgresException ex) when (ex.SqlState == "23505")
                     {
-                        repository.Update(user);
+                        return Results.Conflict("User already exists");
                     }
-
-                    await unitOfWork.SaveChangesAsync(cancellationToken);
-
-                    var client = BrowserExtensionHub.Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-                    if (client.Key is not null && !cancellationToken.IsCancellationRequested)
+                    catch
                     {
-                        await extensionHub.Clients.Client(client.Key).ReloadUserData(dto.MapUserDto(user.IsChatMember));
+                        await transaction.RollbackAsync(cancellationToken);
+                        return Results.BadRequest();
                     }
-
-                    return Results.Ok();
                 })
             .WithSummary("Авторизация");
 
@@ -81,8 +92,7 @@ public class Telegram : ICarterModule
                 async (long id, ITelegramService service, CancellationToken cancellationToken) =>
                 {
                     var getChatMemberResponse = await service.GetChatMember(id, cancellationToken);
-                    if (getChatMemberResponse is null || cancellationToken.IsCancellationRequested)
-                        return Results.BadRequest("Chat member check failed");
+                    if (getChatMemberResponse is null) return Results.BadRequest("Chat member check failed");
 
                     return Results.Ok(getChatMemberResponse);
                 })
