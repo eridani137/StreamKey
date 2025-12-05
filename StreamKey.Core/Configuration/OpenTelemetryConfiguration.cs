@@ -18,6 +18,8 @@ public static class OpenTelemetryConfiguration
 
     public static void Configure(WebApplicationBuilder builder)
     {
+        var excludedPaths = builder.Configuration.GetSection("OpenTelemetry:ExcludedPaths").Get<string[]>() ?? [];
+        
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
             .WithTracing(tracing =>
@@ -29,6 +31,12 @@ public static class OpenTelemetryConfiguration
                     .AddProcessor(new ErrorOnlyProcessor())
                     .AddAspNetCoreInstrumentation(options =>
                     {
+                        options.Filter = httpContext => 
+                        {
+                            var path = httpContext.Request.Path.Value ?? string.Empty;
+                            return !excludedPaths.Any(excludedPath => path.StartsWith(excludedPath));
+                        };
+                        
                         options.EnrichWithHttpRequest = (activity, httpRequest) =>
                         {
                             activity.SetTag("http.request.query_string", httpRequest.QueryString.Value);
@@ -36,6 +44,21 @@ public static class OpenTelemetryConfiguration
                     })
                     .AddHttpClientInstrumentation(options =>
                     {
+                        options.FilterHttpRequestMessage = httpRequestMessage =>
+                        {
+                            var uri = httpRequestMessage.RequestUri;
+                            if (uri == null) return true;
+
+                            var path = uri.AbsolutePath;
+
+                            if (excludedPaths.Any(excluded => path.StartsWith(excluded, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                return false;
+                            }
+
+                            return true;
+                        };
+                        
                         options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
                         {
                             if (httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true)
