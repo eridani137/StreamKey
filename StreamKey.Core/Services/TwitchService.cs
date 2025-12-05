@@ -35,28 +35,17 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
-        using var client = clientFactory.CreateClient(ApplicationConstants.TwitchClientName);
-        var request = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
-        {
-            Content = JsonContent.Create(tokenRequest)
-        };
-        context.Request.Query.AddQueryAuth(request);
-        using var response = await client.SendAsync(request);
-        
-        await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var accessTokenResponse =
-            await JsonSerializer.DeserializeAsync<StreamPlaybackAccessTokenResponse>(contentStream);
+        var tokenResponse =
+            await SendTwitchGqlRequest<StreamPlaybackAccessTokenResponse>(tokenRequest, context, "StreamAccessToken");
 
-        if (accessTokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
-            accessTokenResponse.Data?.StreamPlaybackAccessToken?.Value is null)
+        if (tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
+            tokenResponse.Data.StreamPlaybackAccessToken?.Value is null)
         {
-            var jsonString = await response.Content.ReadAsStringAsync();
-            logger.LogError("Ошибка получения StreamAccessToken: {JSON}", jsonString);
-
+            logger.LogError("Twitch вернул неверный StreamAccessToken. Response: {@Response}", tokenResponse);
             return null;
         }
 
-        return accessTokenResponse;
+        return tokenResponse;
     }
 
     public async Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string vodId, HttpContext context)
@@ -83,27 +72,49 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
+        var tokenResponse = await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, context, "VodAccessToken");
+
+        if (tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
+            tokenResponse.Data?.VideoPlaybackAccessToken?.Value is null)
+        {
+            logger.LogError("Twitch вернул неверный VodAccessToken. Response: {@Response}", tokenResponse);
+            return null;
+        }
+
+        return tokenResponse;
+    }
+
+    private async Task<T?> SendTwitchGqlRequest<T>(object tokenRequest, HttpContext context, string logPrefix)
+        where T : class
+    {
         using var client = clientFactory.CreateClient(ApplicationConstants.TwitchClientName);
         var request = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
         {
             Content = JsonContent.Create(tokenRequest)
         };
+
         context.Request.Query.AddQueryAuth(request);
+
         using var response = await client.SendAsync(request);
-        
-        await using var contentStream = await response.Content.ReadAsStreamAsync();
-        var accessTokenResponse =
-            await JsonSerializer.DeserializeAsync<VideoPlaybackAccessTokenResponse>(contentStream);
+        var body = await response.Content.ReadAsStringAsync();
 
-        if (accessTokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
-            accessTokenResponse.Data?.VideoPlaybackAccessToken?.Value is null)
+        if (!response.IsSuccessStatusCode)
         {
-            var jsonString = await response.Content.ReadAsStringAsync();
-            logger.LogError("Ошибка получения VodAccessToken: {JSON}", jsonString);
-
+            logger.LogWarning("{Prefix} Twitch GQL error {Status}. Body: {Body}", logPrefix, response.StatusCode, body);
             return null;
         }
 
-        return accessTokenResponse;
+        T? tokenResponse;
+        try
+        {
+            tokenResponse = JsonSerializer.Deserialize<T>(body);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "{Prefix} Ошибка десериализации Twitch JSON. Body: {Body}", logPrefix, body);
+            return null;
+        }
+
+        return tokenResponse;
     }
 }
