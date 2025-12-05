@@ -24,6 +24,8 @@ public static class OpenTelemetryConfiguration
             {
                 tracing
                     .SetSampler<IgnoreSignalRSampler>()
+                    .AddProcessor(new IgnorePathProcessor("/health", "/metrics", "/hubs"))
+                    .AddProcessor(new ErrorOnlyProcessor())
                     .AddAspNetCoreInstrumentation(options =>
                     {
                         options.EnrichWithHttpRequest = (activity, httpRequest) =>
@@ -53,7 +55,6 @@ public static class OpenTelemetryConfiguration
                     })
                     // .AddEntityFrameworkCoreInstrumentation()
                     // .AddNpgsql()
-                    .AddProcessor(new ErrorOnlyProcessor())
                     .AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/traces");
