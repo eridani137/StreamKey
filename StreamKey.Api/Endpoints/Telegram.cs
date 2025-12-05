@@ -28,7 +28,8 @@ public class Telegram : ICarterModule
                     user ??= dto.Map();
 
                     var getChatMemberResponse = await service.GetChatMember(dto.Id, cancellationToken);
-                    if (getChatMemberResponse is null || cancellationToken.IsCancellationRequested) return Results.BadRequest("Chat member check failed");
+                    if (getChatMemberResponse is null || cancellationToken.IsCancellationRequested)
+                        return Results.BadRequest("Chat member check failed");
 
                     user.FirstName = dto.FirstName;
                     user.Username = dto.Username;
@@ -80,9 +81,10 @@ public class Telegram : ICarterModule
                 async (long id, ITelegramService service, CancellationToken cancellationToken) =>
                 {
                     var getChatMemberResponse = await service.GetChatMember(id, cancellationToken);
-                    return getChatMemberResponse is null
-                        ? Results.BadRequest(getChatMemberResponse)
-                        : Results.Ok(getChatMemberResponse);
+                    if (getChatMemberResponse is null || cancellationToken.IsCancellationRequested)
+                        return Results.BadRequest("Chat member check failed");
+
+                    return Results.Ok(getChatMemberResponse);
                 })
             .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");

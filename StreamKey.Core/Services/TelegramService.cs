@@ -14,16 +14,23 @@ public class TelegramService(IHttpClientFactory clientFactory, ILogger<TelegramS
         try
         {
             using var client = clientFactory.CreateClient(ApplicationConstants.TelegramClientName);
-            using var response = await client.PostAsJsonAsync($"/bot{ApplicationConstants.TelegramBotToken}/getChatMember", new
-            {
-                chat_id = ApplicationConstants.TelegramChatId,
-                user_id = userId,
-            }, cancellationToken: cancellationToken);
-            
+            using var response = await client.PostAsJsonAsync(
+                $"/bot{ApplicationConstants.TelegramBotToken}/getChatMember", new
+                {
+                    chat_id = ApplicationConstants.TelegramChatId,
+                    user_id = userId,
+                }, cancellationToken: cancellationToken);
+
             await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            var getChatMemberResponse = await JsonSerializer.DeserializeAsync<GetChatMemberResponse>(contentStream, cancellationToken: cancellationToken);
-        
+            var getChatMemberResponse =
+                await JsonSerializer.DeserializeAsync<GetChatMemberResponse>(contentStream,
+                    cancellationToken: cancellationToken);
+
             return getChatMemberResponse;
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
         }
         catch (Exception e)
         {
