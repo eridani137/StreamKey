@@ -13,21 +13,30 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Произошло необработанное исключение: {Message}", exception.Message);
+        if (cancellationToken.IsCancellationRequested) return true;
 
-        var problemDetails = new ProblemDetails
+        try
         {
-            Status = (int)HttpStatusCode.InternalServerError,
-            Title = "Внутренняя ошибка сервера",
-            Detail = exception.Message,
-            Instance = httpContext.Request.Path
-        };
+            logger.LogError(exception, "Произошло необработанное исключение: {Message}", exception.Message);
+
+            var problemDetails = new ProblemDetails
+            {
+                Status = (int)HttpStatusCode.InternalServerError,
+                Title = "Внутренняя ошибка сервера",
+                Detail = exception.Message,
+                Instance = httpContext.Request.Path
+            };
         
-        httpContext.Response.ContentType = "application/problem+json";
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
+            httpContext.Response.ContentType = "application/problem+json";
+            httpContext.Response.StatusCode = problemDetails.Status.Value;
 
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
-        return true;
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return true;
+        }
     }
 }
