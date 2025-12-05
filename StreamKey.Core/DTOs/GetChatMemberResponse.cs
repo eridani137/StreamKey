@@ -3,21 +3,21 @@ using System.Text.Json.Serialization;
 
 namespace StreamKey.Core.DTOs;
 
-public class GetChatMemberResponse
+public record GetChatMemberResponse
 {
     [JsonPropertyName("ok")]  public bool Ok { get; set; }
     
     [JsonPropertyName("result")] public ChatMemberResult? Result { get; set; }
 }
 
-public class ChatMemberResult
+public record ChatMemberResult
 {
     [JsonPropertyName("user")] public ChatMemberUser? User { get; set; }
     
     [JsonPropertyName("status")] public ChatMemberStatus? Status { get; set; }
 }
 
-public class ChatMemberUser
+public record ChatMemberUser
 {
     [JsonPropertyName("id")] public long Id { get; set; }
     

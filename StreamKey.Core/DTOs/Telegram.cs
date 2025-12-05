@@ -3,23 +3,23 @@ using MessagePack;
 
 namespace StreamKey.Core.DTOs;
 
-public class TelegramAuthDto
+public record TelegramAuthDto
 {
-    [JsonPropertyName("auth_date")] public long AuthDate { get; set; }
+    [JsonPropertyName("auth_date")] public long AuthDate { get; init; }
 
-    [JsonPropertyName("first_name")] public string FirstName { get; set; } = string.Empty;
+    [JsonPropertyName("first_name")] public string FirstName { get; init; } = string.Empty;
 
-    [JsonPropertyName("hash")] public required string Hash { get; set; }
+    [JsonPropertyName("hash")] public string Hash { get; init; } = string.Empty;
 
-    [JsonPropertyName("id")] public long Id { get; set; }
+    [JsonPropertyName("id")] public long Id { get; init; }
 
-    [JsonPropertyName("photo_url")] public string PhotoUrl { get; set; } = string.Empty;
+    [JsonPropertyName("photo_url")] public string PhotoUrl { get; init; } = string.Empty;
 
-    [JsonPropertyName("username")] public string Username { get; set; } = string.Empty;
+    [JsonPropertyName("username")] public string Username { get; init; } = string.Empty;
 }
 
 [MessagePackObject]
-public class TelegramUserDto
+public record TelegramUserDto
 {
     [Key("id")]
     [JsonPropertyName("id")] 
@@ -38,13 +38,30 @@ public class TelegramUserDto
     public bool IsChatMember { get; set; }
 }
 
-public class TelegramUserRequest
+public record TelegramUserRequest
 {
     public required long UserId { get; set; }
     public required string UserHash { get; set; }
 }
 
-public class CheckMemberRequest
+public record CheckMemberRequest
 {
     public required long UserId { get; set; }
+}
+
+public record TelegramAuthDtoWithSessionId : TelegramAuthDto
+{
+    public Guid SessionId { get; init; }
+    
+    public TelegramAuthDtoWithSessionId(TelegramAuthDto dto, Guid sessionId)
+    {
+        AuthDate = dto.AuthDate;
+        FirstName = dto.FirstName;
+        Hash = dto.Hash;
+        Id = dto.Id;
+        PhotoUrl = dto.PhotoUrl;
+        Username = dto.Username;
+        
+        SessionId = sessionId;
+    }
 }

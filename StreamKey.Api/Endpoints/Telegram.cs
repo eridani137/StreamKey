@@ -1,10 +1,8 @@
-using System.Data;
 using Carter;
 using Microsoft.AspNetCore.SignalR;
-using Npgsql;
 using StreamKey.Core.Abstractions;
+using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.DTOs;
-using StreamKey.Core.Extensions;
 using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
@@ -19,55 +17,21 @@ public class Telegram : ICarterModule
             .WithTags("Взаимодействие с Telegram");
 
         group.MapPost("/login/{sessionId:guid}",
-                async (TelegramAuthDto dto, Guid sessionId, ITelegramService service,
-                    ITelegramUserRepository repository, IUnitOfWork unitOfWork,
-                    IHubContext<BrowserExtensionHub, IBrowserExtensionHub> extensionHub,
-                    CancellationToken cancellationToken) =>
+                (TelegramAuthDto dto, Guid sessionId) =>
                 {
-                    await using var transaction =
-                        await unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-
-                    try
+                    if (string.IsNullOrEmpty(dto.Hash))
                     {
-                        var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
-
-                        if (user is null)
-                        {
-                            user = dto.Map();
-                            await repository.Add(user, cancellationToken);
-                        }
-
-                        var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
-                        if (chatMember is null) return Results.BadRequest("Chat member check failed");
-
-                        user.FirstName = dto.FirstName;
-                        user.Username = dto.Username;
-                        user.AuthDate = dto.AuthDate;
-                        user.PhotoUrl = dto.PhotoUrl;
-                        user.Hash = dto.Hash;
-                        user.IsChatMember = chatMember.IsChatMember();
-                        user.AuthorizedAt = DateTime.UtcNow;
-
-                        await unitOfWork.SaveChangesAsync(cancellationToken);
-                        await transaction.CommitAsync(cancellationToken);
-
-                        if (BrowserExtensionHub.GetConnectionIdBySessionId(sessionId) is { } connectionId)
-                        {
-                            await extensionHub.Clients.Client(connectionId)
-                                .ReloadUserData(dto.MapUserDto(user.IsChatMember));
-                        }
-
-                        return Results.Ok();
-                    }
-                    catch (PostgresException ex) when (ex.SqlState == "23505")
-                    {
-                        return Results.Conflict("User already exists");
-                    }
-                    catch
-                    {
-                        await transaction.RollbackAsync(cancellationToken);
                         return Results.BadRequest();
                     }
+
+                    if (TelegramHandler.NewUsers.Any(u => u.Id == dto.Id))
+                    {
+                        return Results.BadRequest("Запрос уже в обработке");
+                    }
+
+                    TelegramHandler.NewUsers.Enqueue(new TelegramAuthDtoWithSessionId(dto, sessionId));
+
+                    return Results.Ok();
                 })
             .WithSummary("Авторизация");
 

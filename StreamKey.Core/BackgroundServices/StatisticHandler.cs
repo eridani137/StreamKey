@@ -16,6 +16,8 @@ public class StatisticHandler(
     ILogger<StatisticHandler> logger)
     : IHostedService, IDisposable
 {
+    private static readonly TimeSpan StoppingTimeout = TimeSpan.FromMinutes(1);
+
     private static readonly TimeSpan SaveViewStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan SaveClickChannelStatisticInterval = TimeSpan.FromMinutes(1);
@@ -25,6 +27,7 @@ public class StatisticHandler(
     private Task? _removeOfflineUsers;
     private Task? _savingChannelClick;
     private Task? _loggingOnline;
+
     private CancellationTokenSource _stoppingCts = null!;
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -91,7 +94,7 @@ public class StatisticHandler(
                 }
             }
         }, _stoppingCts.Token);
-        
+
         _loggingOnline = Task.Run(async () =>
         {
             while (!_stoppingCts.Token.IsCancellationRequested)
@@ -117,7 +120,7 @@ public class StatisticHandler(
             if (_savingViewStatistic is not null && _removeOfflineUsers is not null && _savingChannelClick is not null)
             {
                 await Task.WhenAll(_savingViewStatistic, _removeOfflineUsers, _savingChannelClick)
-                    .WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+                    .WaitAsync(StoppingTimeout, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -140,14 +143,11 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<ViewStatisticRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var processed = 0;
-
             while (statisticService.ViewStatisticQueue.TryDequeue(out var entity))
             {
                 try
                 {
                     await repository.Add(entity, cancellationToken);
-                    processed++;
                 }
                 catch (Exception e)
                 {
@@ -156,11 +156,6 @@ public class StatisticHandler(
             }
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            if (processed > 0)
-            {
-                logger.LogDebug("Сохранено {RecordsProcessedCount} записей просмотров", processed);
-            }
         }
         catch (Exception e)
         {
@@ -176,7 +171,7 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var users = isShutdown 
+            var users = isShutdown
                 ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
                 : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
 
@@ -215,14 +210,11 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<ChannelClickRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var processed = 0;
-
             while (statisticService.ChannelActivityQueue.TryDequeue(out var entity))
             {
                 try
                 {
                     await repository.Add(entity, cancellationToken);
-                    processed++;
                 }
                 catch (Exception e)
                 {
@@ -231,11 +223,6 @@ public class StatisticHandler(
             }
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            if (processed > 0)
-            {
-                logger.LogDebug("Сохранено {RecordsProcessedCount} записей кликов на каналы", processed);
-            }
         }
         catch (Exception e)
         {
@@ -246,10 +233,12 @@ public class StatisticHandler(
     public void Dispose()
     {
         _stoppingCts.Cancel();
+
         _savingViewStatistic?.Dispose();
         _removeOfflineUsers?.Dispose();
         _savingChannelClick?.Dispose();
         _loggingOnline?.Dispose();
+
         _stoppingCts.Dispose();
     }
 }

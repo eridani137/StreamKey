@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StreamKey.Core.DTOs.TwitchGraphQL;
 
-public class PlaybackAccessToken
+public record PlaybackAccessToken
 {
     [JsonPropertyName("value")] public string? Value { get; init; }
 
