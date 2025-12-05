@@ -8,18 +8,26 @@ public class ErrorOnlyProcessor : BaseProcessor<Activity>
     public override void OnEnd(Activity activity)
     {
         var expectedError = activity.GetTagItem("expected_error")?.ToString() == "true";
-        if (expectedError) return;
-
-        if (activity.Status == ActivityStatusCode.Error)
+        if (expectedError)
         {
-            base.OnEnd(activity);
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;
         }
 
-        if (activity.Events.Any(e => e.Name == "exception"))
+        var hasError = activity.Status == ActivityStatusCode.Error || 
+                       activity.Events.Any(e => e.Name == "exception");
+        
+        var statusCode = activity.GetTagItem("http.response.status_code")?.ToString();
+        if (!string.IsNullOrEmpty(statusCode) && int.TryParse(statusCode, out var code))
         {
-            base.OnEnd(activity);
-            return;
+            hasError = hasError || code >= 400;
         }
+        
+        if (!hasError)
+        {
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+        }
+
+        base.OnEnd(activity);
     }
 }
