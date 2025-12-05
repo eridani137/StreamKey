@@ -7,25 +7,22 @@ public class ErrorOnlyProcessor : BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
-        if (IsSuccess(activity))
+        if (activity.Status == ActivityStatusCode.Error)
         {
-            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            base.OnEnd(activity);
             return;
         }
-        
-        base.OnEnd(activity);
-    }
 
-    private static bool IsSuccess(Activity activity)
-    {
-        if (activity.Status == ActivityStatusCode.Ok) return true;
+        if (activity.GetTagItem("expected_error")?.ToString() == "true")
+        {
+            base.OnEnd(activity);
+            return;
+        }
 
-        if (activity.GetTagItem("http.status_code") is string statusCodeStr &&
-            int.TryParse(statusCodeStr, out var statusCode) && 
-            statusCode is >= 200 and < 300) return true;
-
-        if (activity.GetTagItem("otel.status_code")?.ToString() == "OK") return true;
-
-        return false;
+        if (activity.Events.Any(e => e.Name == "exception"))
+        {
+            base.OnEnd(activity);
+            return;
+        }
     }
 }
