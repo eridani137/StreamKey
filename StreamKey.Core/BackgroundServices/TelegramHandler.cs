@@ -12,7 +12,7 @@ public class TelegramHandler(
     ILogger<TelegramHandler> logger)
     : BackgroundService
 {
-    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(3);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -50,7 +50,7 @@ public class TelegramHandler(
 
             if (processedUsersCount > 0)
             {
-                logger.LogInformation("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount} пользователя", users.Count, processedUsersCount);
+                logger.LogDebug("Обработано {UsersCount} тг пользователей, изменился статус подписки у {ProcessedUsersCount} пользователя", users.Count, processedUsersCount);
             }
             
             try
