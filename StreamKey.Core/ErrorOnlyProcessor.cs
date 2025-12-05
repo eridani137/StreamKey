@@ -7,13 +7,10 @@ public class ErrorOnlyProcessor : BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
-        if (activity.Status == ActivityStatusCode.Error)
-        {
-            base.OnEnd(activity);
-            return;
-        }
+        var expectedError = activity.GetTagItem("expected_error")?.ToString() == "true";
+        if (expectedError) return;
 
-        if (activity.GetTagItem("expected_error")?.ToString() == "true")
+        if (activity.Status == ActivityStatusCode.Error)
         {
             base.OnEnd(activity);
             return;
