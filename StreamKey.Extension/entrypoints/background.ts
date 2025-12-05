@@ -27,7 +27,7 @@ export async function onInstalled() {
 
 export async function onStartup() {
   const sessionId = await utils.createNewSession();
-  await extensionClient.start(sessionId);
+  await extensionClient.startWithRetry(sessionId);
   await utils.initUserProfile();
   const isEnabled = await storage.getItem(Config.keys.extensionState);
   if (isEnabled) {
