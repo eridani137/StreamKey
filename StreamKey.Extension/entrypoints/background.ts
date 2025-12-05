@@ -3,10 +3,6 @@ import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
 import { loadTwitchRedirectRules } from '@/rules';
-import { createPinia, setActivePinia } from 'pinia'
-
-const pinia = createPinia();
-setActivePinia(pinia);
 
 export default defineBackground(() => {
   registerMessageHandlers();
