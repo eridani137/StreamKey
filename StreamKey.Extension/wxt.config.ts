@@ -4,28 +4,13 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
   vite: () => ({
-    plugins:
+    plugins: [],
+    esbuild:
       process.env.NODE_ENV === 'production'
-        ? [
-            {
-              name: 'remove-console-prod',
-              transform(code, id) {
-                if (
-                  id.endsWith('.js') ||
-                  id.endsWith('.ts') ||
-                  id.endsWith('.vue')
-                ) {
-                  return {
-                    code: code
-                      .replace(/console\.(log|debug|info)\(.*?\);?/g, '')
-                      .replace(/debugger;?/g, ''),
-                    map: null,
-                  };
-                }
-              },
-            },
-          ]
-        : [],
+        ? {
+            drop: ['console', 'debugger'],
+          }
+        : undefined,
   }), // TODO
   manifest: (env) => {
     const manifest = {

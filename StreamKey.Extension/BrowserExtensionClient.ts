@@ -75,7 +75,9 @@ class BrowserExtensionClient {
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
-      } catch {}
+      } catch (e) {
+        // Ignore messaging errors
+      }
 
       await removeAllDynamicRules();
     });
@@ -85,7 +87,9 @@ class BrowserExtensionClient {
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
-      } catch {}
+      } catch (e) {
+        // Ignore messaging errors
+      }
 
       const isEnabled = await storage.getItem(Config.keys.extensionState);
       if (isEnabled) await loadTwitchRedirectRules();
@@ -98,7 +102,9 @@ class BrowserExtensionClient {
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
-      } catch {}
+      } catch (e) {
+        // Ignore messaging errors
+      }
 
       if (this.shouldReconnect) {
         console.log('Запуск переподключения после закрытия соединения...');
@@ -128,12 +134,16 @@ class BrowserExtensionClient {
 
         try {
           await sendMessage('setConnectionState', this.connectionState);
-        } catch {}
+        } catch (e) {
+          // Ignore messaging errors
+        }
 
         console.log('SignalR соединение восстановлено');
         
         const isEnabled = await storage.getItem(Config.keys.extensionState);
         if (isEnabled) await loadTwitchRedirectRules();
+        
+        await utils.initUserProfile();
         
         break;
       } catch (err) {
@@ -147,7 +157,7 @@ class BrowserExtensionClient {
     return this.connection.state;
   }
 
-  async startWithPersistentRetry(sessionId: string) {
+  async startWithPersistentRetry(sessionId: string): Promise<void> {
     if (sessionId) this.sessionId = sessionId;
     this.shouldReconnect = true;
     
@@ -158,7 +168,9 @@ class BrowserExtensionClient {
 
         try {
           await sendMessage('setConnectionState', this.connectionState);
-        } catch {}
+        } catch (e) {
+          // Ignore messaging errors
+        }
 
         console.log('SignalR соединение установлено');
         break;
