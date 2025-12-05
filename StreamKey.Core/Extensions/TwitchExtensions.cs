@@ -1,6 +1,6 @@
-namespace StreamKey.Shared;
+namespace StreamKey.Core.Extensions;
 
-public static class Extensions
+public static class TwitchExtensions
 {
     public static string GenerateDeviceId()
     {

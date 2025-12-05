@@ -3,6 +3,7 @@ namespace StreamKey.Shared;
 public static class ApplicationConstants
 {
     public const string UsherClientName = "UsherClient";
+    public const string TwitchClientName = "TwitchClient";
     
     public const string PlaylistContentType = "application/vnd.apple.mpegurl";
     
@@ -25,6 +26,7 @@ public static class ApplicationConstants
         { "Accept", "*/*" },
         { "Accept-Language", "en-US" },
         { "Origin", TwitchUrl.AbsoluteUri },
+        { "Client-ID", ClientId },
         { "sec-ch-ua", """Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24""" },
         { "sec-ch-ua-mobile", "?0" },
         { "sec-ch-ua-platform", """Windows""" },
