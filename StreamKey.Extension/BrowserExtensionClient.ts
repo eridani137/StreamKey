@@ -25,9 +25,6 @@ class BrowserExtensionClient {
   private connection: HubConnection;
   private sessionId: string;
 
-  // private inactivityTimer: NodeJS.Timeout | null = null;
-  // private readonly INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
-
   constructor() {
     this.sessionId = '';
     this.connection = new HubConnectionBuilder()
@@ -40,20 +37,18 @@ class BrowserExtensionClient {
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds(retryContext) {
           const defaultDelays = [
-            0, 2000, 2000, 2000, 2000, 2000
+            0, 1000, 1000, 1000
           ];
           if (retryContext.previousRetryCount < defaultDelays.length) {
             return defaultDelays[retryContext.previousRetryCount];
           } else {
-            return 5000;
+            return 2000;
           }
         },
       })
       .build();
 
     this.connection.on('RequestUserData', async (): Promise<void> => {
-      this.resetInactivityTimer();
-
       await this.connection.invoke('EntranceUserData', {
         SessionId: this.sessionId,
       } as WithSessionId);
@@ -62,8 +57,6 @@ class BrowserExtensionClient {
     this.connection.on(
       'ReloadUserData',
       async (user: TelegramUser): Promise<void> => {
-        this.resetInactivityTimer();
-
         await utils.initUserProfile(user);
       }
     );
@@ -101,46 +94,19 @@ class BrowserExtensionClient {
       } catch {}
 
       await removeAllDynamicRules();
-
-      this.clearInactivityTimer();
     });
-  }
-
-  private resetInactivityTimer() {
-    this.clearInactivityTimer();
-    // this.inactivityTimer = setTimeout(async () => {
-    //   console.warn('Нет активности — останавливаю соединение');
-    //   await this.stop();
-    // }, this.INACTIVITY_LIMIT_MS);
-  }
-
-  private clearInactivityTimer() {
-    // if (this.inactivityTimer) {
-    //   clearTimeout(this.inactivityTimer);
-    //   this.inactivityTimer = null;
-    // }
   }
 
   public get connectionState(): HubConnectionState {
     return this.connection.state;
   }
 
-  async start(sessionId: string | null = null): Promise<void> {
+  async start(sessionId: string): Promise<void> {
     if (sessionId) {
       this.sessionId = sessionId;
     }
 
-    if (!this.sessionId) {
-      console.error('Нет назначена сессия');
-      return;
-    }
-    if (this.connection.state === HubConnectionState.Connected) return;
-    if (this.connection.state !== HubConnectionState.Disconnected) {
-      this.waitForState(HubConnectionState.Disconnected);
-    }
-
     await this.connection.start();
-    this.resetInactivityTimer();
   }
 
   private async invokeWithActivity(method: string, ...args: any[]) {
@@ -159,7 +125,6 @@ class BrowserExtensionClient {
       await this.waitForState(HubConnectionState.Connected);
     }
 
-    this.resetInactivityTimer();
     return await this.connection.invoke(method, ...args);
   }
 
@@ -206,7 +171,6 @@ class BrowserExtensionClient {
   }
 
   async stop() {
-    this.clearInactivityTimer();
     await this.connection.stop();
   }
 }
