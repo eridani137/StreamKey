@@ -40,12 +40,12 @@ class BrowserExtensionClient {
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds(retryContext) {
           const defaultDelays = [
-            0, 2000, 2000, 5000, 5000, 5000, 10000, 10000, 10000, 20000, 20000, 20000
+            0, 2000, 2000, 2000, 2000, 2000
           ];
           if (retryContext.previousRetryCount < defaultDelays.length) {
             return defaultDelays[retryContext.previousRetryCount];
           } else {
-            return 30000;
+            return 5000;
           }
         },
       })
