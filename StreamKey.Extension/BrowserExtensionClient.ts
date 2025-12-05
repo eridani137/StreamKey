@@ -97,6 +97,11 @@ class BrowserExtensionClient {
         try {
           console.log('Попытка подключения...');
           await this.connection.start();
+
+          try {
+            await sendMessage('setConnectionState', this.connectionState);
+          } catch {}
+
           console.log('SignalR соединение установлено');
           break;
         } catch (err) {
