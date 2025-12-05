@@ -26,18 +26,6 @@ public class Channel : ICarterModule
             .Produces<List<ChannelDto>>()
             .WithSummary("Получить все добавленные каналы");
 
-        group.MapGet("",
-                async (IChannelService service) =>
-                {
-                    var channels = await service.GetChannels();
-                    var mapped = channels.Map();
-
-                    return Results.Ok(mapped);
-                })
-            .Produces<List<ChannelDto>>()
-            .AllowAnonymous()
-            .WithSummary("Получить онлайн каналы");
-
         group.MapPost("",
                 async (ChannelDto dto, IChannelService service) =>
                 {

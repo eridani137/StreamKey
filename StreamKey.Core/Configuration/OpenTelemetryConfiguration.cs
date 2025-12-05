@@ -25,6 +25,7 @@ public static class OpenTelemetryConfiguration
                 tracing
                     .SetSampler<IgnoreSignalRSampler>()
                     .AddProcessor(new IgnorePathProcessor("/health", "/metrics", "/hubs"))
+                    .AddProcessor(new HttpClientOnlyErrorProcessor())
                     .AddProcessor(new ErrorOnlyProcessor())
                     .AddAspNetCoreInstrumentation(options =>
                     {
