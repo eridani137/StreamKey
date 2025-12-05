@@ -16,7 +16,7 @@ public class StatisticHandler(
     ILogger<StatisticHandler> logger)
     : IHostedService, IDisposable
 {
-    private static readonly TimeSpan StoppingTimeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan StoppingTimeout = TimeSpan.FromSeconds(30);
 
     private static readonly TimeSpan SaveViewStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);

@@ -17,7 +17,7 @@ public class TelegramHandler(
     ILogger<TelegramHandler> logger)
     : IHostedService, IDisposable
 {
-    private static readonly TimeSpan StoppingTimeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan StoppingTimeout = TimeSpan.FromSeconds(30);
     
     private static readonly TimeSpan CheckOldUsersInterval = TimeSpan.FromMinutes(3);
 

@@ -24,16 +24,21 @@ import { loadTwitchRedirectRules, removeAllDynamicRules } from './rules';
 class BrowserExtensionClient {
   private connection: HubConnection;
   private sessionId: string;
+  private shouldReconnect: boolean = true;
 
   constructor() {
     this.sessionId = '';
-    this.connection = new HubConnectionBuilder()
+    this.connection = this.createConnection();
+  }
+
+  private createConnection(): HubConnection {
+    const connection = new HubConnectionBuilder()
       .withUrl(Config.urls.extensionHub, {
         skipNegotiation: true,
         transport: HttpTransportType.WebSockets,
       })
       .withHubProtocol(new MessagePackHubProtocol())
-      .configureLogging(LogLevel.Error) // TODO
+      .configureLogging(LogLevel.Error)
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds(retryContext) {
           const defaultDelays = [0, 1000, 1000, 1000];
@@ -46,24 +51,26 @@ class BrowserExtensionClient {
       })
       .build();
 
-    this.connection.on('RequestUserData', async (): Promise<void> => {
-      await this.connection.invoke('EntranceUserData', {
+    connection.on('RequestUserData', async (): Promise<void> => {
+      await connection.invoke('EntranceUserData', {
         SessionId: this.sessionId,
       } as WithSessionId);
     });
 
-    this.connection.on(
+    connection.on(
       'ReloadUserData',
       async (user: TelegramUser): Promise<void> => {
         await utils.initUserProfile(user);
       }
     );
 
-    this.setupConnectionHandlers();
+    this.setupConnectionHandlers(connection);
+
+    return connection;
   }
 
-  private setupConnectionHandlers(): void {
-    this.connection.onreconnecting(async (error) => {
+  private setupConnectionHandlers(connection: HubConnection): void {
+    connection.onreconnecting(async (error) => {
       console.log('Переподключение...', error);
 
       try {
@@ -73,7 +80,7 @@ class BrowserExtensionClient {
       await removeAllDynamicRules();
     });
 
-    this.connection.onreconnected(async () => {
+    connection.onreconnected(async () => {
       console.log('Переподключено');
 
       try {
@@ -83,6 +90,57 @@ class BrowserExtensionClient {
       const isEnabled = await storage.getItem(Config.keys.extensionState);
       if (isEnabled) await loadTwitchRedirectRules();
     });
+
+    connection.onclose(async (error) => {
+      console.warn('Соединение закрыто', error);
+      
+      await removeAllDynamicRules();
+
+      try {
+        await sendMessage('setConnectionState', this.connectionState);
+      } catch {}
+
+      if (this.shouldReconnect) {
+        console.log('Запуск переподключения после закрытия соединения...');
+        await this.reconnectAfterClose();
+      }
+    });
+  }
+
+  private async reconnectAfterClose(): Promise<void> {
+    let retryCount = 0;
+    const initialDelay = 45000;
+    const subsequentDelay = 3000;
+    
+    while (this.shouldReconnect) {
+      try {
+        const delay = retryCount === 0 ? initialDelay : subsequentDelay;
+        console.log(`Повтор подключения через ${delay}ms (попытка ${retryCount + 1})...`);
+        
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        if (!this.sessionId) {
+          this.sessionId = await utils.createNewSession();
+        }
+
+        console.log('Попытка подключения...');
+        await this.connection.start();
+
+        try {
+          await sendMessage('setConnectionState', this.connectionState);
+        } catch {}
+
+        console.log('SignalR соединение восстановлено');
+        
+        const isEnabled = await storage.getItem(Config.keys.extensionState);
+        if (isEnabled) await loadTwitchRedirectRules();
+        
+        break;
+      } catch (err) {
+        console.warn('Ошибка переподключения:', err);
+        retryCount++;
+      }
+    }
   }
 
   public get connectionState(): HubConnectionState {
@@ -91,36 +149,29 @@ class BrowserExtensionClient {
 
   async startWithPersistentRetry(sessionId: string) {
     if (sessionId) this.sessionId = sessionId;
-  
-    const connect = async () => {
-      while (true) {
-        try {
-          console.log('Попытка подключения...');
-          await this.connection.start();
-
-          try {
-            await sendMessage('setConnectionState', this.connectionState);
-          } catch {}
-
-          console.log('SignalR соединение установлено');
-          break;
-        } catch (err) {
-          console.warn('Ошибка подключения. Повтор через 2 секунды...', err);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      }
-    };
-  
-    await connect();
-  
-    this.connection.onclose(async () => {
-      console.warn('Соединение закрыто. Переподключение...');
-      await removeAllDynamicRules();
+    this.shouldReconnect = true;
     
-      this.sessionId = await utils.createNewSession();
-      
-      await connect();
-    });
+    while (this.shouldReconnect) {
+      try {
+        console.log('Попытка подключения...');
+        await this.connection.start();
+
+        try {
+          await sendMessage('setConnectionState', this.connectionState);
+        } catch {}
+
+        console.log('SignalR соединение установлено');
+        break;
+      } catch (err) {
+        console.warn('Ошибка подключения. Повтор через 2 секунды...', err);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  public async stop(): Promise<void> {
+    this.shouldReconnect = false;
+    await this.connection.stop();
   }
 
   public waitForState(state: HubConnectionState): Promise<void> {
