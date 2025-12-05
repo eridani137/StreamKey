@@ -44,7 +44,7 @@ public static class ServiceExtensions
         }
     }
 
-    public static void AddDefaultAuthorization(this IHostApplicationBuilder builder)
+    public static void AddDefaultAuthorizationData(this IHostApplicationBuilder builder)
     {
         var authorization = builder.Configuration.GetSection("Authorization");
         if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))

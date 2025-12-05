@@ -41,7 +41,7 @@ builder.Services.AddIdentity();
 
 builder.Services.AddTransient<FilterNotFoundHandler>();
 
-builder.AddDefaultAuthorization();
+builder.AddDefaultAuthorizationData();
 
 ConfigureCors.Configure(builder);
 ConfigureJwt.Configure(builder);

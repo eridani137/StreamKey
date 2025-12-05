@@ -132,12 +132,11 @@ public class StatisticHandler(
 
             var processed = 0;
 
-            var entities = new List<ViewStatisticEntity>();
             while (statisticService.ViewStatisticQueue.TryDequeue(out var entity))
             {
                 try
                 {
-                    entities.Add(entity);
+                    await repository.Add(entity);
                     processed++;
                 }
                 catch (Exception e)
@@ -145,8 +144,6 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при добавлении записи просмотра");
                 }
             }
-
-            await repository.AddRange(entities);
 
             await unitOfWork.SaveChangesAsync();
 
@@ -186,7 +183,10 @@ public class StatisticHandler(
     private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
         UserSessionRepository repository, IUnitOfWork unitOfWork)
     {
-        await repository.AddRange(entities);
+        foreach (var sessionEntity in entities)
+        {
+            await repository.Add(sessionEntity);
+        }
 
         await unitOfWork.SaveChangesAsync();
 
@@ -207,12 +207,11 @@ public class StatisticHandler(
 
             var processed = 0;
 
-            var entities = new List<ClickChannelEntity>();
             while (statisticService.ChannelActivityQueue.TryDequeue(out var entity))
             {
                 try
                 {
-                    entities.Add(entity);
+                    await repository.Add(entity);
                     processed++;
                 }
                 catch (Exception e)
@@ -220,8 +219,6 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при добавлении записи клика на канал");
                 }
             }
-
-            await repository.AddRange(entities);
 
             await unitOfWork.SaveChangesAsync();
 
