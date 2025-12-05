@@ -19,7 +19,7 @@ public class StatisticHandler(
     private static readonly TimeSpan SaveViewStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan SaveClickChannelStatisticInterval = TimeSpan.FromMinutes(1);
-    private static readonly TimeSpan LoggingOnlineInterval = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan LoggingOnlineInterval = TimeSpan.FromMinutes(10);
 
     private Task? _savingViewStatistic;
     private Task? _removeOfflineUsers;
