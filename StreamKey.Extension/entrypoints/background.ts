@@ -23,7 +23,7 @@ export async function onInstalled() {
 
 export async function onStartup() {
   const sessionId = await utils.createNewSession();
-  await extensionClient.startWithRetry(sessionId);
+  await extensionClient.startWithPersistentRetry(sessionId);
   await utils.initUserProfile();
   const isEnabled = await storage.getItem(Config.keys.extensionState);
   if (isEnabled) {
@@ -51,8 +51,4 @@ export function registerMessageHandlers() {
   onMessage('checkMember', async (message) => {
     await extensionClient.checkMember(message.data);
   });
-
-  // onMessage('wakeConnection', async () => {
-  //   await extensionClient.start();
-  // });
 }

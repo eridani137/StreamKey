@@ -83,46 +83,39 @@ class BrowserExtensionClient {
       const isEnabled = await storage.getItem(Config.keys.extensionState);
       if (isEnabled) await loadTwitchRedirectRules();
     });
-
-    this.connection.onclose(async (error) => {
-      console.warn('Соединение закрыто:', error);
-
-      try {
-        await sendMessage('setConnectionState', this.connectionState);
-      } catch {}
-
-      await removeAllDynamicRules();
-    });
   }
 
   public get connectionState(): HubConnectionState {
     return this.connection.state;
   }
 
-  async start(sessionId: string): Promise<void> {
-    if (sessionId) {
-      this.sessionId = sessionId;
-    }
-
-    await this.connection.start();
-  }
-
-  async startWithRetry(sessionId: string): Promise<void> {
-    if (sessionId) {
-      this.sessionId = sessionId;
-    }
+  async startWithPersistentRetry(sessionId: string) {
+    if (sessionId) this.sessionId = sessionId;
   
-    while (true) {
-      try {
-        console.log("Попытка подключения...");
-        await this.connection.start();
-        console.log("SignalR соединение установлено");
-        break;
-      } catch (err) {
-        console.warn("Ошибка подключения. Повтор через 2 секунды...", err);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+    const connect = async () => {
+      while (true) {
+        try {
+          console.log('Попытка подключения...');
+          await this.connection.start();
+          console.log('SignalR соединение установлено');
+          break;
+        } catch (err) {
+          console.warn('Ошибка подключения. Повтор через 2 секунды...', err);
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
       }
-    }
+    };
+  
+    await connect();
+  
+    this.connection.onclose(async () => {
+      console.warn('Соединение закрыто. Переподключение...');
+      await removeAllDynamicRules();
+    
+      this.sessionId = await utils.createNewSession();
+      
+      await connect();
+    });
   }
 
   public waitForState(state: HubConnectionState): Promise<void> {
