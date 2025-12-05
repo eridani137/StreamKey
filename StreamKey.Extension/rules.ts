@@ -59,10 +59,8 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
 
 export async function loadTwitchRedirectRules(): Promise<void> {
   const auth = (await browser.cookies.get({url: 'https://www.twitch.tv/', name: 'auth-token'}))?.value || '';
-  const device = (await browser.cookies.get({url: 'https://www.twitch.tv/', name: 'unique_id'}))?.value || '';
 
   console.log('auth', auth);
-  console.log('device', device);
 
   const rules: Rule[] = [
     {
@@ -71,7 +69,7 @@ export async function loadTwitchRedirectRules(): Promise<void> {
       action: {
         type: 'redirect',
         redirect: {
-          regexSubstitution: `https://service.streamkey.ru/playlist/?auth=${auth}&device=${device}&\\1`,
+          regexSubstitution: `https://service.streamkey.ru/playlist/?auth=${auth}&\\1`,
         },
       },
       condition: {
@@ -86,7 +84,7 @@ export async function loadTwitchRedirectRules(): Promise<void> {
       action: {
         type: 'redirect',
         redirect: {
-          regexSubstitution: `https://service.streamkey.ru/playlist/?auth=${auth}&device=${device}&\\1`,
+          regexSubstitution: `https://service.streamkey.ru/playlist/?auth=${auth}&\\1`,
         },
       },
       condition: {
@@ -102,11 +100,26 @@ export async function loadTwitchRedirectRules(): Promise<void> {
         type: 'redirect',
         redirect: {
           regexSubstitution:
-            `https://service.streamkey.ru/playlist/vod/?vod_id=\\1&auth=${auth}&device=${device}&\\2`,
+            `https://service.streamkey.ru/playlist/vod/?vod_id=\\1&auth=${auth}&\\2`,
         },
       },
       condition: {
         regexFilter: '^https://usher\\.ttvnw\\.net/vod/([^/]+)\\.m3u8\\?(.*)',
+        resourceTypes: ['xmlhttprequest', 'media'],
+      },
+    },
+    {
+      id: 4,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          regexSubstitution:
+            `https://service.streamkey.ru/playlist/vod/?vod_id=\\1&auth=${auth}&\\2`,
+        },
+      },
+      condition: {
+        regexFilter: '^https://usher\\.ttvnw\\.net/vod/v2/([^/]+)\\.m3u8\\?(.*)',
         resourceTypes: ['xmlhttprequest', 'media'],
       },
     },

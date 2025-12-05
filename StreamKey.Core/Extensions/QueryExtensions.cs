@@ -14,8 +14,12 @@ public static class QueryExtensions
                 : ApplicationConstants.DefaultAuthorization;
             
             request.Headers.Add("Authorization", authorization);
+
+            var deviceId = authorization == ApplicationConstants.DefaultAuthorization
+                ? ApplicationConstants.DefaultDeviceId
+                : TwitchExtensions.GenerateDeviceId();
             
-            request.Headers.Add("x-device-id", TwitchExtensions.GenerateDeviceId());
+            request.Headers.Add("x-device-id", deviceId);
         }
     }
 }
