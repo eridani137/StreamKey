@@ -134,19 +134,11 @@ class BrowserExtensionClient {
   async getTelegramUser(
     payload: TelegramUserResponse
   ): Promise<TelegramUser | null> {
-    try {
-      return await this.connection.invoke('GetTelegramUser', payload);
-    } catch {
-      return null;
-    }
+    return (await this.connection.invoke('GetTelegramUser', payload)) || null;
   }
 
   async getChannels(): Promise<ChannelData[] | null> {
-    try {
-      return await this.connection.invoke('GetChannels');
-    } catch {
-      return null;
-    }
+    return (await this.connection.invoke('GetChannels')) || null;
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {

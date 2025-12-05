@@ -139,7 +139,7 @@ public class BrowserExtensionHub
     }
 
     public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
-        [FromServices] ITelegramUserRepository repository, CancellationToken cancellationToken)
+        [FromServices] ITelegramUserRepository repository, [FromServices] CancellationToken cancellationToken)
     {
         var user = await repository.GetByTelegramIdNotTracked(request.UserId, cancellationToken);
         if (user is null) return null;
@@ -152,7 +152,7 @@ public class BrowserExtensionHub
         return user.MapUserDto();
     }
 
-    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service, CancellationToken cancellationToken)
+    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service, [FromServices] CancellationToken cancellationToken)
     {
         var channels = await service.GetChannels(cancellationToken);
         return channels.Map();
@@ -162,7 +162,7 @@ public class BrowserExtensionHub
         [FromServices] ITelegramUserRepository repository,
         [FromServices] ITelegramService service,
         [FromServices] IUnitOfWork unitOfWork,
-        CancellationToken cancellationToken)
+        [FromServices] CancellationToken cancellationToken)
     {
         var user = await repository.GetByTelegramId(request.UserId, cancellationToken);
         if (user is null) return;
@@ -177,7 +177,7 @@ public class BrowserExtensionHub
             user.UpdatedAt = DateTime.UtcNow;
 
             repository.Update(user);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         await Clients.Caller.ReloadUserData(user.MapUserDto());
