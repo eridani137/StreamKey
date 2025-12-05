@@ -25,7 +25,7 @@ public class Telegram : ICarterModule
                     CancellationToken cancellationToken) =>
                 {
                     await using var transaction =
-                        await unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+                        await unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
                     try
                     {
