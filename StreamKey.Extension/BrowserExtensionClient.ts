@@ -107,6 +107,24 @@ class BrowserExtensionClient {
     await this.connection.start();
   }
 
+  async startWithRetry(sessionId: string): Promise<void> {
+    if (sessionId) {
+      this.sessionId = sessionId;
+    }
+  
+    while (true) {
+      try {
+        console.log("Попытка подключения...");
+        await this.connection.start();
+        console.log("SignalR соединение установлено");
+        break;
+      } catch (err) {
+        console.warn("Ошибка подключения. Повтор через 2 секунды...", err);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
   public waitForState(state: HubConnectionState): Promise<void> {
     return new Promise((resolve) => {
       const check = () => {
