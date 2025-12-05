@@ -36,9 +36,7 @@ class BrowserExtensionClient {
       .configureLogging(LogLevel.Error) // TODO
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds(retryContext) {
-          const defaultDelays = [
-            0, 1000, 1000, 1000
-          ];
+          const defaultDelays = [0, 1000, 1000, 1000];
           if (retryContext.previousRetryCount < defaultDelays.length) {
             return defaultDelays[retryContext.previousRetryCount];
           } else {
@@ -109,25 +107,6 @@ class BrowserExtensionClient {
     await this.connection.start();
   }
 
-  private async invokeWithActivity(method: string, ...args: any[]) {
-    const state = this.connection.state;
-
-    if (state === HubConnectionState.Disconnected) {
-      console.log('Автоподключение после неактивности...');
-      await this.start(this.sessionId);
-    }
-
-    if (
-      state === HubConnectionState.Connecting ||
-      state === HubConnectionState.Reconnecting
-    ) {
-      console.log('Ожидаю завершения соединения...');
-      await this.waitForState(HubConnectionState.Connected);
-    }
-
-    return await this.connection.invoke(method, ...args);
-  }
-
   public waitForState(state: HubConnectionState): Promise<void> {
     return new Promise((resolve) => {
       const check = () => {
@@ -146,7 +125,7 @@ class BrowserExtensionClient {
   // ================================
 
   async updateActivity(payload: WithUserId): Promise<void> {
-    return await this.invokeWithActivity('UpdateActivity', {
+    await this.connection.invoke('UpdateActivity', {
       SessionId: this.sessionId,
       UserId: payload.UserId,
     } as ActivityRequest);
@@ -155,23 +134,27 @@ class BrowserExtensionClient {
   async getTelegramUser(
     payload: TelegramUserResponse
   ): Promise<TelegramUser | null> {
-    return await this.invokeWithActivity('GetTelegramUser', payload);
+    try {
+      return await this.connection.invoke('GetTelegramUser', payload);
+    } catch {
+      return null;
+    }
   }
 
-  async getChannels(): Promise<ChannelData[]> {
-    return await this.invokeWithActivity('GetChannels');
+  async getChannels(): Promise<ChannelData[] | null> {
+    try {
+      return await this.connection.invoke('GetChannels');
+    } catch {
+      return null;
+    }
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {
-    await this.invokeWithActivity('ClickChannel', payload);
+    await this.connection.invoke('ClickChannel', payload);
   }
 
   async checkMember(payload: CheckMemberResponse): Promise<void> {
-    await this.invokeWithActivity('CheckMember', payload);
-  }
-
-  async stop() {
-    await this.connection.stop();
+    await this.connection.invoke('CheckMember', payload);
   }
 }
 

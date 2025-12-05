@@ -7,7 +7,7 @@ interface ProtocolMap {
   clickChannel(payload: ClickChannel): Promise<void>;
   getConnectionState(): Promise<HubConnectionState>;
   setConnectionState(payload: HubConnectionState): Promise<void>;
-  getChannels(): Promise<ChannelData[]>;
+  getChannels(): Promise<ChannelData[] | null>;
   checkMember(payload: CheckMemberResponse): Promise<void>;
   // wakeConnection(): Promise<void>;
 }

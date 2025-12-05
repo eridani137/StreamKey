@@ -74,12 +74,16 @@ export class ActiveChannels {
   private async fetchAndUpdateChannels(): Promise<void> {
     const channels = await sendMessage('getChannels');
 
-    console.log(`[Channels] Fetch OK — received ${channels.length} items`);
+    if (channels) {
+      console.log(`[Channels] Fetch OK — received ${channels.length} items`);
 
-    this.channelData = channels;
-    this.isDataReady = true;
-
-    await this.waitForChannelsAndReplace();
+      this.channelData = channels;
+      this.isDataReady = true;
+  
+      await this.waitForChannelsAndReplace();
+    } else {
+      console.log(`[Channels] Fetch failed`);
+    }
   }
 
   private async waitForChannelsAndReplace(): Promise<void> {
