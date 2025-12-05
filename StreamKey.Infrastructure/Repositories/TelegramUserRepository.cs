@@ -7,17 +7,17 @@ namespace StreamKey.Infrastructure.Repositories;
 public class TelegramUserRepository(ApplicationDbContext context)
     : BaseRepository<TelegramUserEntity>(context), ITelegramUserRepository
 {
-    public async Task<TelegramUserEntity?> GetByTelegramId(long id)
+    public async Task<TelegramUserEntity?> GetByTelegramId(long id, CancellationToken cancellationToken)
     {
-        return await GetSet().FirstOrDefaultAsync(e => e.TelegramId == id);
+        return await GetSet().FirstOrDefaultAsync(e => e.TelegramId == id, cancellationToken: cancellationToken);
     }
 
-    public async Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id)
+    public async Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id, CancellationToken cancellationToken)
     {
-        return await GetSet().AsNoTracking().FirstOrDefaultAsync(e => e.TelegramId == id);
+        return await GetSet().AsNoTracking().FirstOrDefaultAsync(e => e.TelegramId == id, cancellationToken: cancellationToken);
     }
 
-    public async Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit)
+    public async Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit, CancellationToken cancellationToken)
     {
         var cutoffDate = DateTime.UtcNow.AddHours(-24);
         
@@ -25,6 +25,6 @@ public class TelegramUserRepository(ApplicationDbContext context)
             .Where(e => e.UpdatedAt < cutoffDate)
             .OrderBy(e => e.UpdatedAt)
             .Take(limit)
-            .ToListAsync();
+            .ToListAsync(cancellationToken: cancellationToken);
     }
 }

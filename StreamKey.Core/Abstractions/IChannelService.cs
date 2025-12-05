@@ -6,9 +6,9 @@ namespace StreamKey.Core.Abstractions;
 
 public interface IChannelService
 {
-    Task<List<ChannelEntity>> GetChannels();
-    Task<Result<ChannelEntity>> AddChannel(ChannelDto dto);
-    Task<Result<ChannelEntity>> RemoveChannel(int position);
-    Task<Result<ChannelEntity>> UpdateChannel(ChannelDto dto);
-    Task UpdateChannelInfo(ChannelEntity entity);
+    Task<List<ChannelEntity>> GetChannels(CancellationToken cancellationToken);
+    Task<Result<ChannelEntity>> AddChannel(ChannelDto dto, CancellationToken cancellationToken);
+    Task<Result<ChannelEntity>> RemoveChannel(int position, CancellationToken cancellationToken);
+    Task<Result<ChannelEntity>> UpdateChannel(ChannelDto dto, CancellationToken cancellationToken);
+    Task UpdateChannelInfo(ChannelEntity entity, CancellationToken cancellationToken);
 }

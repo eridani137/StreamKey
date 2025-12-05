@@ -10,19 +10,19 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
 {
     protected override string CacheKeyPrefix => "TelegramUser";
 
-    public Task<TelegramUserEntity?> GetByTelegramId(long id)
+    public Task<TelegramUserEntity?> GetByTelegramId(long id, CancellationToken cancellationToken)
     {
-        return Repository.GetByTelegramId(id);
+        return Repository.GetByTelegramId(id, cancellationToken);
     }
 
-    public Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id)
+    public Task<TelegramUserEntity?> GetByTelegramIdNotTracked(long id, CancellationToken cancellationToken)
     {
-        return GetCachedData(GetCacheKey(id.ToString()), () => Repository.GetByTelegramIdNotTracked(id));
+        return GetCachedData(GetCacheKey(id.ToString()), () => Repository.GetByTelegramIdNotTracked(id, cancellationToken));
     }
 
-    public Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit)
+    public Task<IReadOnlyList<TelegramUserEntity>> GetOldestUpdatedUsers(int limit, CancellationToken cancellationToken)
     {
-        return Repository.GetOldestUpdatedUsers(limit);
+        return Repository.GetOldestUpdatedUsers(limit, cancellationToken);
     }
 
     public DbSet<TelegramUserEntity> GetSet()
@@ -30,16 +30,16 @@ public class CachedTelegramUserRepository(TelegramUserRepository repository, IMe
         return Repository.GetSet();
     }
 
-    public Task Add(TelegramUserEntity entity)
+    public Task Add(TelegramUserEntity entity, CancellationToken cancellationToken)
     {
         InvalidateCache(entity.TelegramId.ToString());
-        return Repository.Add(entity);
+        return Repository.Add(entity, cancellationToken);
     }
 
-    public Task AddRange(IEnumerable<TelegramUserEntity> entities)
+    public Task AddRange(IEnumerable<TelegramUserEntity> entities, CancellationToken cancellationToken)
     {
         InvalidateCache();
-        return Repository.AddRange(entities);
+        return Repository.AddRange(entities, cancellationToken);
     }
 
     public void Update(TelegramUserEntity entity)

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using StreamKey.Infrastructure.Abstractions;
-using StreamKey.Shared;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Services;

@@ -12,14 +12,14 @@ public abstract class BaseRepository<TEntity>(ApplicationDbContext context)
         return context.Set<TEntity>();
     }
     
-    public async Task Add(TEntity entity)
+    public async Task Add(TEntity entity, CancellationToken cancellationToken)
     {
-        await GetSet().AddAsync(entity); 
+        await GetSet().AddAsync(entity, cancellationToken); 
     }
 
-    public async Task AddRange(IEnumerable<TEntity> entities)
+    public async Task AddRange(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
     {
-        await GetSet().AddRangeAsync(entities);
+        await GetSet().AddRangeAsync(entities, cancellationToken);
     }
 
     public void Update(TEntity entity)

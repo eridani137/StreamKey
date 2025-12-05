@@ -3,7 +3,6 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
 using StreamKey.Core.Mappers;
-using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -16,9 +15,9 @@ public class Channel : ICarterModule
             .RequireAuthorization();
 
         group.MapGet("/all",
-                async (IChannelService service) =>
+                async (IChannelService service, CancellationToken cancellationToken) =>
                 {
-                    var channels = await service.GetChannels();
+                    var channels = await service.GetChannels(cancellationToken);
                     var mapped = channels.MapAll();
 
                     return Results.Ok(mapped);
@@ -27,9 +26,9 @@ public class Channel : ICarterModule
             .WithSummary("Получить все добавленные каналы");
 
         group.MapPost("",
-                async (ChannelDto dto, IChannelService service) =>
+                async (ChannelDto dto, IChannelService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.AddChannel(dto);
+                    var result = await service.AddChannel(dto, cancellationToken);
 
                     if (!result.IsSuccess)
                     {
@@ -43,9 +42,9 @@ public class Channel : ICarterModule
             .WithSummary("Добавить канал");
 
         group.MapDelete("/{position:int}",
-                async (int position, IChannelService service) =>
+                async (int position, IChannelService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.RemoveChannel(position);
+                    var result = await service.RemoveChannel(position, cancellationToken);
 
                     if (!result.IsSuccess)
                     {
@@ -58,9 +57,9 @@ public class Channel : ICarterModule
             .WithSummary("Удалить канал");
 
         group.MapPut("",
-                async (ChannelDto dto, IChannelService service) =>
+                async (ChannelDto dto, IChannelService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.UpdateChannel(dto);
+                    var result = await service.UpdateChannel(dto, cancellationToken);
 
                     if (!result.IsSuccess)
                     {

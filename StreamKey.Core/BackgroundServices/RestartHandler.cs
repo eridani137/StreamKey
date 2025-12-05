@@ -23,7 +23,7 @@ public class RestartHandler(
             var repository = scope.ServiceProvider.GetRequiredService<IRestartRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var lastRestartEntity = await repository.GetLastRestart();
+            var lastRestartEntity = await repository.GetLastRestart(stoppingToken);
 
             var now = DateTime.UtcNow;
             var timeToday = new DateTime(now.Year, now.Month, now.Day, _time.Hours, _time.Minutes, _time.Seconds);
@@ -37,7 +37,7 @@ public class RestartHandler(
                     await repository.Add(new RestartEntity
                     {
                         DateTime = now
-                    });
+                    }, stoppingToken);
                     await unitOfWork.SaveChangesAsync(stoppingToken);
 
                     appLifetime.StopApplication();

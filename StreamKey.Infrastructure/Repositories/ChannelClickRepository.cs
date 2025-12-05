@@ -7,7 +7,7 @@ namespace StreamKey.Infrastructure.Repositories;
 public class ChannelClickRepository(ApplicationDbContext context)
     : BaseRepository<ClickChannelEntity>(context)
 {
-    public async Task<ChannelClicksStatistic> GetChannelClicksCount(string channelName, int hours)
+    public async Task<ChannelClicksStatistic> GetChannelClicksCount(string channelName, int hours, CancellationToken cancellationToken)
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-hours);
 
@@ -20,7 +20,7 @@ public class ChannelClickRepository(ApplicationDbContext context)
                 ClickCount = g.Count(),
                 UniqueUsers = g.Select(x => x.UserId).Distinct().Count()
             })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         return statistic ?? new ChannelClicksStatistic 
         { 

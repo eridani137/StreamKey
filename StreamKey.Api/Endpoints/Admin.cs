@@ -1,6 +1,4 @@
 using Carter;
-using Microsoft.AspNetCore.SignalR;
-using StreamKey.Core.Abstractions;
 using StreamKey.Core.Hubs;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
@@ -19,15 +17,16 @@ public class Admin : ICarterModule
                 async (IHostApplicationLifetime appLifetime,
                     ILogger<Admin> logger,
                     IRestartRepository repository,
-                    IUnitOfWork unitOfWork) =>
+                    IUnitOfWork unitOfWork,
+                    CancellationToken cancellationToken) =>
                 {
                     logger.LogInformation("Перезапуск по запросу");
 
                     await repository.Add(new RestartEntity
                     {
                         DateTime = DateTime.UtcNow
-                    });
-                    await unitOfWork.SaveChangesAsync();
+                    }, cancellationToken);
+                    await unitOfWork.SaveChangesAsync(cancellationToken);
 
                     appLifetime.StopApplication();
                 })

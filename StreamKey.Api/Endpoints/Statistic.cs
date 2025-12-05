@@ -1,7 +1,6 @@
 using Carter;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Hubs;
-using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Types;
 
@@ -15,53 +14,51 @@ public class Statistic : ICarterModule
             .WithTags("Статистические данные");
 
         group.MapGet("/channels",
-                async (int hours, int count, ViewStatisticRepository repository) =>
+                async (int hours, int count, ViewStatisticRepository repository, CancellationToken cancellationToken) =>
                 {
                     if (hours <= 0 || count <= 0)
                         return Results.BadRequest("Часов и количество записей должны быть больше 0");
 
-                    return Results.Json(await repository.GetTopViewedChannelsAsync(hours, count));
+                    return Results.Json(await repository.GetTopViewedChannelsAsync(hours, count, cancellationToken));
                 })
             .WithSummary("Топ каналов")
             .RequireAuthorization();
 
         group.MapGet("/sessions/time-spent",
-                async (int hours, UserSessionRepository repository) =>
+                async (int hours, UserSessionRepository repository, CancellationToken cancellationToken) =>
                 {
                     if (hours <= 0) return Results.BadRequest("Часов должно быть больше 0");
 
-                    return Results.Ok(await repository.GetAverageTimeSpent(hours));
+                    return Results.Ok(await repository.GetAverageTimeSpent(hours, cancellationToken));
                 })
             .WithSummary("Time Spent")
             .RequireAuthorization();
 
-        group.MapGet("/online",
-                (StatisticService statisticService) =>
-                    Results.Ok(new ActivityResponse(BrowserExtensionHub.Users.Count)))
+        group.MapGet("/online", () => Results.Ok(new ActivityResponse(BrowserExtensionHub.Users.Count)))
             .WithSummary("Получить число онлайн пользователей")
             .RequireAuthorization()
             .Produces<ActivityResponse>();
 
         group.MapGet("/dau",
-                async (DateOnly startDate, UserSessionRepository repository) =>
-                    Results.Ok(await repository.GetUsersPerDayStatistic(startDate)))
+                async (DateOnly startDate, UserSessionRepository repository, CancellationToken cancellationToken) =>
+                    Results.Ok(await repository.GetUsersPerDayStatistic(startDate, cancellationToken)))
             .WithSummary("Уникальные пользователи за день")
             .RequireAuthorization()
             .Produces<UsersPerTimeStatistic>();
 
         group.MapGet("/mau",
-                async (DateOnly startDate, UserSessionRepository repository) =>
-                    Results.Ok(await repository.GetUsersPerMonthStatistic(startDate)))
+                async (DateOnly startDate, UserSessionRepository repository, CancellationToken cancellationToken) =>
+                    Results.Ok(await repository.GetUsersPerMonthStatistic(startDate, cancellationToken)))
             .WithSummary("Уникальные пользователи за месяц")
             .RequireAuthorization()
             .Produces<UsersPerTimeStatistic>();
 
         group.MapGet("/channels/clicks",
-                async (string channelName, int hours, ChannelClickRepository repository) =>
+                async (string channelName, int hours, ChannelClickRepository repository, CancellationToken cancellationToken) =>
                 {
                     if (hours <= 0) return Results.BadRequest("Часов должно быть больше 0");
 
-                    return Results.Ok(await repository.GetChannelClicksCount(channelName, hours));
+                    return Results.Ok(await repository.GetChannelClicksCount(channelName, hours, cancellationToken));
                 })
             .Produces<ChannelClicksStatistic>()
             .WithSummary("Получение числа кликов на канал");

@@ -10,29 +10,29 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
 {
     protected override string CacheKeyPrefix => "Channel";
     
-    public Task<List<ChannelEntity>> GetAll()
+    public Task<List<ChannelEntity>> GetAll(CancellationToken cancellationToken)
     {
-        return GetCachedData(GetCacheKey(), Repository.GetAll);
+        return GetCachedData(GetCacheKey(), () => Repository.GetAll(cancellationToken));
     }
 
-    public Task<bool> HasEntity(string channelName)
+    public Task<bool> HasEntity(string channelName, CancellationToken cancellationToken)
     {
-        return Repository.HasEntity(channelName);
+        return Repository.HasEntity(channelName, cancellationToken);
     }
 
-    public Task<ChannelEntity?> GetByName(string channelName)
+    public Task<ChannelEntity?> GetByName(string channelName, CancellationToken cancellationToken)
     {
-        return Repository.GetByName(channelName);
+        return Repository.GetByName(channelName, cancellationToken);
     }
 
-    public Task<ChannelEntity?> GetByPosition(int position)
+    public Task<ChannelEntity?> GetByPosition(int position, CancellationToken cancellationToken)
     {
-        return Repository.GetByPosition(position);
+        return Repository.GetByPosition(position, cancellationToken);
     }
 
-    public Task<bool> HasInPosition(int position)
+    public Task<bool> HasInPosition(int position, CancellationToken cancellationToken)
     {
-        return Repository.HasInPosition(position);
+        return Repository.HasInPosition(position, cancellationToken);
     }
 
     public DbSet<ChannelEntity> GetSet()
@@ -40,16 +40,16 @@ public class CachedChannelRepository(ChannelRepository repository, IMemoryCache 
         return Repository.GetSet();
     }
 
-    public Task Add(ChannelEntity entity)
+    public Task Add(ChannelEntity entity, CancellationToken cancellationToken)
     {
         InvalidateCache(entity.Id.ToString());
-        return Repository.Add(entity);
+        return Repository.Add(entity, cancellationToken);
     }
 
-    public Task AddRange(IEnumerable<ChannelEntity> entities)
+    public Task AddRange(IEnumerable<ChannelEntity> entities, CancellationToken cancellationToken)
     {
         InvalidateCache();
-        return Repository.AddRange(entities);
+        return Repository.AddRange(entities, cancellationToken);
     }
 
     public void Update(ChannelEntity entity)

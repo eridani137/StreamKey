@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Span;
@@ -27,10 +26,6 @@ public static class ConfigureLogging
         var levelSwitch = new LoggingLevelSwitch();
         var seqEndpoint = EnvironmentHelper.GetSeqEndpoint();
         var seqApiKey = EnvironmentHelper.GetSeqApiKey();
-        
-        var excludedPaths = builder.Configuration
-            .GetSection("OpenTelemetry:ExcludedPaths")
-            .Get<string[]>() ?? [];
 
         var configuration = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(levelSwitch)
@@ -40,16 +35,6 @@ public static class ConfigureLogging
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.SignalR", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Warning)
-            // .Filter.ByExcluding(logEvent =>
-            // {
-            //     if (!logEvent.Properties.TryGetValue("RequestPath", out var value))
-            //     {
-            //         return false;
-            //     }
-            //
-            //     var path = value.ToString().Trim('"');
-            //     return excludedPaths.Any(x => path.StartsWith(x, StringComparison.OrdinalIgnoreCase));
-            // })
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()

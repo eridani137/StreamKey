@@ -25,12 +25,12 @@ public class ChannelHandler(
                 var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
                 var channelService = scope.ServiceProvider.GetRequiredService<IChannelService>();
 
-                var channels = await channelRepository.GetAll();
+                var channels = await channelRepository.GetAll(stoppingToken);
                 foreach (var channel in channels)
                 {
                     try
                     {
-                        await channelService.UpdateChannelInfo(channel);
+                        await channelService.UpdateChannelInfo(channel, stoppingToken);
                     }
                     catch (Exception e)
                     {

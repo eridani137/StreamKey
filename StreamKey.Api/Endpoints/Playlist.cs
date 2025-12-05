@@ -4,7 +4,6 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Services;
 using StreamKey.Core.Types;
-using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared;
 using StreamKey.Shared.Entities;
 

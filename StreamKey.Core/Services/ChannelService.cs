@@ -16,54 +16,54 @@ public class ChannelService(
     ICamoufoxService camoufox,
     ILogger<ChannelService> logger) : IChannelService
 {
-    public async Task<List<ChannelEntity>> GetChannels()
+    public async Task<List<ChannelEntity>> GetChannels(CancellationToken cancellationToken)
     {
-        return await channelRepository.GetAll();
+        return await channelRepository.GetAll(cancellationToken);
     }
 
-    public async Task<Result<ChannelEntity>> AddChannel(ChannelDto dto)
+    public async Task<Result<ChannelEntity>> AddChannel(ChannelDto dto, CancellationToken cancellationToken)
     {
-        if (await channelRepository.HasEntity(dto.ChannelName))
+        if (await channelRepository.HasEntity(dto.ChannelName, cancellationToken))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelAlreadyExist);
         }
 
-        if (await channelRepository.HasInPosition(dto.Position))
+        if (await channelRepository.HasInPosition(dto.Position, cancellationToken))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
         }
 
         var channel = dto.Map();
 
-        await channelRepository.Add(channel);
-        await unitOfWork.SaveChangesAsync();
+        await channelRepository.Add(channel, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(channel);
     }
 
-    public async Task<Result<ChannelEntity>> RemoveChannel(int position)
+    public async Task<Result<ChannelEntity>> RemoveChannel(int position, CancellationToken cancellationToken)
     {
-        var channel = await channelRepository.GetByPosition(position);
+        var channel = await channelRepository.GetByPosition(position, cancellationToken);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
 
         channelRepository.Delete(channel);
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(channel);
     }
 
-    public async Task<Result<ChannelEntity>> UpdateChannel(ChannelDto dto)
+    public async Task<Result<ChannelEntity>> UpdateChannel(ChannelDto dto, CancellationToken cancellationToken)
     {
-        var channel = await channelRepository.GetByName(dto.ChannelName);
+        var channel = await channelRepository.GetByName(dto.ChannelName, cancellationToken);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
 
-        if (await channelRepository.HasInPosition(dto.Position))
+        if (await channelRepository.HasInPosition(dto.Position, cancellationToken))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
         }
@@ -71,23 +71,23 @@ public class ChannelService(
         channel.Position = dto.Position;
 
         channelRepository.Update(channel);
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(channel);
     }
 
-    public async Task UpdateChannelInfo(ChannelEntity channel)
+    public async Task UpdateChannelInfo(ChannelEntity channel, CancellationToken cancellationToken)
     {
         logger.LogDebug("Обновление канала: {ChannelName}", channel.Name);
 
-        var fresh = await channelRepository.GetByName(channel.Name);
+        var fresh = await channelRepository.GetByName(channel.Name, cancellationToken);
         if (fresh is null) return;
 
         var info = await ParseChannelInfo(channel.Name);
         fresh.Info = info;
 
         channelRepository.Update(fresh);
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<ChannelInfo?> ParseChannelInfo(string name)

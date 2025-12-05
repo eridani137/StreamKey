@@ -12,9 +12,7 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Hubs;
 
-public class BrowserExtensionHub(
-    // ILogger<BrowserExtensionHub> logger
-)
+public class BrowserExtensionHub
     : Hub<IBrowserExtensionHub>
 {
     public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
@@ -141,9 +139,9 @@ public class BrowserExtensionHub(
     }
 
     public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
-        [FromServices] ITelegramUserRepository repository)
+        [FromServices] ITelegramUserRepository repository, CancellationToken cancellationToken)
     {
-        var user = await repository.GetByTelegramIdNotTracked(request.UserId);
+        var user = await repository.GetByTelegramIdNotTracked(request.UserId, cancellationToken);
         if (user is null) return null;
 
         if (!string.Equals(request.UserHash, user.Hash, StringComparison.Ordinal))
@@ -154,21 +152,22 @@ public class BrowserExtensionHub(
         return user.MapUserDto();
     }
 
-    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service)
+    public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service, CancellationToken cancellationToken)
     {
-        var channels = await service.GetChannels();
+        var channels = await service.GetChannels(cancellationToken);
         return channels.Map();
     }
 
     public async Task CheckMember(CheckMemberRequest request,
         [FromServices] ITelegramUserRepository repository,
         [FromServices] ITelegramService service,
-        [FromServices] IUnitOfWork unitOfWork)
+        [FromServices] IUnitOfWork unitOfWork,
+        CancellationToken cancellationToken)
     {
-        var user = await repository.GetByTelegramId(request.UserId);
+        var user = await repository.GetByTelegramId(request.UserId, cancellationToken);
         if (user is null) return;
 
-        var getChatMemberResponse = await service.GetChatMember(request.UserId);
+        var getChatMemberResponse = await service.GetChatMember(request.UserId, cancellationToken);
         if (getChatMemberResponse is null) return;
 
         var isChatMember = getChatMemberResponse.IsChatMember();

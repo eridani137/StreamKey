@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
-using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.BackgroundServices;
@@ -27,12 +26,12 @@ public class TelegramHandler(
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
             var processedUsersCount = 0;
-            var users = await repository.GetOldestUpdatedUsers(30);
+            var users = await repository.GetOldestUpdatedUsers(30, stoppingToken);
             foreach (var user in users)
             {
                 if (stoppingToken.IsCancellationRequested) break;
                 
-                var response = await service.GetChatMember(user.TelegramId);
+                var response = await service.GetChatMember(user.TelegramId, stoppingToken);
                 if (response is null) continue;
                 
                 var isChatMember = response.IsChatMember();

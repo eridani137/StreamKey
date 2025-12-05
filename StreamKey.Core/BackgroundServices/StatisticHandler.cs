@@ -39,7 +39,7 @@ public class StatisticHandler(
                 try
                 {
                     await Task.Delay(SaveViewStatisticInterval, _stoppingCts.Token);
-                    await SaveViewStatistic();
+                    await SaveViewStatistic(cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -59,7 +59,7 @@ public class StatisticHandler(
                 try
                 {
                     await Task.Delay(RemoveOfflineUsersInterval, _stoppingCts.Token);
-                    await RemoveOfflineUsers(false);
+                    await RemoveOfflineUsers(false, cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -79,7 +79,7 @@ public class StatisticHandler(
                 try
                 {
                     await Task.Delay(SaveClickChannelStatisticInterval, _stoppingCts.Token);
-                    await SaveChannelClickStatistic();
+                    await SaveChannelClickStatistic(cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -106,9 +106,9 @@ public class StatisticHandler(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await SaveViewStatistic();
-        await RemoveOfflineUsers(true);
-        await SaveChannelClickStatistic();
+        await SaveViewStatistic(cancellationToken);
+        await RemoveOfflineUsers(true, cancellationToken);
+        await SaveChannelClickStatistic(cancellationToken);
 
         await _stoppingCts.CancelAsync();
 
@@ -132,7 +132,7 @@ public class StatisticHandler(
     }
 
 
-    private async Task SaveViewStatistic()
+    private async Task SaveViewStatistic(CancellationToken cancellationToken)
     {
         try
         {
@@ -146,7 +146,7 @@ public class StatisticHandler(
             {
                 try
                 {
-                    await repository.Add(entity);
+                    await repository.Add(entity, cancellationToken);
                     processed++;
                 }
                 catch (Exception e)
@@ -155,7 +155,7 @@ public class StatisticHandler(
                 }
             }
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             if (processed > 0)
             {
@@ -168,7 +168,7 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveOfflineUsers(bool isShutdown)
+    private async Task RemoveOfflineUsers(bool isShutdown, CancellationToken cancellationToken)
     {
         try
         {
@@ -182,7 +182,7 @@ public class StatisticHandler(
 
             BrowserExtensionHub.DisconnectedUsers.Clear();
 
-            await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork);
+            await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork, cancellationToken);
         }
         catch (Exception e)
         {
@@ -191,14 +191,14 @@ public class StatisticHandler(
     }
 
     private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
-        UserSessionRepository repository, IUnitOfWork unitOfWork)
+        UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
     {
         foreach (var sessionEntity in entities)
         {
-            await repository.Add(sessionEntity);
+            await repository.Add(sessionEntity, cancellationToken);
         }
 
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (entities.Count != 0)
         {
@@ -207,7 +207,7 @@ public class StatisticHandler(
         }
     }
 
-    private async Task SaveChannelClickStatistic()
+    private async Task SaveChannelClickStatistic(CancellationToken cancellationToken)
     {
         try
         {
@@ -221,7 +221,7 @@ public class StatisticHandler(
             {
                 try
                 {
-                    await repository.Add(entity);
+                    await repository.Add(entity, cancellationToken);
                     processed++;
                 }
                 catch (Exception e)
@@ -230,7 +230,7 @@ public class StatisticHandler(
                 }
             }
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             if (processed > 0)
             {

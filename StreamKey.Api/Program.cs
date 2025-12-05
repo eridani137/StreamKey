@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;

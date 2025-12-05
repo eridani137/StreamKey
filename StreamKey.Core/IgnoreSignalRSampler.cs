@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using OpenTelemetry.Trace;
 
 namespace StreamKey.Core;

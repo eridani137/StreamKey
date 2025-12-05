@@ -7,7 +7,7 @@ namespace StreamKey.Infrastructure.Repositories;
 public class ViewStatisticRepository(ApplicationDbContext context)
     : BaseRepository<ViewStatisticEntity>(context)
 {
-    public async Task<List<ChannelViewStatistic>> GetTopViewedChannelsAsync(int hours, int count)
+    public async Task<List<ChannelViewStatistic>> GetTopViewedChannelsAsync(int hours, int count, CancellationToken cancellationToken)
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-hours);
         
@@ -21,6 +21,6 @@ public class ViewStatisticRepository(ApplicationDbContext context)
             })
             .OrderByDescending(x => x.ViewCount)
             .Take(count)
-            .ToListAsync();
+            .ToListAsync(cancellationToken: cancellationToken);
     }
 }

@@ -3,7 +3,7 @@ using OpenTelemetry;
 
 namespace StreamKey.Core;
 
-public class IgnorePathProcessor(params string[] ignoredPaths) : BaseProcessor<Activity>
+public class IgnorePathProcessor(params string[]? ignoredPaths) : BaseProcessor<Activity>
 {
     private readonly string[] _ignoredPaths = ignoredPaths ?? [];
 

@@ -7,7 +7,7 @@ namespace StreamKey.Infrastructure.Repositories;
 public class UserSessionRepository(ApplicationDbContext context)
     : BaseRepository<UserSessionEntity>(context)
 {
-    public async Task<UsersPerTimeStatistic> GetUsersPerMonthStatistic(DateOnly date)
+    public async Task<UsersPerTimeStatistic> GetUsersPerMonthStatistic(DateOnly date, CancellationToken cancellationToken)
     {
         var firstDayOfMonth = new DateOnly(date.Year, date.Month, 1);
         var firstDayOfNextMonth = firstDayOfMonth.AddMonths(1);
@@ -19,7 +19,7 @@ public class UserSessionRepository(ApplicationDbContext context)
             .Where(us => us.StartedAt >= startOfMonth && us.StartedAt < startOfNextMonth)
             .Select(us => us.UserId)
             .Distinct()
-            .ToListAsync();
+            .ToListAsync(cancellationToken: cancellationToken);
 
         return new UsersPerTimeStatistic
         {
@@ -27,7 +27,7 @@ public class UserSessionRepository(ApplicationDbContext context)
         };
     }
     
-    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateOnly date)
+    public async Task<UsersPerTimeStatistic> GetUsersPerDayStatistic(DateOnly date, CancellationToken cancellationToken)
     {
         var startOfDay = new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
         var endOfDay = new DateTimeOffset(date.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
@@ -36,7 +36,7 @@ public class UserSessionRepository(ApplicationDbContext context)
             .Where(us => us.StartedAt.Date >= startOfDay.Date && us.StartedAt.Date <= endOfDay.Date)
             .Select(us => us.UserId)
             .Distinct()
-            .ToListAsync();
+            .ToListAsync(cancellationToken: cancellationToken);
 
         return new UsersPerTimeStatistic
         {
@@ -44,7 +44,7 @@ public class UserSessionRepository(ApplicationDbContext context)
         };
     }
     
-    public async Task<UserTimeSpentStats> GetAverageTimeSpent(int hours)
+    public async Task<UserTimeSpentStats> GetAverageTimeSpent(int hours, CancellationToken cancellationToken)
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-hours);
         
@@ -52,7 +52,7 @@ public class UserSessionRepository(ApplicationDbContext context)
             .Where(s => s.UpdatedAt >= cutoffTime)
             .GroupBy(s => s.UserId)
             .Select(g => g.Sum(s => s.AccumulatedTime.TotalSeconds))
-            .ToListAsync();
+            .ToListAsync(cancellationToken: cancellationToken);
         
         if (perUserSeconds.Count == 0)
         {

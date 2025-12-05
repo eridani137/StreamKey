@@ -4,5 +4,5 @@ namespace StreamKey.Infrastructure.Abstractions;
 
 public interface IRestartRepository : IBaseRepository<RestartEntity>
 {
-    Task<RestartEntity?> GetLastRestart();
+    Task<RestartEntity?> GetLastRestart(CancellationToken cancellationToken);
 }
