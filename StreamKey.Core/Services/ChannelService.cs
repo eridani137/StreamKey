@@ -78,7 +78,7 @@ public class ChannelService(
 
     public async Task UpdateChannelInfo(ChannelEntity channel)
     {
-        logger.LogInformation("Обновление канала: {ChannelName}", channel.Name);
+        logger.LogDebug("Обновление канала: {ChannelName}", channel.Name);
 
         var fresh = await channelRepository.GetByName(channel.Name);
         if (fresh is null) return;

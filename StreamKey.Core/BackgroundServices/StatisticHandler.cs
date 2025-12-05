@@ -152,7 +152,7 @@ public class StatisticHandler(
 
             if (processed > 0)
             {
-                logger.LogInformation("Сохранено {RecordsProcessedCount} записей просмотров", processed);
+                logger.LogDebug("Сохранено {RecordsProcessedCount} записей просмотров", processed);
             }
         }
         catch (Exception e)
@@ -192,7 +192,7 @@ public class StatisticHandler(
 
         if (entities.Count != 0)
         {
-            logger.LogInformation("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
+            logger.LogDebug("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
                 entities.Count);
         }
     }
@@ -227,7 +227,7 @@ public class StatisticHandler(
 
             if (processed > 0)
             {
-                logger.LogInformation("Сохранено {RecordsProcessedCount} записей кликов на каналы", processed);
+                logger.LogDebug("Сохранено {RecordsProcessedCount} записей кликов на каналы", processed);
             }
         }
         catch (Exception e)
