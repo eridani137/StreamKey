@@ -19,9 +19,13 @@ export default defineBackground(() => {
 
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === Config.alarms.checkConnectionState) {
+      console.log(`[ALARM] ${alarm.name}`);
       if (extensionClient.connectionState === HubConnectionState.Disconnected) {
+        console.log(`Статус соединения ${extensionClient.connectionState}, пробуем переподключиться`);
         const sessionId = await utils.createNewSession();
         await extensionClient.startWithPersistentRetry(sessionId);
+      } else {
+        console.log(`Статус соединения ${extensionClient.connectionState}, переподключение пропущено`);
       }
     }
   });

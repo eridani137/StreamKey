@@ -121,6 +121,7 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
     }
   } else {
     await storage.removeItem(Config.keys.userProfile); // TODO
+    console.log('getUserProfile: Удаляю локальную копию профиля');
   }
   return null;
 }
@@ -128,10 +129,15 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
 export async function initUserProfile(
   telegramUser: TelegramUser | null = null
 ): Promise<void> {
-  const userData = telegramUser ?? await getUserProfile();
+  let userData = telegramUser ?? await storage.getItem(Config.keys.userProfile);
+
+  if (!userData) {
+    userData = await getUserProfile();
+  }
 
   if (!userData) {
     await storage.removeItem(Config.keys.userProfile); // TODO
+    console.log('initUserProfile: Удаляю локальную копию профиля');
     return;
   }
 
