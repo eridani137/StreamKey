@@ -28,10 +28,15 @@ export interface QualityMenu {
   instructionUrl: string;
 }
 
+export interface AlarmKeys {
+  checkConnectionState: string;
+}
+
 export interface AppConfig {
   urls: AppUrls;
   keys: StorageKeys;
   qualityMenu: QualityMenu;
+  alarms: AlarmKeys;
 }
 
 export interface TelegramUser {

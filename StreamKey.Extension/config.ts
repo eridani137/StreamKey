@@ -26,6 +26,9 @@ const Config: AppConfig = {
     minResolution: 1080,
     instructionUrl: 'https://service.streamkey.ru/files/menu-instruction.jpg',
   },
+  alarms: {
+    checkConnectionState: 'CHECK_CONNECTION_STATE'
+  }
 };
 
 export default Config;

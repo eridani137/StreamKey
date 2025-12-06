@@ -3,9 +3,11 @@ import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
 import { loadTwitchRedirectRules } from '@/rules';
+import { HubConnectionState } from '@microsoft/signalr';
 
 export default defineBackground(() => {
   registerMessageHandlers();
+
   browser.runtime.onInstalled.addListener(async () => {
     await onStartup();
     await onInstalled();
@@ -13,6 +15,15 @@ export default defineBackground(() => {
 
   browser.runtime.onStartup.addListener(async () => {
     await onStartup();
+  });
+
+  browser.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === Config.alarms.checkConnectionState) {
+      if (extensionClient.connectionState === HubConnectionState.Disconnected) {
+        const sessionId = await utils.createNewSession();
+        await extensionClient.startWithPersistentRetry(sessionId);
+      }
+    }
   });
 });
 
@@ -26,9 +37,12 @@ export async function onStartup() {
   await extensionClient.startWithPersistentRetry(sessionId);
   await utils.initUserProfile();
   const isEnabled = await storage.getItem(Config.keys.extensionState);
-  if (isEnabled) {
-    await loadTwitchRedirectRules();
-  }
+  if (isEnabled) await loadTwitchRedirectRules();
+
+  browser.alarms.create(Config.alarms.checkConnectionState, {
+    delayInMinutes: 0.5,
+    periodInMinutes: 0.5,
+  });
 }
 
 export function registerMessageHandlers() {

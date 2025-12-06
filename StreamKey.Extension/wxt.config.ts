@@ -16,6 +16,7 @@ export default defineConfig({
     const manifest = {
       name: 'Твич 1080 и 1440 | Вернуть 1080/1440 на Твич от STREAM KEY (не ВПН)',
       permissions: [
+        'alarms',
         'cookies',
         'storage',
         'declarativeNetRequest',

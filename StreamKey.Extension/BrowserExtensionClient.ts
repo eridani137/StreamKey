@@ -158,7 +158,7 @@ class BrowserExtensionClient {
   }
 
   async startWithPersistentRetry(sessionId: string): Promise<void> {
-    if (sessionId) this.sessionId = sessionId;
+    this.sessionId = sessionId;
     this.shouldReconnect = true;
     
     while (this.shouldReconnect) {
