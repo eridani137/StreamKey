@@ -18,14 +18,13 @@ public class TelegramHandler(
     : IHostedService, IDisposable
 {
     private static readonly TimeSpan StoppingTimeout = TimeSpan.FromSeconds(30);
-
+    
     private static readonly TimeSpan CheckOldUsersInterval = TimeSpan.FromMinutes(3);
-    private static readonly TimeSpan SaveNewUsersInterval = TimeSpan.FromMinutes(1);
 
     public static ConcurrentQueue<TelegramAuthDtoWithSessionId> NewUsers { get; } = new();
 
     private Task? _checkOldUsers;
-    private Task? _saveNewUsers;
+    private Task? _checkNewUsers;
 
     private CancellationTokenSource _stoppingCts = null!;
 
@@ -54,52 +53,48 @@ public class TelegramHandler(
             }
         }, _stoppingCts.Token);
 
-        _saveNewUsers = Task.Run(async () =>
+        _checkNewUsers = Task.Run(async () =>
         {
             while (!_stoppingCts.Token.IsCancellationRequested)
             {
                 try
                 {
-                    await Task.Delay(SaveNewUsersInterval, _stoppingCts.Token);
+                    using var scope = serviceProvider.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
+                    var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var extensionHub = scope.ServiceProvider
+                        .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
 
-                    await SaveNewUsers(_stoppingCts.Token);
-                    // await SaveNewUsers();
-                    // using var scope = serviceProvider.CreateScope();
-                    // // var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
-                    // var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
-                    // var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    // var extensionHub = scope.ServiceProvider
-                    //     .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
-                    //
-                    // if (NewUsers.TryDequeue(out var dto))
-                    // {
-                    //     var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
-                    //
-                    //     if (user is null)
-                    //     {
-                    //         user = dto.Map();
-                    //         await repository.Add(user, cancellationToken);
-                    //     }
-                    //
-                    //     // var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
-                    //     // if (chatMember is null) continue;
-                    //
-                    //     user.FirstName = dto.FirstName;
-                    //     user.Username = dto.Username;
-                    //     user.AuthDate = dto.AuthDate;
-                    //     user.PhotoUrl = dto.PhotoUrl;
-                    //     user.Hash = dto.Hash;
-                    //     // user.IsChatMember = chatMember.IsChatMember();
-                    //     user.AuthorizedAt = DateTime.UtcNow;
-                    //
-                    //     await unitOfWork.SaveChangesAsync(cancellationToken);
-                    //
-                    //     if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
-                    //     {
-                    //         await extensionHub.Clients.Client(connectionId)
-                    //             .ReloadUserData(dto.MapUserDto(user.IsChatMember));
-                    //     }
-                    // }
+                    if (NewUsers.TryDequeue(out var dto))
+                    {
+                        var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
+
+                        if (user is null)
+                        {
+                            user = dto.Map();
+                            await repository.Add(user, cancellationToken);
+                        }
+
+                        // var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
+                        // if (chatMember is null) continue;
+
+                        user.FirstName = dto.FirstName;
+                        user.Username = dto.Username;
+                        user.AuthDate = dto.AuthDate;
+                        user.PhotoUrl = dto.PhotoUrl;
+                        user.Hash = dto.Hash;
+                        // user.IsChatMember = chatMember.IsChatMember();
+                        user.AuthorizedAt = DateTime.UtcNow;
+
+                        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                        if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
+                        {
+                            await extensionHub.Clients.Client(connectionId)
+                                .ReloadUserData(dto.MapUserDto(user.IsChatMember));
+                        }
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -122,28 +117,19 @@ public class TelegramHandler(
             await using var scope = serviceProvider.CreateAsyncScope();
             var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var extensionHub = scope.ServiceProvider
-                .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
 
             while (NewUsers.TryDequeue(out var dto))
             {
                 try
                 {
-                    var user = dto.Map();
-                    await repository.Add(user, cancellationToken);
-
-                    if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
-                    {
-                        await extensionHub.Clients.Client(connectionId)
-                            .ReloadUserData(dto.MapUserDto(user.IsChatMember));
-                    }
+                    await repository.Add(dto.Map(), cancellationToken);
                 }
                 catch (Exception e)
                 {
                     logger.LogError(e, "Ошибка при добавлении нового необработанного пользователя");
                 }
             }
-
+            
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)
@@ -160,9 +146,9 @@ public class TelegramHandler(
 
         try
         {
-            if (_checkOldUsers is not null && _saveNewUsers is not null)
+            if (_checkOldUsers is not null && _checkNewUsers is not null)
             {
-                await Task.WhenAll(_checkOldUsers, _saveNewUsers)
+                await Task.WhenAll(_checkOldUsers, _checkNewUsers)
                     .WaitAsync(StoppingTimeout, cancellationToken);
             }
         }
@@ -211,7 +197,7 @@ public class TelegramHandler(
         _stoppingCts.Cancel();
 
         _checkOldUsers?.Dispose();
-        _saveNewUsers?.Dispose();
+        _checkNewUsers?.Dispose();
 
         _stoppingCts.Dispose();
     }
