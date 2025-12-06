@@ -80,7 +80,7 @@ export class QualityMenu {
   }
 
   async block2KResolutionElement(): Promise<void> {
-    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile);
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
     if (tgUser?.is_chat_member) return;
 
     this.addInstruction();
@@ -180,7 +180,7 @@ export class QualityMenu {
   }
 
   async autoSwitch(): Promise<void> {
-    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile);
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
     if (tgUser?.is_chat_member) return;
 
     await this.setDefault();
@@ -247,7 +247,7 @@ export class QualityMenu {
   }
 
   async setDefault(): Promise<void> {
-    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile);
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
     if (tgUser?.is_chat_member) return;
 
     localStorage.setItem('s-qs-ts', String(Math.floor(Date.now())));

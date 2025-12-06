@@ -212,7 +212,7 @@ async function loadUserProfile() {
   try {
     const userData = await storage.getItem<TelegramUser>(
       Config.keys.userProfile
-    );
+    ); // TODO
     console.log('Загрузка профиля', userData);
     if (userData) {
       telegramUser.value = userData;

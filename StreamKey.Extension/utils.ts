@@ -120,7 +120,7 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
       return null;
     }
   } else {
-    await storage.removeItem(Config.keys.userProfile);
+    await storage.removeItem(Config.keys.userProfile); // TODO
   }
   return null;
 }
@@ -128,14 +128,15 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
 export async function initUserProfile(
   telegramUser: TelegramUser | null = null
 ): Promise<void> {
-  const userData = telegramUser ?? (await getUserProfile());
+  const userData = telegramUser ?? await getUserProfile();
 
   if (!userData) {
-    await storage.removeItem(Config.keys.userProfile);
+    await storage.removeItem(Config.keys.userProfile); // TODO
     return;
   }
 
-  await storage.setItem(Config.keys.userProfile, userData);
+  await storage.setItem(Config.keys.userProfile, userData); // TODO
+  
 }
 
 export const sleep = (ms: number): Promise<void> =>
