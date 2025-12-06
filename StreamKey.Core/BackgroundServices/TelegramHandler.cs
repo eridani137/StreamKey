@@ -19,7 +19,7 @@ public class TelegramHandler(
 {
     private static readonly TimeSpan StoppingTimeout = TimeSpan.FromSeconds(30);
 
-    private static readonly TimeSpan CheckOldUsersInterval = TimeSpan.FromMinutes(3);
+    private static readonly TimeSpan CheckOldUsersInterval = TimeSpan.FromMinutes(1);
 
     public static ConcurrentQueue<TelegramAuthDtoWithSessionId> NewUsers { get; } = new();
 
