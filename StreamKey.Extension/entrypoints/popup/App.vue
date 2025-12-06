@@ -285,7 +285,7 @@ onMounted(async () => {
 }
 
 .telegram-button {
-  margin-top: auto;
+  margin-top: 0px;
   background: none;
   border: none;
   cursor: pointer;

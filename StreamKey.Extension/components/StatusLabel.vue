@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineEmits } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { onMessage, sendMessage } from '@/messaging';
 import { StatusType } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr';
@@ -31,8 +31,6 @@ function setState(state: HubConnectionState) {
 }
 
 onMounted(async () => {
-  // await sendMessage('wakeConnection');
-
   await updateStatus();
 
   onMessage('setConnectionState', async (message) => {
