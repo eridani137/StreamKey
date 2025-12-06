@@ -1,4 +1,4 @@
-import { HubConnectionState } from '@microsoft/signalr/dist/esm/HubConnection';
+import { HubConnectionState } from '@microsoft/signalr';
 import extensionClient from './BrowserExtensionClient';
 import Config from './config';
 import { DeviceInfo, StatusType, TelegramUser, TelegramUserResponse } from './types';
