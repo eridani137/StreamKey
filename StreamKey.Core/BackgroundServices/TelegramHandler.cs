@@ -80,6 +80,7 @@ public class TelegramHandler(
         try
         {
             await using var scope = serviceProvider.CreateAsyncScope();
+            var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
             var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var extensionHub = scope.ServiceProvider
@@ -97,15 +98,15 @@ public class TelegramHandler(
                         await repository.Add(user, cancellationToken);
                     }
                     
-                    // var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
-                    // if (chatMember is null) continue;
+                    var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
+                    if (chatMember is null) continue;
                     
                     user.FirstName = dto.FirstName;
                     user.Username = dto.Username;
                     user.AuthDate = dto.AuthDate;
                     user.PhotoUrl = dto.PhotoUrl;
                     user.Hash = dto.Hash;
-                    // user.IsChatMember = chatMember.IsChatMember();
+                    user.IsChatMember = chatMember.IsChatMember();
                     user.AuthorizedAt = DateTime.UtcNow;
                     
                     if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
