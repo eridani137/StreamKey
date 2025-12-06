@@ -91,8 +91,8 @@
       - ./files:/app/files:ro
     ulimits:
       nofile:
-        soft: 30000
-        hard: 60000
+        soft: 500000
+        hard: 500000
     depends_on:
       streamkey-api:
         condition: service_healthy
