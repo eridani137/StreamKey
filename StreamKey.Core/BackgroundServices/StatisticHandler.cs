@@ -109,11 +109,11 @@ public class StatisticHandler(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        await _stoppingCts.CancelAsync();
+        
         await SaveViewStatistic(cancellationToken);
         await RemoveOfflineUsers(true, cancellationToken);
         await SaveChannelClickStatistic(cancellationToken);
-
-        await _stoppingCts.CancelAsync();
 
         try
         {
