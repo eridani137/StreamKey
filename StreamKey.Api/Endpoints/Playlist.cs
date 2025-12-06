@@ -58,7 +58,7 @@ public class Playlist : ICarterModule
             UserId = request.UserId
         });
 
-        var result = await usherService.GetStreamPlaylist(request.ChannelName, context);
+        var result = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
 
         if (result.IsFailure)
         {
@@ -88,10 +88,23 @@ public class Playlist : ICarterModule
             return Results.BadRequest("vod_id is not found");
         }
 
-        // var request = ProcessRequest(context, logger);
-        // if (request is null) return Results.BadRequest();
+        if (!context.Request.Query.TryGetValue("token", out var tokenValue))
+        {
+            logger.LogError("Token отсутствует в запросе");
+            return Results.BadRequest("token is not found");
+        }
 
-        var result = await usherService.GetVodPlaylist(vodId.ToString(), context);
+        var obj = JObject.Parse(tokenValue.ToString());
+
+        var deviceId = obj.SelectToken(".device_id")?.ToString();
+
+        if (string.IsNullOrEmpty(deviceId))
+        {
+            logger.LogError("Не удалось получить device_id: {Json}", obj.ToString());
+            return Results.BadRequest("device_id is not found");
+        }
+
+        var result = await usherService.GetVodPlaylist(vodId.ToString(), deviceId, context);
 
         if (result.IsFailure)
         {
@@ -121,11 +134,16 @@ public class Playlist : ICarterModule
 
         var obj = JObject.Parse(tokenValue.ToString());
 
+        var deviceId = obj.SelectToken(".device_id")?.ToString();
+
+        if (string.IsNullOrEmpty(deviceId))
+        {
+            logger.LogError("Не удалось получить device_id: {Json}", obj.ToString());
+            return null;
+        }
+
         var channel = obj.SelectToken(".channel")?.ToString();
         var channelId = obj.SelectToken(".channel_id")?.ToObject<int>();
-
-        var userIp = obj.SelectToken(".user_ip")?.ToString();
-        var userId = obj.SelectToken(".user_id")?.ToString() ?? "anonymous";
 
         if (string.IsNullOrEmpty(channel))
         {
@@ -139,6 +157,9 @@ public class Playlist : ICarterModule
             return null;
         }
 
+        var userIp = obj.SelectToken(".user_ip")?.ToString();
+        var userId = obj.SelectToken(".user_id")?.ToString() ?? "anonymous";
+
         if (string.IsNullOrEmpty(userIp))
         {
             logger.LogError("Не удалось получить IP: {Json}", obj.ToString());
@@ -150,7 +171,8 @@ public class Playlist : ICarterModule
             ChannelName = channel,
             ChannelId = channelId.Value,
             UserIp = userIp,
-            UserId = userId
+            UserId = userId,
+            DeviceId = deviceId
         };
     }
 }

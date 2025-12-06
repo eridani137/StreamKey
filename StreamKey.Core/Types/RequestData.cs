@@ -6,4 +6,5 @@ public class RequestData
     public required int ChannelId { get; set; }
     public required string UserIp { get; set; }
     public required string UserId { get; set; }
+    public required string DeviceId { get; set; }
 }

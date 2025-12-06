@@ -7,19 +7,13 @@ public static class QueryExtensions
 {
     extension(IQueryCollection query)
     {
-        public void AddQueryAuth(HttpRequestMessage request)
+        public void AddQueryAuth(HttpRequestMessage request, string deviceId)
         {
-            // var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-            //     ? auth.ToString()
-            //     : ApplicationConstants.DefaultAuthorization;
-
-            var authorization = ApplicationConstants.DefaultAuthorization;
+            var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
+                ? $"OAuth {auth}"
+                : "undefined";
 
             request.Headers.Add("Authorization", authorization);
-
-            var deviceId = authorization == ApplicationConstants.DefaultAuthorization
-                ? ApplicationConstants.DefaultDeviceId
-                : TwitchExtensions.GenerateDeviceId();
 
             request.Headers.Add("x-device-id", deviceId);
         }

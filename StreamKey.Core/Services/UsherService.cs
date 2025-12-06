@@ -14,9 +14,9 @@ public class UsherService(
     ITwitchService twitchService
 ) : IUsherService
 {
-    public async Task<Result<string>> GetStreamPlaylist(string username, HttpContext context)
+    public async Task<Result<string>> GetStreamPlaylist(string username, string deviceId, HttpContext context)
     {
-        var tokenResponse = await twitchService.GetStreamAccessToken(username, context);
+        var tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
 
         if (tokenResponse?.Data is null)
         {
@@ -32,7 +32,7 @@ public class UsherService(
 
         foreach (var (key, value) in context.Request.Query)
         {
-            if (key.Equals("auth") || key.Equals("device")) continue;
+            if (key.Equals("auth")) continue;
             query[key] = value;
         }
 
@@ -82,9 +82,9 @@ public class UsherService(
         }
     }
 
-    public async Task<Result<string>> GetVodPlaylist(string vodId, HttpContext context)
+    public async Task<Result<string>> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
     {
-        var tokenResponse = await twitchService.GetVodAccessToken(vodId, context);
+        var tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
 
         if (tokenResponse?.Data is null)
         {
@@ -100,7 +100,7 @@ public class UsherService(
         
         foreach (var (key, value) in context.Request.Query)
         {
-            if (key.Equals("vod_id")) continue;
+            if (key.Equals("vod_id") || key.Equals("auth")) continue;
             query[key] = value;
         }
         

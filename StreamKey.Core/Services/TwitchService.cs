@@ -11,7 +11,8 @@ namespace StreamKey.Core.Services;
 
 public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchService> logger) : ITwitchService
 {
-    public async Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username, HttpContext context)
+    public async Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username, string deviceId,
+        HttpContext context)
     {
         var tokenRequest = new
         {
@@ -36,7 +37,8 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         };
 
         var result =
-            await SendTwitchGqlRequest<StreamPlaybackAccessTokenResponse>(tokenRequest, context, "StreamAccessToken");
+            await SendTwitchGqlRequest<StreamPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
+                "StreamAccessToken");
 
         if (result?.Data?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             result?.Data.Data.StreamPlaybackAccessToken?.Value is null)
@@ -48,7 +50,8 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         return result.Data;
     }
 
-    public async Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string vodId, HttpContext context)
+    public async Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string vodId, string deviceId,
+        HttpContext context)
     {
         var tokenRequest = new
         {
@@ -72,12 +75,14 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             }
         };
 
-        var result = await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, context, "VodAccessToken");
+        var result =
+            await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
+                "VodAccessToken");
 
         if (result?.Data?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             result?.Data.Data?.VideoPlaybackAccessToken?.Value is null)
         {
-            logger.LogError("Twitch вернул неверный VodAccessToken. Body: {@Body}", result.RawJson);
+            logger.LogError("Twitch вернул неверный VodAccessToken. Body: {@Body}", result?.RawJson);
             return null;
         }
 
@@ -86,6 +91,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
     private async Task<TwitchResponseWrapper<T>?> SendTwitchGqlRequest<T>(
         object tokenRequest,
+        string deviceId,
         HttpContext context,
         string logPrefix)
         where T : class
@@ -96,7 +102,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             Content = JsonContent.Create(tokenRequest)
         };
 
-        context.Request.Query.AddQueryAuth(request);
+        context.Request.Query.AddQueryAuth(request, deviceId);
 
         using var response = await client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
