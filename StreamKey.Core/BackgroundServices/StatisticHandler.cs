@@ -64,6 +64,7 @@ public class StatisticHandler(
                 {
                     await Task.Delay(RemoveOfflineUsersInterval, _stoppingCts.Token);
                     await RemoveOfflineUsers(false, cancellationToken);
+                    await RemoveAndSaveOfflineUsers(false, cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -114,6 +115,7 @@ public class StatisticHandler(
         
         await SaveViewStatistic(cancellationToken);
         await RemoveOfflineUsers(true, cancellationToken);
+        await RemoveAndSaveOfflineUsers(true, cancellationToken);
         await SaveChannelClickStatistic(cancellationToken);
 
         try
@@ -164,44 +166,44 @@ public class StatisticHandler(
         }
     }
 
-    // private async Task RemoveOfflineUsers(bool isShutdown, CancellationToken cancellationToken)
-    // {
-    //     try
-    //     {
-    //         await using var scope = serviceProvider.CreateAsyncScope();
-    //         var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
-    //         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-    //
-    //         var users = isShutdown
-    //             ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
-    //             : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
-    //
-    //         BrowserExtensionHub.DisconnectedUsers.Clear();
-    //
-    //         await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork, cancellationToken);
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         logger.LogError(e, "Ошибка при удалении оффлайн пользователей");
-    //     }
-    // }
+    private async Task RemoveAndSaveOfflineUsers(bool isShutdown, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+    
+            var users = isShutdown
+                ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
+                : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
+    
+            BrowserExtensionHub.DisconnectedUsers.Clear();
+    
+            await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при удалении оффлайн пользователей");
+        }
+    }
 
-    // private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
-    //     UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
-    // {
-    //     foreach (var sessionEntity in entities)
-    //     {
-    //         await repository.Add(sessionEntity, cancellationToken);
-    //     }
-    //
-    //     await unitOfWork.SaveChangesAsync(cancellationToken);
-    //
-    //     if (entities.Count != 0)
-    //     {
-    //         logger.LogDebug("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
-    //             entities.Count);
-    //     }
-    // }
+    private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
+        UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
+    {
+        foreach (var sessionEntity in entities)
+        {
+            await repository.Add(sessionEntity, cancellationToken);
+        }
+    
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+    
+        if (entities.Count != 0)
+        {
+            logger.LogDebug("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
+                entities.Count);
+        }
+    }
 
     private async Task RemoveOfflineUsers(bool shutdown, CancellationToken cancellationToken)
     {

@@ -69,6 +69,6 @@ app.MapHealthChecks("/health");
 
 await app.SeedDatabase();
 
-// app.MapHub<BrowserExtensionHub>("/hubs/extension");
+app.MapHub<BrowserExtensionHub>("/hubs/extension");
 
 app.Run();
