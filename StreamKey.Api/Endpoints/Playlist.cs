@@ -1,6 +1,7 @@
 using Carter;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
+using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Services;
 using StreamKey.Core.Types;
@@ -100,8 +101,7 @@ public class Playlist : ICarterModule
 
         if (string.IsNullOrEmpty(deviceId))
         {
-            logger.LogError("Не удалось получить device_id: {Json}", obj.ToString());
-            return Results.BadRequest("device_id is not found");
+            deviceId = TwitchExtensions.GenerateDeviceId();
         }
 
         var result = await usherService.GetVodPlaylist(vodId.ToString(), deviceId, context);
