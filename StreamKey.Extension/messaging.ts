@@ -4,9 +4,10 @@ import { ActivityRequest, ChannelData, ClickChannel } from '@/types';
 interface ProtocolMap {
   updateActivity(payload: ActivityRequest): Promise<void>;
   clickChannel(payload: ClickChannel): Promise<void>;
+  getChannels(): Promise<ChannelData[] | null>;
+  
   // getConnectionState(): Promise<HubConnectionState>;
   // setConnectionState(payload: HubConnectionState): Promise<void>;
-  getChannels(): Promise<ChannelData[] | null>;
   // checkMember(payload: CheckMemberResponse): Promise<void>;
 }
 

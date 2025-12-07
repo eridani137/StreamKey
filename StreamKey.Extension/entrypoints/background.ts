@@ -63,15 +63,15 @@ export function registerMessageHandlers() {
     await client.clickChannel(message.data);
   });
 
-  // onMessage('getConnectionState', async () => {
-  //   return extensionClient.connectionState;
-  // });
-
   onMessage('getChannels', async () => {
     // return await extensionClient.getChannels();
 
     return await client.getChannels();
   });
+
+  // onMessage('getConnectionState', async () => {
+  //   return extensionClient.connectionState;
+  // });
 
   // onMessage('checkMember', async (message) => {
   //   await extensionClient.checkMember(message.data);
