@@ -210,6 +210,7 @@ export function getStateClass(state: HubConnectionState) {
     : StatusType.MAINTENANCE;
 }
 
-export function updateActivity() {
-  
+export function getTwitchUserId(): string | null {
+  const userIdRaw = localStorage.getItem(Config.keys.twId);
+  return userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
 }

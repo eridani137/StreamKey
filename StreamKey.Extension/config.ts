@@ -14,7 +14,8 @@ const Config: AppConfig = {
   keys: {
     sessionId: 'local:sessionId',
     userProfile: 'local:userProfile',
-    extensionState: 'local:streamKeyEnabled'
+    extensionState: 'local:streamKeyEnabled',
+    twId: 'local_copy_unique_id',
   },
   qualityMenu: {
     qualityMenuSelectors: {

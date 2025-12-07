@@ -40,7 +40,7 @@ export async function onInstalled() {
 export async function onStartup() {
   // const sessionId = await utils.createNewSession();
   // await extensionClient.startWithPersistentRetry(sessionId);
-  await utils.initUserProfile();
+  // await utils.initUserProfile();
   const isEnabled = await storage.getItem(Config.keys.extensionState);
   if (isEnabled) await loadTwitchRedirectRules();
 

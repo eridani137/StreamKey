@@ -1,5 +1,5 @@
 import { ChannelData, ClickChannel } from '@/types';
-import { sleep } from '@/utils';
+import { getTwitchUserId, sleep } from '@/utils';
 import { sendMessage } from '@/messaging';
 import Config from './config';
 
@@ -9,7 +9,7 @@ export class ActiveChannels {
   private channelData: ChannelData[] = [];
   private isDataReady: boolean = false;
   private tooltipObserver: MutationObserver | null = null;
-  private readonly minUpdateInterval: number = 60000;
+  private readonly minUpdateInterval: number = 180000;
   private pendingUpdate: NodeJS.Timeout | null = null;
 
   public init(ctx: any): void {
@@ -175,12 +175,7 @@ export class ActiveChannels {
         event.stopPropagation && event.stopPropagation();
 
         try {
-          const userId = (
-            await browser.cookies.get({
-              url: Config.urls.twitchUrl,
-              name: 'unique_id',
-            })
-          )?.value;
+          const userId = getTwitchUserId();
           if (userId) {
             await sendMessage('clickChannel', {
               ChannelName: item.channelName,

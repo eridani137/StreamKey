@@ -12,8 +12,7 @@ export default defineContentScript({
 });
 
 async function runScripts(ctx: any) {
-  // await loadTwitchRedirectRules();
-  await activeChannels.init(ctx);
+  activeChannels.init(ctx);
   await qualityMenu.init(ctx);
   await activityHandler.init(ctx);
 }
