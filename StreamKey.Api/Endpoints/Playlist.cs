@@ -138,8 +138,7 @@ public class Playlist : ICarterModule
 
         if (string.IsNullOrEmpty(deviceId))
         {
-            logger.LogError("Не удалось получить device_id: {Json}", obj.ToString());
-            return null;
+            deviceId = TwitchExtensions.GenerateDeviceId();
         }
 
         var channel = obj.SelectToken(".channel")?.ToString();
