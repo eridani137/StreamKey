@@ -4,6 +4,7 @@ import Config from '@/config';
 import { onMessage } from '@/messaging';
 import { loadTwitchRedirectRules } from '@/rules';
 import { HubConnectionState } from '@microsoft/signalr';
+import client from '@/client';
 
 export default defineBackground(() => {
   registerMessageHandlers();
@@ -37,7 +38,7 @@ export async function onInstalled() {
 }
 
 export async function onStartup() {
-  const sessionId = await utils.createNewSession();
+  // const sessionId = await utils.createNewSession();
   // await extensionClient.startWithPersistentRetry(sessionId);
   await utils.initUserProfile();
   const isEnabled = await storage.getItem(Config.keys.extensionState);
@@ -50,21 +51,27 @@ export async function onStartup() {
 }
 
 export function registerMessageHandlers() {
-  // onMessage('updateActivity', async (message) => {
-  //   await extensionClient.updateActivity(message.data);
-  // });
+  onMessage('updateActivity', async (message) => {
+    // await extensionClient.updateActivity(message.data);
 
-  // onMessage('clickChannel', async (message) => {
-  //   await extensionClient.clickChannel(message.data);
-  // });
+    await client.updateActivity(message.data);
+  });
+
+  onMessage('clickChannel', async (message) => {
+    // await extensionClient.clickChannel(message.data);
+
+    await client.clickChannel(message.data);
+  });
 
   // onMessage('getConnectionState', async () => {
   //   return extensionClient.connectionState;
   // });
 
-  // onMessage('getChannels', async () => {
-  //   return await extensionClient.getChannels();
-  // });
+  onMessage('getChannels', async () => {
+    // return await extensionClient.getChannels();
+
+    return await client.getChannels();
+  });
 
   // onMessage('checkMember', async (message) => {
   //   await extensionClient.checkMember(message.data);

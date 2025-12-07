@@ -1,3 +1,4 @@
+import Config from './config';
 import { Rule } from './types';
 
 export async function getDynamicRules(): Promise<Rule[]> {
@@ -58,7 +59,7 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
 }
 
 export async function loadTwitchRedirectRules(): Promise<void> {
-  const auth = (await browser.cookies.get({url: 'https://www.twitch.tv/', name: 'auth-token'}))?.value || '';
+  const auth = (await browser.cookies.get({url: Config.urls.twitchUrl, name: 'auth-token'}))?.value || '';
 
   console.log('auth', auth);
 

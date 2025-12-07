@@ -165,11 +165,6 @@ export async function initUserProfile(
 export const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export function getTwitchUserId(): string | null {
-  const userIdRaw = localStorage.getItem(Config.keys.twId);
-  return userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
-}
-
 export async function waitForElement(xpath: string, timeout = 20000) {
   const startTime = Date.now();
 
@@ -213,4 +208,8 @@ export function getStateClass(state: HubConnectionState) {
   return state === HubConnectionState.Connected
     ? StatusType.WORKING
     : StatusType.MAINTENANCE;
+}
+
+export function updateActivity() {
+  
 }

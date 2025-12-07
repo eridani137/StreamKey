@@ -9,12 +9,12 @@ const Config: AppConfig = {
     extensionAuthorizationUrl: 'https://streamkey.ru/extension-authorization/',
     extensionStateKeyName: 'streamKeyEnabled',
     extensionHub: 'https://service.streamkey.ru/hubs/extension',
+    twitchUrl: 'https://www.twitch.tv/'
   },
   keys: {
     sessionId: 'local:sessionId',
     userProfile: 'local:userProfile',
-    extensionState: 'local:streamKeyEnabled',
-    twId: 'local_copy_unique_id',
+    extensionState: 'local:streamKeyEnabled'
   },
   qualityMenu: {
     qualityMenuSelectors: {

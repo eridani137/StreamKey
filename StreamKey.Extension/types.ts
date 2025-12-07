@@ -8,13 +8,13 @@ export interface AppUrls {
   extensionAuthorizationUrl: string;
   extensionStateKeyName: string;
   extensionHub: string;
+  twitchUrl: string;
 }
 
 export interface StorageKeys {
   sessionId: StorageItemKey;
   userProfile: StorageItemKey;
   extensionState: StorageItemKey;
-  twId: string;
 }
 
 export interface QualityMenu {
@@ -95,9 +95,9 @@ export interface WithChannelName {
   ChannelName: string;
 }
 
-export interface TelegramUserResponse extends WithNumberUserId, WithUserHash {}
+export interface ActivityRequest extends WithUserId, WithSessionId {}
 
-export interface ActivityRequest extends WithSessionId, WithUserId {}
+export interface TelegramUserResponse extends WithNumberUserId, WithUserHash {}
 
 export interface ClickChannel extends WithUserId, WithChannelName {}
 

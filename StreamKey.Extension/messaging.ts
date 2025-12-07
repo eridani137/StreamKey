@@ -1,13 +1,12 @@
 import { defineExtensionMessaging } from '@webext-core/messaging';
-import { ChannelData, CheckMemberResponse, ClickChannel, WithUserId } from '@/types';
-import { HubConnectionState } from '@microsoft/signalr';
+import { ActivityRequest, ChannelData, ClickChannel } from '@/types';
 
 interface ProtocolMap {
-  // updateActivity(payload: WithUserId): Promise<void>;
-  // clickChannel(payload: ClickChannel): Promise<void>;
+  updateActivity(payload: ActivityRequest): Promise<void>;
+  clickChannel(payload: ClickChannel): Promise<void>;
   // getConnectionState(): Promise<HubConnectionState>;
   // setConnectionState(payload: HubConnectionState): Promise<void>;
-  // getChannels(): Promise<ChannelData[] | null>;
+  getChannels(): Promise<ChannelData[] | null>;
   // checkMember(payload: CheckMemberResponse): Promise<void>;
 }
 
