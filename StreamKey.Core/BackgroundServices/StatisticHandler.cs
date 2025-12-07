@@ -22,6 +22,7 @@ public class StatisticHandler(
     private static readonly TimeSpan RemoveOfflineUsersInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan SaveClickChannelStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan LoggingOnlineInterval = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan UserOfflineTimeout = TimeSpan.FromMinutes(3);
 
     private Task? _savingViewStatistic;
     private Task? _removeOfflineUsers;
@@ -163,7 +164,46 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveOfflineUsers(bool isShutdown, CancellationToken cancellationToken)
+    // private async Task RemoveOfflineUsers(bool isShutdown, CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         await using var scope = serviceProvider.CreateAsyncScope();
+    //         var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
+    //         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+    //
+    //         var users = isShutdown
+    //             ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
+    //             : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
+    //
+    //         BrowserExtensionHub.DisconnectedUsers.Clear();
+    //
+    //         await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork, cancellationToken);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         logger.LogError(e, "Ошибка при удалении оффлайн пользователей");
+    //     }
+    // }
+
+    // private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
+    //     UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
+    // {
+    //     foreach (var sessionEntity in entities)
+    //     {
+    //         await repository.Add(sessionEntity, cancellationToken);
+    //     }
+    //
+    //     await unitOfWork.SaveChangesAsync(cancellationToken);
+    //
+    //     if (entities.Count != 0)
+    //     {
+    //         logger.LogDebug("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
+    //             entities.Count);
+    //     }
+    // }
+
+    private async Task RemoveOfflineUsers(bool shutdown, CancellationToken cancellationToken)
     {
         try
         {
@@ -171,13 +211,21 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var users = isShutdown
-                ? BrowserExtensionHub.Users.Values.Select(v => v.Map()).ToList()
-                : BrowserExtensionHub.DisconnectedUsers.Values.Select(v => v.Map()).ToList();
+            List<string> userIds;
+            if (!shutdown)
+            {
+                var offlineThreshold = DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout);
+                userIds = statisticService.OnlineUsers
+                    .Where(kvp => kvp.Value.UpdatedAt < offlineThreshold)
+                    .Select(s => s.Key)
+                    .ToList();
+            }
+            else
+            {
+                userIds = statisticService.OnlineUsers.Keys.ToList();
+            }
 
-            BrowserExtensionHub.DisconnectedUsers.Clear();
-
-            await RemoveAndSaveDisconnectedUserSessions(users, repository, unitOfWork, cancellationToken);
+            await RemoveAndSaveUserSessions(userIds, repository, unitOfWork, cancellationToken);
         }
         catch (Exception e)
         {
@@ -185,20 +233,27 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveAndSaveDisconnectedUserSessions(List<UserSessionEntity> entities,
-        UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
+    private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
     {
-        foreach (var sessionEntity in entities)
+        var minimumSessionDuration = TimeSpan.FromSeconds(45);
+    
+        var processed = 0;
+    
+        foreach (var offlineUserId in userIds)
         {
-            await repository.Add(sessionEntity, cancellationToken);
+            if (!statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser)) continue;
+            var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
+    
+            if (sessionDuration < minimumSessionDuration) continue;
+            await repository.Add(offlineUser, cancellationToken);
+            processed++;
         }
-
+    
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        if (entities.Count != 0)
+    
+        if (processed > 0)
         {
-            logger.LogDebug("Сохранено {DisconnectedUserSessions} сессий отключившихся пользователей",
-                entities.Count);
+            logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
         }
     }
 

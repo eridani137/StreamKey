@@ -1,6 +1,7 @@
 import { ChannelData, ClickChannel } from '@/types';
 import { sleep, getTwitchUserId } from '@/utils';
 import { sendMessage } from '@/messaging';
+import Config from './config';
 
 export class ActiveChannels {
   private ctx: any = null;
@@ -72,14 +73,38 @@ export class ActiveChannels {
   }
 
   private async fetchAndUpdateChannels(): Promise<void> {
-    const channels = await sendMessage('getChannels');
+    // const channels = await sendMessage('getChannels');
+
+    const getChannels = await fetch(Config.urls.apiUrl + '/channels').catch(
+      (err) => {
+        console.error('[Channels] Fetch error:', err);
+        return null;
+      }
+    );
+
+    if (!getChannels || !getChannels.ok) {
+      console.error(
+        `[Channels] API request failed with status ${getChannels?.status}`
+      );
+      return;
+    }
+
+    let error: Error | null = null;
+    const channels = (await getChannels.json().catch((err: Error) => {
+      error = err;
+      return null;
+    })) as ChannelData[] | null;
+
+    if (error) {
+      return console.error('[Channels] Failed to parse JSON:', error);
+    }
 
     if (channels) {
       console.log(`[Channels] Fetch OK — received ${channels.length} items`);
 
       this.channelData = channels;
       this.isDataReady = true;
-  
+
       await this.waitForChannelsAndReplace();
     } else {
       console.log(`[Channels] Fetch failed`);
@@ -176,10 +201,29 @@ export class ActiveChannels {
         try {
           const userId = getTwitchUserId();
           if (userId) {
-            await sendMessage('clickChannel', {
-              ChannelName: item.channelName,
-              UserId: userId,
-            } as ClickChannel);
+            // await sendMessage('clickChannel', {
+            //   ChannelName: item.channelName,
+            //   UserId: userId,
+            // } as ClickChannel);
+
+            const response = await fetch(
+              `${Config.urls.apiUrl}/activity/click`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  channelName: item.channelName,
+                  userId: userId,
+                }),
+              }
+            );
+
+            if (!response.ok) {
+              console.warn('Сервер вернул ошибку: ' + response.status);
+            }
+
             console.log('Клик на канал', userId);
           }
         } finally {

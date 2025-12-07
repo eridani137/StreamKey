@@ -1,5 +1,5 @@
 import { HubConnectionState } from '@microsoft/signalr';
-import extensionClient from './BrowserExtensionClient';
+// import extensionClient from './BrowserExtensionClient';
 import Config from './config';
 import { DeviceInfo, StatusType, TelegramUser, TelegramUserResponse } from './types';
 
@@ -106,15 +106,32 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
         UserHash: telegramUserHash
       }
 
-      const response = await extensionClient.getTelegramUser(responseData);
-      if (!response) {
-        console.log("Сервер не вернул пользователя");
+      // const response = await extensionClient.getTelegramUser(responseData);
+      // if (!response) {
+      //   console.log("Сервер не вернул пользователя");
+      //   return null;
+      // }
+
+      const response = await fetch(
+          `${Config.urls.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }
+      );
+
+      if (!response.ok) {
+        console.log('Сервер вернул ошибку: ' + response.status);
         return null;
       }
 
+      const text = await response.text();
+
+      const data = text ? JSON.parse(text) as TelegramUser : null;
+      
       console.log('Сервер вернул пользователя', response);
 
-      return response;
+      return data;
     } catch (err) {
       console.error(err);
       return null;
