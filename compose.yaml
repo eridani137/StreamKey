@@ -12,6 +12,8 @@
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
       - DOTNET_GCServer:1
       - DOTNET_EnableDiagnostics:0
+      - DOTNET_SYSTEM_NET_SOCKETS_THREAD_COUNT=16
+      - ASPNETCORE_THREADPOOL_MINTHREADS=200
     ulimits:
       nofile:
         soft: 1000000
