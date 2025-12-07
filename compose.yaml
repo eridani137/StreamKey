@@ -12,6 +12,10 @@
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
       - DOTNET_GCServer:1
       - DOTNET_EnableDiagnostics:0
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
     env_file:
       - .env
 #    ports:
@@ -91,8 +95,8 @@
       - ./files:/app/files:ro
     ulimits:
       nofile:
-        soft: 500000
-        hard: 500000
+        soft: 1000000
+        hard: 1000000
     depends_on:
       streamkey-api:
         condition: service_healthy
