@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.DTOs;
-using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
 

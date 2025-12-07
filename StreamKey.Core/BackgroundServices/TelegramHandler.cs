@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
-using StreamKey.Core.Hubs;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
 
@@ -83,8 +82,8 @@ public class TelegramHandler(
             var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
             var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var extensionHub = scope.ServiceProvider
-                .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
+            // var extensionHub = scope.ServiceProvider
+            //     .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
 
             while (NewUsers.TryDequeue(out var dto))
             {
@@ -109,11 +108,11 @@ public class TelegramHandler(
                     user.IsChatMember = chatMember.IsChatMember();
                     user.AuthorizedAt = DateTime.UtcNow;
                     
-                    if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
-                    {
-                        await extensionHub.Clients.Client(connectionId)
-                            .ReloadUserData(dto.MapUserDto(user.IsChatMember));
-                    }
+                    // if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
+                    // {
+                    //     await extensionHub.Clients.Client(connectionId)
+                    //         .ReloadUserData(dto.MapUserDto(user.IsChatMember));
+                    // }
                 }
                 catch (Exception e)
                 {

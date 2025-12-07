@@ -6,7 +6,6 @@ using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
-using StreamKey.Core.Hubs;
 using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared;
 
@@ -69,6 +68,6 @@ app.MapHealthChecks("/health");
 
 await app.SeedDatabase();
 
-app.MapHub<BrowserExtensionHub>("/hubs/extension");
+// app.MapHub<BrowserExtensionHub>("/hubs/extension");
 
 app.Run();

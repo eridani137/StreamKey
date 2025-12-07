@@ -1,5 +1,4 @@
 using Carter;
-using StreamKey.Core.Hubs;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.Entities;
 
@@ -32,7 +31,7 @@ public class Admin : ICarterModule
                 })
             .WithSummary("Перезапуск");
 
-        group.MapGet("/users", () => Results.Json(BrowserExtensionHub.Users.ToList()))
-            .WithSummary("Получение подключенных пользователей");
+        // group.MapGet("/users", () => Results.Json(BrowserExtensionHub.Users.ToList()))
+        //     .WithSummary("Получение подключенных пользователей");
     }
 }

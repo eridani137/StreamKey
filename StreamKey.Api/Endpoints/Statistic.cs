@@ -1,6 +1,6 @@
 using Carter;
 using StreamKey.Core.DTOs;
-using StreamKey.Core.Hubs;
+using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.Types;
 
@@ -34,7 +34,11 @@ public class Statistic : ICarterModule
             .WithSummary("Time Spent")
             .RequireAuthorization();
 
-        group.MapGet("/online", () => Results.Ok(new ActivityResponse(BrowserExtensionHub.Users.Count)))
+        group.MapGet("/online", (StatisticService statisticService) =>
+            {
+                // return Results.Ok(new ActivityResponse(BrowserExtensionHub.Users.Count));
+                return Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count));
+            })
             .WithSummary("Получить число онлайн пользователей")
             .RequireAuthorization()
             .Produces<ActivityResponse>();
