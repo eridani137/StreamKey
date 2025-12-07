@@ -22,6 +22,7 @@ public class StatisticHandler(
     private static readonly TimeSpan SaveClickChannelStatisticInterval = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan LoggingOnlineInterval = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan UserOfflineTimeout = TimeSpan.FromMinutes(3);
+    private static readonly TimeSpan MinimumSessionDuration = TimeSpan.FromSeconds(30);
 
     private Task? _savingViewStatistic;
     private Task? _removeOfflineUsers;
@@ -237,26 +238,18 @@ public class StatisticHandler(
 
     private async Task RemoveAndSaveUserSessions(List<string> userIds, UserSessionRepository repository, IUnitOfWork unitOfWork, CancellationToken cancellationToken)
     {
-        var minimumSessionDuration = TimeSpan.FromSeconds(45);
-    
-        var processed = 0;
+        
     
         foreach (var offlineUserId in userIds)
         {
             if (!statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser)) continue;
             var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
     
-            if (sessionDuration < minimumSessionDuration) continue;
+            if (sessionDuration < MinimumSessionDuration) continue;
             await repository.Add(offlineUser, cancellationToken);
-            processed++;
         }
     
         await unitOfWork.SaveChangesAsync(cancellationToken);
-    
-        if (processed > 0)
-        {
-            logger.LogInformation("Сохранено {OfflineUserSessions} сессий пользователей", processed);
-        }
     }
 
     private async Task SaveChannelClickStatistic(CancellationToken cancellationToken)
