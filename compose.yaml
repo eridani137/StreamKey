@@ -20,8 +20,8 @@
         hard: 1000000
     env_file:
       - .env
-    ports:
-      - "5555:5555" # TODO
+#    ports:
+#      - "5555:5555" # TODO
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,7 +88,6 @@
   nginx:
     image: nginx:latest
     restart: unless-stopped
-    network_mode: host
     ports:
       - "80:80"
       - "443:443"
@@ -103,6 +102,8 @@
     depends_on:
       streamkey-api:
         condition: service_healthy
+    networks:
+      - internal
 
 networks:
   internal:
