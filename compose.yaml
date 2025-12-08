@@ -25,8 +25,8 @@
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+#      redis:
+#        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:${API_PORT}/health || exit 1" ]
       interval: 3s
@@ -53,11 +53,11 @@
     depends_on:
       postgres:
         condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "redis-cli -a $RedisPassword ping | grep PONG" ]
-      interval: 3s
-      timeout: 3s
-      retries: 5
+#    healthcheck:
+#      test: [ "CMD-SHELL", "redis-cli -a $RedisPassword ping | grep PONG" ]
+#      interval: 3s
+#      timeout: 3s
+#      retries: 5
   
   postgres:
     image: postgres:latest
