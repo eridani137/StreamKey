@@ -25,17 +25,39 @@
     depends_on:
       postgres:
         condition: service_healthy
-      seq:
-        condition: service_started
+      redis:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:5555/health || exit 1" ]
-      interval: 5s
+      interval: 3s
       timeout: 3s
       retries: 5
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
     networks:
       - internal
+        
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: [
+      "redis-server",
+      "--requirepass", "${REDIS_PASSWORD}"
+    ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a $REDIS_PASSWORD ping | grep PONG" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
   
   postgres:
     image: postgres:latest
@@ -45,12 +67,12 @@
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "5432:5432" # TODO
+      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
-      interval: 5s
+      interval: 3s
       timeout: 3s
       retries: 5
     networks:
@@ -67,8 +89,8 @@
       - "8080"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
-      interval: 15s
-      timeout: 5s
+      interval: 3s
+      timeout: 3s
       retries: 3
     networks:
       - internal
@@ -112,3 +134,4 @@ networks:
 volumes:
   db-data:
   seq-data:
+  redis-data:
