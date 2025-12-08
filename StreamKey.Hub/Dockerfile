@@ -3,6 +3,7 @@ WORKDIR /app
 EXPOSE 7777
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["StreamKey.Hub/StreamKey.Hub.csproj", "StreamKey.Hub/"]

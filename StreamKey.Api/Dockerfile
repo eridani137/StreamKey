@@ -12,6 +12,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["StreamKey.Api/StreamKey.Api.csproj", "StreamKey.Api/"]
