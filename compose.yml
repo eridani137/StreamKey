@@ -6,7 +6,7 @@
       dockerfile: StreamKey.Api/Dockerfile
     restart: unless-stopped
     environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:5555
+      - ASPNETCORE_URLS=http://0.0.0.0:${API_PORT}
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:5341
       - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
@@ -20,8 +20,8 @@
         hard: 1000000
     env_file:
       - .env
-#    ports:
-#      - "5555:5555" # TODO
+    #    ports:
+    #      - "${API_PORT}:${API_PORT}" # TODO
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,32 +33,9 @@
       timeout: 3s
       retries: 5
     volumes:
-      - ./keys:/root/.aspnet/DataProtection-Keys
+      - aspnet-keys:/root/.aspnet/DataProtection-Keys
     networks:
       - internal
-      
-  streamkey-hub:
-    image: streamkey-hub
-    build:
-      context: .
-      dockerfile: StreamKey.Hub/Dockerfile
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:7777
-      - DOTNET_GCServer:1
-      - DOTNET_EnableDiagnostics:0
-      - DOTNET_SYSTEM_NET_SOCKETS_THREAD_COUNT=16
-      - ASPNETCORE_THREADPOOL_MINTHREADS=200
-    ulimits:
-      nofile:
-        soft: 1000000
-        hard: 1000000
-    env_file:
-      - .env
-    ports:
-      - "7777:7777"
-    volumes:
-      - ./keys:/root/.aspnet/DataProtection-Keys
         
   redis:
     image: redis:latest
@@ -153,6 +130,7 @@ networks:
     driver: bridge
 
 volumes:
+  aspnet-keys:
   db-data:
   seq-data:
   redis-data:

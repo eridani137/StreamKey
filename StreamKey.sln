@@ -6,7 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Core", "StreamKey
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B8E3A27-3687-4639-BB16-75BDB0D3F850}"
 	ProjectSection(SolutionItems) = preProject
-		compose.yaml = compose.yaml
+		compose.yml = compose.yml
+		compose-hub.yml = compose-hub.yml
 		nginx.conf = nginx.conf
 		.gitignore = .gitignore
 		.env = .env
