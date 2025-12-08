@@ -9,9 +9,11 @@ public static class QueryExtensions
     {
         public void AddQueryAuth(HttpRequestMessage request, string deviceId)
         {
+            const string scheme = "OAuth";
+            
             var authorization = query.TryGetValue("auth", out var auth) && !string.IsNullOrEmpty(auth)
-                ? $"OAuth {auth}"
-                : ApplicationConstants.DefaultAuthorization;
+                ? $"{scheme} {auth}"
+                : $"{scheme} {ApplicationConstants.DefaultAuthorization}";
 
             request.Headers.Add("Authorization", authorization);
 
