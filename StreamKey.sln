@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Shared", "StreamKey.Shared\StreamKey.Shared.csproj", "{06BB995C-D184-4695-B574-3AF214BCC095}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamKey.Hub", "StreamKey.Hub\StreamKey.Hub.csproj", "{B58BEE87-8D62-4958-848A-E5CBE4246C7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,5 +41,9 @@ Global
 		{06BB995C-D184-4695-B574-3AF214BCC095}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06BB995C-D184-4695-B574-3AF214BCC095}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06BB995C-D184-4695-B574-3AF214BCC095}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B58BEE87-8D62-4958-848A-E5CBE4246C7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B58BEE87-8D62-4958-848A-E5CBE4246C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B58BEE87-8D62-4958-848A-E5CBE4246C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B58BEE87-8D62-4958-848A-E5CBE4246C7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

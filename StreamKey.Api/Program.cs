@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;
+using StackExchange.Redis;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
@@ -24,7 +25,11 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 builder.Services.AddHealthChecks();
 
 builder.Services.AddSignalR()
-    .AddMessagePackProtocol();
+    .AddMessagePackProtocol()
+    .AddStackExchangeRedis("redis:6379", options =>
+    {
+        options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
+    });
 
 builder.Services.AddApplication();
 
@@ -67,7 +72,5 @@ app.MapCarter();
 app.MapHealthChecks("/health");
 
 await app.SeedDatabase();
-
-// app.MapHub<BrowserExtensionHub>("/hubs/extension");
 
 app.Run();

@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace StreamKey.Core.DTOs;
+namespace StreamKey.Shared.DTOs;
 
 public record GetChatMemberResponse
 {

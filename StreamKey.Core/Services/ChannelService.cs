@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
 using ParserExtension;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Results;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared;
+using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;

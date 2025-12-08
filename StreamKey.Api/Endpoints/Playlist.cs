@@ -4,9 +4,9 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Services;
-using StreamKey.Core.Types;
 using StreamKey.Shared;
 using StreamKey.Shared.Entities;
+using StreamKey.Shared.Types;
 
 namespace StreamKey.Api.Endpoints;
 

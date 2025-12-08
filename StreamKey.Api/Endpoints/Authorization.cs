@@ -1,8 +1,8 @@
 using Carter;
 using Microsoft.AspNetCore.Identity;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs;
 using StreamKey.Core.Filters;
+using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Api.Endpoints;

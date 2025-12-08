@@ -1,4 +1,4 @@
-namespace StreamKey.Core.DTOs.TwitchGraphQL;
+namespace StreamKey.Shared.DTOs.TwitchGraphQL;
 
 public record TwitchResponseWrapper<T>(
     T? Data,

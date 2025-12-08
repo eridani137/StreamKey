@@ -1,7 +1,7 @@
 using Carter;
 using Microsoft.AspNetCore.Mvc;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs;
+using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Api.Endpoints;
 

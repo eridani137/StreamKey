@@ -1,6 +1,6 @@
 using Carter;
-using StreamKey.Core.DTOs;
 using StreamKey.Core.Services;
+using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Api.Endpoints;

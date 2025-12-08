@@ -1,5 +1,5 @@
-using StreamKey.Core.DTOs;
 using StreamKey.Core.Results;
+using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Abstractions;

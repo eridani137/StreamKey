@@ -1,4 +1,4 @@
-namespace StreamKey.Core.Types;
+namespace StreamKey.Shared.Types;
 
 public class RateLimitData
 {

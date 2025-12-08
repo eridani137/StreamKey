@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace StreamKey.Core.DTOs;
+namespace StreamKey.Shared.DTOs;
 
 public sealed record CamoufoxRequest(
     [property: JsonPropertyName("url")] string Url,

@@ -2,8 +2,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs;
 using StreamKey.Shared;
+using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.Services;
 

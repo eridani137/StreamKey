@@ -1,4 +1,4 @@
-namespace StreamKey.Core.DTOs;
+namespace StreamKey.Shared.DTOs;
 
 public record ActivityRequest(Guid SessionId, string UserId);
 

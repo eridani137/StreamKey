@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace StreamKey.Core.DTOs.TwitchGraphQL;
+namespace StreamKey.Shared.DTOs.TwitchGraphQL;
 
 public record StreamPlaybackAccessTokenResponse
 {

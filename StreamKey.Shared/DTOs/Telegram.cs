@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using MessagePack;
 
-namespace StreamKey.Core.DTOs;
+namespace StreamKey.Shared.DTOs;
 
 public record TelegramAuthDto
 {

@@ -1,7 +1,7 @@
 using MessagePack;
 using StreamKey.Shared.Entities;
 
-namespace StreamKey.Core.DTOs;
+namespace StreamKey.Shared.DTOs;
 
 [MessagePackObject]
 public record ChannelDto(

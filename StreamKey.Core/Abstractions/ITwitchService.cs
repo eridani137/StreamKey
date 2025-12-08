@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using StreamKey.Core.DTOs.TwitchGraphQL;
+using StreamKey.Shared.DTOs.TwitchGraphQL;
 
 namespace StreamKey.Core.Abstractions;
 

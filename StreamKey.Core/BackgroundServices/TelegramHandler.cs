@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.BackgroundServices;
 

@@ -1,6 +1,6 @@
-using StreamKey.Core.DTOs;
+using StreamKey.Shared.DTOs;
 
-namespace StreamKey.Core.Abstractions;
+namespace StreamKey.Shared.Abstractions;
 
 public interface IBrowserExtensionHub
 {

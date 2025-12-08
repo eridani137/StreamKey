@@ -3,9 +3,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.DTOs.TwitchGraphQL;
 using StreamKey.Core.Extensions;
 using StreamKey.Shared;
+using StreamKey.Shared.DTOs.TwitchGraphQL;
 
 namespace StreamKey.Core.Services;
 
