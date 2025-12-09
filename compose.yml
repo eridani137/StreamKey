@@ -56,6 +56,8 @@
       interval: 3s
       timeout: 3s
       retries: 5
+    networks:
+      - internal
   
   postgres:
     image: postgres:latest
