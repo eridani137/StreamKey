@@ -114,7 +114,7 @@ public static class ServiceExtensions
                     });
 
                 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-                    ConnectionMultiplexer.Connect($"{redisHost}:{redisConfig.Port},password={redisConfig.Password}"));
+                    ConnectionMultiplexer.Connect($"{redisHost}:{redisConfig.Port},password='{redisConfig.Password}'"));
             }
             
             builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
