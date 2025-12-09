@@ -70,9 +70,9 @@ public class Playlist : ICarterModule
                 case ErrorCode.PlaylistNotReceived:
                     logger.LogWarning("{Channel}: {Error}", request.ChannelName, result.Error.Message);
                     return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
-                default:
-                    logger.LogWarning("{Error}: {Channel}", result.Error.Message, request.ChannelName);
-                    return Results.InternalServerError(result.Error.Message);
+                // default:
+                //     logger.LogWarning("{Error}: {Channel}", result.Error.Message, request.ChannelName);
+                //     return Results.InternalServerError(result.Error.Message);
             }
         }
 
@@ -115,9 +115,9 @@ public class Playlist : ICarterModule
                 case ErrorCode.PlaylistNotReceived:
                     logger.LogWarning("{VodId}: {Error}", vodId.ToString(), result.Error.Message);
                     return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
-                default:
-                    logger.LogWarning("{Error}: {VodId}", result.Error.Message, vodId.ToString());
-                    return Results.InternalServerError(result.Error.Message);
+                // default:
+                //     logger.LogWarning("{Error}: {VodId}", result.Error.Message, vodId.ToString());
+                //     return Results.InternalServerError(result.Error.Message);
             }
         }
 

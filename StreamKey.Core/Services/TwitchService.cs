@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -44,7 +45,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         if (result?.Data?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             result?.Data.Data.StreamPlaybackAccessToken?.Value is null)
         {
-            logger.LogError("Twitch вернул неверный StreamAccessToken. Body: {@Body}", result?.RawJson);
+            // logger.LogError("Twitch вернул неверный StreamAccessToken. Body: {@Body}", result?.RawJson);
             return null;
         }
 
@@ -79,11 +80,11 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         var result =
             await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
                 RequestTwitchPlaylistType.VodAccessToken);
-
+        
         if (result?.Data?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             result?.Data.Data?.VideoPlaybackAccessToken?.Value is null)
         {
-            logger.LogError("Twitch вернул неверный VodAccessToken. Body: {@Body}", result?.RawJson);
+            // logger.LogError("Twitch вернул неверный VodAccessToken. Body: {@Body}", result?.RawJson);
             return null;
         }
 
@@ -116,7 +117,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         using var response = await client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
-
+        
         if (!response.IsSuccessStatusCode)
         {
             logger.LogWarning("{Prefix} Twitch GQL error {Status}. Body: {Body}",
