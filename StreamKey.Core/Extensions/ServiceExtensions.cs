@@ -119,7 +119,11 @@ public static class ServiceExtensions
                     {
                         EndPoints = { $"{redisHost}:{redisConfig.Port}" },
                         Password = redisConfig.Password,
-                        AbortOnConnectFail = true
+                        KeepAlive = 15,
+                        AbortOnConnectFail = false,
+                        ConnectRetry = 5,
+                        ConnectTimeout = 5000,
+                        SyncTimeout = 5000
                     };
 
                     return ConnectionMultiplexer.Connect(configurationOptions);
