@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using StreamKey.Shared.Abstractions;
@@ -13,6 +12,7 @@ namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
     IConnectionStore store,
+    RedisPublisher publisher,
     IConnectionMultiplexer mux,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
@@ -133,11 +133,52 @@ public class BrowserExtensionHub(
         }
     }
 
-    public async Task ClickChannel(ClickChannel dto, [FromKeyedServices] RedisPublisher publisher)
+    public async Task ClickChannel(ClickChannel dto)
     {
         await publisher.PublishAsync(RedisChannel.Literal(nameof(DTOs.ClickChannel)), dto);
     }
 
+    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request)
+    {
+        var requestId = Guid.CreateVersion7();
+        var channel = RedisChannel.Literal($"{nameof(GetTelegramUserResponse)}:{requestId}");
+
+        var tcs = new TaskCompletionSource<TelegramUserDto?>();
+
+        var sub = mux.GetSubscriber();
+        
+        await sub.SubscribeAsync(channel, (_, payload) =>
+        {
+            try
+            {
+                var response = JsonSerializer.Deserialize<GetTelegramUserResponse>(payload.ToString())!;
+                tcs.TrySetResult(response.User);
+            }
+            catch
+            {
+                tcs.TrySetResult(null);
+            }
+        });
+        
+        var requestEvent = new GetTelegramUserRequest
+        {
+            RequestId = requestId,
+            UserId = request.UserId,
+            UserHash = request.UserHash,
+            ConnectionId = Context.ConnectionId
+        };
+
+        await sub.PublishAsync(
+            RedisChannel.Literal(nameof(GetTelegramUserRequest)),
+            JsonSerializer.Serialize(requestEvent));
+        
+        var result = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(7));
+        
+        await sub.UnsubscribeAsync(channel);
+
+        return result;
+    }
+    
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
     //     [FromServices] ITelegramUserRepository repository)
     // {
