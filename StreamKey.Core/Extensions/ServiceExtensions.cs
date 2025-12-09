@@ -13,7 +13,6 @@ using StreamKey.Infrastructure.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.Configs;
-using StreamKey.Shared.Stores;
 
 namespace StreamKey.Core.Extensions;
 
@@ -119,9 +118,6 @@ public static class ServiceExtensions
             builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(configurationOptions)
             );
-
-            builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
-            builder.Services.AddSingleton<IStatisticStore, RedisStatisticStore>();
 
             builder.Services.AddSignalR()
                 .AddMessagePackProtocol()

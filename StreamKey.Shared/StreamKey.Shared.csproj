@@ -7,11 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="MessagePack" Version="2.5.187" />
       <PackageReference Include="MessagePack.Annotations" Version="3.1.4" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
       <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0" />
+      <PackageReference Include="NATS.Client.Core" Version="2.6.11" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
     </ItemGroup>

@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
+using NATS.Client.Core;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Types;
@@ -9,23 +9,21 @@ using StreamKey.Shared.Types;
 namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
-    IConnectionStore connectionStore,
-    IStatisticStore statisticStore,
+    NatsConnection nats,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
+    private readonly MessagePackNatsSerializer<UserSessionMessage> _serializer = new();
+    
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
 
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
 
     public override async Task OnConnectedAsync()
     {
-        var context = Context;
-        var connectionId = context.ConnectionId;
-
+        var connectionId = Context.ConnectionId;
         var cts = new CancellationTokenSource();
-        RegistrationTimeouts.TryAdd(connectionId, cts);
+        RegistrationTimeouts[connectionId] = cts;
 
         logger.LogInformation("Новое подключение: {ConnectionId}", connectionId);
 
@@ -34,106 +32,85 @@ public class BrowserExtensionHub(
             try
             {
                 await Task.Delay(ConnectionTimeout, cts.Token);
-
-                var session = await connectionStore.GetSessionAsync(connectionId);
-                if (session is null)
-                {
-                    logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
-                    context.Abort();
-                }
+                logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
+                Context.Abort();
             }
-            catch (TaskCanceledException)
-            {
-            }
+            catch (TaskCanceledException) { }
         }, cts.Token);
 
         await Clients.Caller.RequestUserData();
-
         await base.OnConnectedAsync();
     }
-
+    
+    
     public async Task EntranceUserData(UserData userData)
     {
         var connectionId = Context.ConnectionId;
+        var now = DateTimeOffset.UtcNow;
 
-        var session = new UserSession()
+        var sessionMessage = new UserSessionMessage
         {
-            SessionId = userData.SessionId,
-            StartedAt = DateTimeOffset.UtcNow
+            ConnectionId = connectionId,
+            Session = new UserSession
+            {
+                SessionId = userData.SessionId,
+                StartedAt = now
+            }
         };
 
-        await connectionStore.AddConnectionAsync(connectionId, session);
-
+        await nats.PublishAsync("connections.add", sessionMessage, serializer: _serializer);
         CancelRegistrationTimeout(connectionId);
 
-        logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
+        logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
     }
-
+    
     private void CancelRegistrationTimeout(string connectionId)
     {
         if (!RegistrationTimeouts.TryRemove(connectionId, out var cts)) return;
-
+    
         cts.Cancel();
         cts.Dispose();
     }
-
+    
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connectionId = Context.ConnectionId;
-
         CancelRegistrationTimeout(connectionId);
 
-        var session = await connectionStore.GetSessionAsync(connectionId);
-        if (session is not null)
+        var message = new UserSessionMessage()
         {
-            if (session.UserId is not null)
-            {
-                await connectionStore.MoveToDisconnectedAsync(connectionId, session);
-            }
-            else
-            {
-                await connectionStore.RemoveConnectionAsync(connectionId);
-            }
-
-            logger.LogInformation("Пользователь отключен: {@Session}", session);
-        }
-        else
-        {
-            logger.LogInformation("Пользователь отключен с пустой сессией: {ConnectionId}", connectionId);
-        }
-
+            ConnectionId = connectionId
+        };
+        
+        await nats.PublishAsync("connections.remove", message, serializer: _serializer);
+    
+        logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
+        
         await base.OnDisconnectedAsync(exception);
     }
-
+    
     public async Task UpdateActivity(ActivityRequest activityRequest)
     {
         var connectionId = Context.ConnectionId;
-
-        var session = await connectionStore.GetSessionAsync(connectionId);
-        if (session == null) return;
-
         var now = DateTimeOffset.UtcNow;
-
-        session.UserId ??= activityRequest.UserId;
-
-        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-MinimumSessionTime))
+        
+        var message = new UserSessionMessage
         {
-            if (session.UpdatedAt == DateTimeOffset.MinValue)
+            ConnectionId = connectionId,
+            Session = new UserSession
             {
-                session.StartedAt = now;
+                UserId = activityRequest.UserId,
+                UpdatedAt = now
             }
-
-            session.UpdatedAt = now;
-            session.AccumulatedTime += MinimumSessionTime;
-
-            await connectionStore.AddConnectionAsync(connectionId, session);
-        }
+        };
+        
+        await nats.PublishAsync("connections.activity", message, serializer: _serializer);
     }
 
-    public async Task ClickChannel(ClickChannel dto)
-    {
-        await statisticStore.SaveClickAsync(dto);
-    }
+    // public async Task ClickChannel(ClickChannel dto)
+    // {
+    //     await statisticStore.SaveClickAsync(dto);
+    // }
     
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
     //     [FromServices] ITelegramUserRepository repository)
