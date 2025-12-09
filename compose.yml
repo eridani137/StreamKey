@@ -33,15 +33,13 @@
       timeout: 3s
       retries: 5
     volumes:
-      - ./keys:/root/.aspnet/DataProtection-Keys
+      - aspnet-keys:/root/.aspnet/DataProtection-Keys
     networks:
       - internal
         
   redis:
     image: redis:latest
     restart: unless-stopped
-    env_file:
-      - .env
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
@@ -132,6 +130,7 @@ networks:
     driver: bridge
 
 volumes:
+  aspnet-keys:
   db-data:
   seq-data:
   redis-data:
