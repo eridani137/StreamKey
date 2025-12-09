@@ -98,7 +98,7 @@ public static class ServiceExtensions
             if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig &&
                 builder.Configuration.GetSection("RedisHost").Get<string>() is { } redisHost)
             {
-                if (isInternal) redisHost = "redis";
+                if (isInternal) redisHost = "localhost";
                 builder.Services.AddSignalR()
                     .AddMessagePackProtocol()
                     .AddStackExchangeRedis(options =>
