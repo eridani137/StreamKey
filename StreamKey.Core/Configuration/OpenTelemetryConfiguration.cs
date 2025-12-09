@@ -13,9 +13,7 @@ namespace StreamKey.Core.Configuration;
 
 public static class OpenTelemetryConfiguration
 {
-    private static readonly string OtlpEndpoint = EnvironmentHelper.GetSeqEndpoint();
-
-    public static void Configure(WebApplicationBuilder builder)
+    public static void Configure(WebApplicationBuilder builder, string otlpEndpoint)
     {
         var excludedPaths = builder.Configuration.GetSection("OpenTelemetry:ExcludedPaths").Get<string[]>() ?? [];
         
@@ -75,11 +73,9 @@ public static class OpenTelemetryConfiguration
                             }
                         };
                     })
-                    // .AddEntityFrameworkCoreInstrumentation()
-                    // .AddNpgsql()
                     .AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/traces");
+                        options.Endpoint = new Uri($"{otlpEndpoint}/ingest/otlp/v1/traces");
                         options.Protocol = OtlpExportProtocol.HttpProtobuf;
                     });
             })
@@ -91,7 +87,7 @@ public static class OpenTelemetryConfiguration
                     .AddProcessInstrumentation()
                     .AddOtlpExporter(o =>
                     {
-                        o.Endpoint = new Uri($"{OtlpEndpoint}/ingest/otlp/v1/metrics");
+                        o.Endpoint = new Uri($"{otlpEndpoint}/ingest/otlp/v1/metrics");
                         o.Protocol = OtlpExportProtocol.HttpProtobuf;
                     });
             });

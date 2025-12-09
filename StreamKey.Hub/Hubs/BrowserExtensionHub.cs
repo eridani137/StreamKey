@@ -32,6 +32,8 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
 
         var cts = new CancellationTokenSource();
         RegistrationTimeouts.TryAdd(connectionId, cts);
+        
+        logger.LogInformation("Новое подключение: {ConnectionId}", connectionId);
 
         _ = Task.Run(async () =>
         {

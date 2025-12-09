@@ -7,6 +7,9 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:${HUB_PORT}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://${MAIN_SERVER_IP}:${SEQ_PORT}
+      - OTEL_SERVICE_NAME=StreamKey.Hub
+      - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}
       - DOTNET_GCServer:1
       - DOTNET_EnableDiagnostics:0
       - DOTNET_SYSTEM_NET_SOCKETS_THREAD_COUNT=16
@@ -19,6 +22,11 @@ services:
       - .env
     ports:
       - "${HUB_PORT}:${HUB_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:${HUB_PORT}/health || exit 1" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
     volumes:
       - aspnet-keys:/root/.aspnet/DataProtection-Keys
 

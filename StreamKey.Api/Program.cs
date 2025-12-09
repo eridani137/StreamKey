@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 ConfigureLogging.Configure(builder);
-OpenTelemetryConfiguration.Configure(builder);
+OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
 if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string>() is { } token)
 {

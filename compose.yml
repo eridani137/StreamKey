@@ -102,6 +102,8 @@
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=Qwerty123_
       - SEQ_OPENTELEMETRY_ENABLED=True
+    ports:
+      - "${SEQ_PORT}:${SEQ_PORT}"
     networks:
       - internal
 
