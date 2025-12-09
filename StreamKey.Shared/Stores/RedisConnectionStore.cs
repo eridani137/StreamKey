@@ -8,7 +8,8 @@ namespace StreamKey.Shared.Stores;
 public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
 {
     private readonly IDatabase _db = mux.GetDatabase();
-    
+
+    private const string ActiveSet = "signalr:active:set";
     private const string ActiveKey = "signalr:active";
     private const string DisconnectedKey = "signalr:disconnected";
     private const string SessionIndexKey = "signalr:session";
@@ -18,6 +19,7 @@ public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
         var json = JsonSerializer.Serialize(session);
 
         await _db.StringSetAsync($"{ActiveKey}:{connectionId}", json);
+        await _db.SetAddAsync(ActiveSet, connectionId);
         await _db.StringSetAsync($"{SessionIndexKey}:{session.SessionId}", connectionId);
     }
 
@@ -32,6 +34,7 @@ public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
     public async Task RemoveConnectionAsync(string connectionId)
     {
         await _db.KeyDeleteAsync($"{ActiveKey}:{connectionId}");
+        await _db.SetRemoveAsync(ActiveSet, connectionId);
     }
 
     public async Task MoveToDisconnectedAsync(string connectionId, UserSession session)
@@ -39,7 +42,9 @@ public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
         var json = JsonSerializer.Serialize(session);
 
         await _db.StringSetAsync($"{DisconnectedKey}:{connectionId}", json);
+
         await _db.KeyDeleteAsync($"{ActiveKey}:{connectionId}");
+        await _db.SetRemoveAsync(ActiveSet, connectionId);
     }
 
     public async Task<UserSession?> GetDisconnectedAsync(string connectionId)
@@ -60,25 +65,23 @@ public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
     {
         var result = new Dictionary<string, UserSession>();
 
-        var server = mux.GetServer(mux.GetEndPoints().First());
-        var keys = server.Keys(pattern: $"{ActiveKey}:*").ToArray();
+        var connectionIds = await _db.SetMembersAsync(ActiveSet);
+        if (connectionIds.Length == 0) return result;
 
-        if (keys.Length == 0) return result;
+        var keys = connectionIds
+            .Select(id => (RedisKey)$"{ActiveKey}:{id}")
+            .ToArray();
 
-        var values = await _db.StringGetAsync(keys.Select(k => k).ToArray());
+        var values = await _db.StringGetAsync(keys);
 
-        for (var i = 0; i < keys.Length; i++)
+        for (var i = 0; i < connectionIds.Length; i++)
         {
             if (!values[i].HasValue) continue;
 
-            var key = keys[i].ToString();
-            var json = values[i];
-            
-            var session = JsonSerializer.Deserialize<UserSession>(json.ToString());
+            var session = JsonSerializer.Deserialize<UserSession>(values[i].ToString());
             if (session == null) continue;
 
-            var connectionId = key[(ActiveKey.Length + 1)..];
-            result[connectionId] = session;
+            result[connectionIds[i].ToString()] = session;
         }
 
         return result;
