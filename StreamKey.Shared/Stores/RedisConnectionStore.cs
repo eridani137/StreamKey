@@ -86,4 +86,36 @@ public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
 
         return result;
     }
+    
+    public async Task<Dictionary<string, UserSession>> GetAllDisconnectedConnectionsAsync()
+    {
+        var result = new Dictionary<string, UserSession>();
+
+        var server = GetServer();
+        var disconnectedKeys = server.Keys(pattern: $"{DisconnectedKey}:*").ToArray();
+
+        if (disconnectedKeys.Length == 0) return result;
+
+        var values = await _db.StringGetAsync(disconnectedKeys);
+
+        for (var i = 0; i < disconnectedKeys.Length; i++)
+        {
+            if (!values[i].HasValue) continue;
+
+            var session = JsonSerializer.Deserialize<UserSession>(values[i].ToString());
+            if (session == null) continue;
+
+            var connectionId = disconnectedKeys[i].ToString()!.Split(':')[2];
+            result[connectionId] = session;
+        }
+
+        return result;
+    }
+    
+    private IServer GetServer()
+    {
+        var mux = _db.Multiplexer;
+        var endpoints = mux.GetEndPoints();
+        return mux.GetServer(endpoints[0]);
+    }
 }

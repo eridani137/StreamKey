@@ -26,5 +26,13 @@ public class Hub : ICarterModule
                     return Results.Ok(new OnlineResponse(connections.Count));
                 })
             .WithSummary("Получить онлайн");
+        
+        group.MapGet("/disconnected",
+                async ([FromServices] IConnectionStore store) =>
+                {
+                    var disconnected = await store.GetAllDisconnectedConnectionsAsync();
+                    return Results.Json(disconnected);
+                })
+            .WithSummary("Получить отключившихся пользователей");
     }
 }
