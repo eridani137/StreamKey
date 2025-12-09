@@ -25,21 +25,6 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 
 builder.Services.AddHealthChecks();
 
-if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig)
-{
-    builder.Services.AddSignalR()
-        .AddMessagePackProtocol()
-        .AddStackExchangeRedis(options =>
-        {
-            options.Configuration = new ConfigurationOptions
-            {
-                EndPoints = { $"redis:{redisConfig.Port}" },
-                Password = redisConfig.Password,
-                ChannelPrefix = RedisChannel.Literal("StreamKey")
-            };
-        });
-}
-
 builder.AddRedisBackplane(true);
 
 builder.Services.AddApplication();
