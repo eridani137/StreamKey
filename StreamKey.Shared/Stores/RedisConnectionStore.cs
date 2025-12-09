@@ -5,9 +5,9 @@ using StreamKey.Shared.Types;
 
 namespace StreamKey.Shared.Stores;
 
-public class RedisConnectionStore(IConnectionMultiplexer redis) : IConnectionStore
+public class RedisConnectionStore(IConnectionMultiplexer mux) : IConnectionStore
 {
-    private readonly IDatabase _db = redis.GetDatabase();
+    private readonly IDatabase _db = mux.GetDatabase();
     
     private const string ActiveKey = "signalr:active";
     private const string DisconnectedKey = "signalr:disconnected";
@@ -54,5 +54,33 @@ public class RedisConnectionStore(IConnectionMultiplexer redis) : IConnectionSto
     {
         var value = await _db.StringGetAsync($"{SessionIndexKey}:{sessionId}");
         return value.HasValue ? value.ToString() : null;
+    }
+
+    public async Task<Dictionary<string, UserSession>> GetAllActiveConnectionsAsync()
+    {
+        var result = new Dictionary<string, UserSession>();
+
+        var server = mux.GetServer(mux.GetEndPoints().First());
+        var keys = server.Keys(pattern: $"{ActiveKey}:*").ToArray();
+
+        if (keys.Length == 0) return result;
+
+        var values = await _db.StringGetAsync(keys.Select(k => k).ToArray());
+
+        for (var i = 0; i < keys.Length; i++)
+        {
+            if (!values[i].HasValue) continue;
+
+            var key = keys[i].ToString();
+            var json = values[i];
+            
+            var session = JsonSerializer.Deserialize<UserSession>(json.ToString());
+            if (session == null) continue;
+
+            var connectionId = key[(ActiveKey.Length + 1)..];
+            result[connectionId] = session;
+        }
+
+        return result;
     }
 }

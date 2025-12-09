@@ -34,14 +34,10 @@ public class Statistic : ICarterModule
             .WithSummary("Time Spent")
             .RequireAuthorization();
 
-        group.MapGet("/online", (StatisticService statisticService) =>
-            {
-                // return Results.Ok(new ActivityResponse(BrowserExtensionHub.Users.Count));
-                return Results.Ok(new ActivityResponse(statisticService.OnlineUsers.Count));
-            })
+        group.MapGet("/online", (StatisticService statisticService) => Results.Ok(new OnlineResponse(statisticService.OnlineUsers.Count)))
             .WithSummary("Получить число онлайн пользователей")
             .RequireAuthorization()
-            .Produces<ActivityResponse>();
+            .Produces<OnlineResponse>();
 
         group.MapGet("/dau",
                 async (DateOnly startDate, UserSessionRepository repository, CancellationToken cancellationToken) =>

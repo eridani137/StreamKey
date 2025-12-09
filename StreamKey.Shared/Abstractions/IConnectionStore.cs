@@ -12,4 +12,5 @@ public interface IConnectionStore
     Task<UserSession?> GetDisconnectedAsync(string connectionId);
 
     Task<string?> GetConnectionIdBySessionId(Guid sessionId);
+    Task<Dictionary<string, UserSession>> GetAllActiveConnectionsAsync();
 }
