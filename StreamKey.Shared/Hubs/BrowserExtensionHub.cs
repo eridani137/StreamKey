@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Types;
 
-namespace StreamKey.Hub.Hubs;
+namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
     IConnectionStore store,
@@ -31,7 +32,7 @@ public class BrowserExtensionHub(
             try
             {
                 await Task.Delay(ConnectionTimeout, cts.Token);
-                
+
                 var session = await store.GetSessionAsync(connectionId);
                 if (session is null)
                 {
@@ -58,9 +59,9 @@ public class BrowserExtensionHub(
             SessionId = userData.SessionId,
             StartedAt = DateTimeOffset.UtcNow
         };
-        
+
         await store.AddConnectionAsync(connectionId, session);
-        
+
         CancelRegistrationTimeout(connectionId);
 
         logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
@@ -91,7 +92,7 @@ public class BrowserExtensionHub(
             {
                 await store.RemoveConnectionAsync(connectionId);
             }
-            
+
             logger.LogInformation("Пользователь отключен: {@Session}", session);
         }
         else
@@ -105,12 +106,12 @@ public class BrowserExtensionHub(
     public async Task UpdateActivity(ActivityRequest activityRequest)
     {
         var connectionId = Context.ConnectionId;
-        
+
         var session = await store.GetSessionAsync(connectionId);
         if (session == null) return;
-        
+
         var now = DateTimeOffset.UtcNow;
-        
+
         session.UserId ??= activityRequest.UserId;
 
         if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-MinimumSessionTime))

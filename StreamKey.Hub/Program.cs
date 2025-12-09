@@ -2,8 +2,8 @@ using DotNetEnv;
 using Serilog.Events;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
-using StreamKey.Hub.Hubs;
 using StreamKey.Shared.Abstractions;
+using StreamKey.Shared.Hubs;
 using StreamKey.Shared.Stores;
 
 var builder = WebApplication.CreateBuilder(args);

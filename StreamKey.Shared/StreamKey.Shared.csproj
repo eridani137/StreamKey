@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="MessagePack.Annotations" Version="3.1.4" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
       <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0" />
