@@ -20,7 +20,7 @@ public class TelegramHandler(
 
     private static readonly TimeSpan CheckOldUsersInterval = TimeSpan.FromMinutes(1);
 
-    public static ConcurrentQueue<TelegramAuthDtoWithSessionId> NewUsers { get; } = new();
+    // public static ConcurrentQueue<TelegramAuthDtoWithSessionId> NewUsers { get; } = new();
 
     private Task? _checkOldUsers;
     private Task? _saveNewUsers;
@@ -52,87 +52,87 @@ public class TelegramHandler(
             }
         }, _stoppingCts.Token);
 
-        _saveNewUsers = Task.Run(async () =>
-        {
-            while (!_stoppingCts.Token.IsCancellationRequested)
-            {
-                try
-                {
-                    await SaveNewUsers(_stoppingCts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Ошибка в основном цикле проверки новых пользователей");
-                }
-            }
-        }, _stoppingCts.Token);
+        // _saveNewUsers = Task.Run(async () =>
+        // {
+        //     while (!_stoppingCts.Token.IsCancellationRequested)
+        //     {
+        //         try
+        //         {
+        //             await SaveNewUsers(_stoppingCts.Token);
+        //         }
+        //         catch (OperationCanceledException)
+        //         {
+        //             break;
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             logger.LogError(ex, "Ошибка в основном цикле проверки новых пользователей");
+        //         }
+        //     }
+        // }, _stoppingCts.Token);
 
         return Task.CompletedTask;
     }
 
-    private async Task SaveNewUsers(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
-            var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            // var extensionHub = scope.ServiceProvider
-            //     .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
-
-            while (NewUsers.TryDequeue(out var dto))
-            {
-                try
-                {
-                    var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
-                    
-                    if (user is null)
-                    {
-                        user = dto.Map();
-                        await repository.Add(user, cancellationToken);
-                    }
-                    
-                    var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
-                    if (chatMember is null) continue;
-                    
-                    user.FirstName = dto.FirstName;
-                    user.Username = dto.Username;
-                    user.AuthDate = dto.AuthDate;
-                    user.PhotoUrl = dto.PhotoUrl;
-                    user.Hash = dto.Hash;
-                    user.IsChatMember = chatMember.IsChatMember();
-                    user.AuthorizedAt = DateTime.UtcNow;
-                    
-                    // if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
-                    // {
-                    //     await extensionHub.Clients.Client(connectionId)
-                    //         .ReloadUserData(dto.MapUserDto(user.IsChatMember));
-                    // }
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Ошибка при добавлении нового необработанного пользователя");
-                }
-            }
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Ошибка при сохранении новых необработанных пользователей");
-        }
-    }
+    // private async Task SaveNewUsers(CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         await using var scope = serviceProvider.CreateAsyncScope();
+    //         var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
+    //         var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
+    //         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+    //         // var extensionHub = scope.ServiceProvider
+    //         //     .GetRequiredService<IHubContext<BrowserExtensionHub, IBrowserExtensionHub>>();
+    //
+    //         while (NewUsers.TryDequeue(out var dto))
+    //         {
+    //             try
+    //             {
+    //                 var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
+    //                 
+    //                 if (user is null)
+    //                 {
+    //                     user = dto.Map();
+    //                     await repository.Add(user, cancellationToken);
+    //                 }
+    //                 
+    //                 var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
+    //                 if (chatMember is null) continue;
+    //                 
+    //                 user.FirstName = dto.FirstName;
+    //                 user.Username = dto.Username;
+    //                 user.AuthDate = dto.AuthDate;
+    //                 user.PhotoUrl = dto.PhotoUrl;
+    //                 user.Hash = dto.Hash;
+    //                 user.IsChatMember = chatMember.IsChatMember();
+    //                 user.AuthorizedAt = DateTime.UtcNow;
+    //                 
+    //                 // if (BrowserExtensionHub.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
+    //                 // {
+    //                 //     await extensionHub.Clients.Client(connectionId)
+    //                 //         .ReloadUserData(dto.MapUserDto(user.IsChatMember));
+    //                 // }
+    //             }
+    //             catch (Exception e)
+    //             {
+    //                 logger.LogError(e, "Ошибка при добавлении нового необработанного пользователя");
+    //             }
+    //         }
+    //
+    //         await unitOfWork.SaveChangesAsync(cancellationToken);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         logger.LogError(e, "Ошибка при сохранении новых необработанных пользователей");
+    //     }
+    // }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await _stoppingCts.CancelAsync();
         
-        await SaveNewUsers(cancellationToken);
+        // await SaveNewUsers(cancellationToken);
 
         try
         {
