@@ -61,15 +61,15 @@
     networks:
       - internal
   
-  nats:
-    image: nats:latest
-    restart: unless-stopped
-    ports:
-      - "${NATS_PORT}:${NATS_PORT}"
-      - "${NATS_MONITORING_PORT}:${NATS_MONITORING_PORT}"
-    environment:
-      - NATS_USER=${NATS_USER}
-      - NATS_PASS=${NATS_PASSWORD}
+#  nats:
+#    image: nats:latest
+#    restart: unless-stopped
+#    ports:
+#      - "${NATS_PORT}:${NATS_PORT}"
+#      - "${NATS_MONITORING_PORT}:${NATS_MONITORING_PORT}"
+#    environment:
+#      - NATS_USER=${NATS_USER}
+#      - NATS_PASS=${NATS_PASSWORD}
   
   postgres:
     image: postgres:latest
