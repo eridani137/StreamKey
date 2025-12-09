@@ -1,4 +1,5 @@
 using Carter;
+using Microsoft.AspNetCore.Mvc;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
 
@@ -11,7 +12,7 @@ public class Hub : ICarterModule
         var group = app.MapGroup("/hub");
 
         group.MapGet("/connections",
-                async (IConnectionStore store) =>
+                async ([FromServices] IConnectionStore store) =>
                 {
                     var connections = await store.GetAllActiveConnectionsAsync();
                     return Results.Json(connections);
@@ -19,7 +20,7 @@ public class Hub : ICarterModule
             .WithSummary("Получить соединения");
         
         group.MapGet("/online",
-                async (IConnectionStore store) =>
+                async ([FromServices] IConnectionStore store) =>
                 {
                     var connections = await store.GetAllActiveConnectionsAsync();
                     return Results.Ok(new OnlineResponse(connections.Count));
