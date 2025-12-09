@@ -11,21 +11,10 @@ public class BrowserExtensionHub(
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
-    public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
-    public static ConcurrentDictionary<string, UserSession> DisconnectedUsers { get; } = new();
-
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
 
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
-
-    public static string? GetConnectionIdBySessionId(Guid sessionId)
-    {
-        var client = Users.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-        return !string.IsNullOrEmpty(client.Key)
-            ? client.Key
-            : null;
-    }
 
     public override async Task OnConnectedAsync()
     {
@@ -42,8 +31,9 @@ public class BrowserExtensionHub(
             try
             {
                 await Task.Delay(ConnectionTimeout, cts.Token);
-
-                if (!Users.ContainsKey(connectionId))
+                
+                var session = await store.GetSessionAsync(connectionId);
+                if (session is null)
                 {
                     logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
                     context.Abort();
@@ -59,7 +49,7 @@ public class BrowserExtensionHub(
         await base.OnConnectedAsync();
     }
 
-    public Task EntranceUserData(UserData userData)
+    public async Task EntranceUserData(UserData userData)
     {
         var connectionId = Context.ConnectionId;
 
@@ -68,19 +58,12 @@ public class BrowserExtensionHub(
             SessionId = userData.SessionId,
             StartedAt = DateTimeOffset.UtcNow
         };
-
-        if (!Users.TryAdd(connectionId, session))
-        {
-            logger.LogWarning("Вход пользователя не удался: {@UserData}", userData);
-            Context.Abort();
-            return Task.CompletedTask;
-        }
-
-        logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
-
+        
+        await store.AddConnectionAsync(connectionId, session);
+        
         CancelRegistrationTimeout(connectionId);
 
-        return Task.CompletedTask;
+        logger.LogInformation("Пользователь предоставил данные: {@UserData}", userData);
     }
 
     private void CancelRegistrationTimeout(string connectionId)
@@ -97,25 +80,37 @@ public class BrowserExtensionHub(
 
         CancelRegistrationTimeout(connectionId);
 
-        if (Users.TryRemove(connectionId, out var userSession))
+        var session = await store.GetSessionAsync(connectionId);
+        if (session is not null)
         {
-            if (userSession.UserId is not null)
+            if (session.UserId is not null)
             {
-                DisconnectedUsers.TryAdd(connectionId, userSession);
+                await store.MoveToDisconnectedAsync(connectionId, session);
             }
-
-            logger.LogInformation("Пользователь отключен: {@Session}", userSession);
+            else
+            {
+                await store.RemoveConnectionAsync(connectionId);
+            }
+            
+            logger.LogInformation("Пользователь отключен: {@Session}", session);
+        }
+        else
+        {
+            logger.LogInformation("Пользователь отключен с пустой сессией: {ConnectionId}", connectionId);
         }
 
         await base.OnDisconnectedAsync(exception);
     }
 
-    public Task UpdateActivity(ActivityRequest activityRequest)
+    public async Task UpdateActivity(ActivityRequest activityRequest)
     {
-        if (!Users.TryGetValue(Context.ConnectionId, out var session)) return Task.CompletedTask;
-
+        var connectionId = Context.ConnectionId;
+        
+        var session = await store.GetSessionAsync(connectionId);
+        if (session == null) return;
+        
         var now = DateTimeOffset.UtcNow;
-
+        
         session.UserId ??= activityRequest.UserId;
 
         if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-MinimumSessionTime))
@@ -127,9 +122,9 @@ public class BrowserExtensionHub(
 
             session.UpdatedAt = now;
             session.AccumulatedTime += MinimumSessionTime;
-        }
 
-        return Task.CompletedTask;
+            await store.AddConnectionAsync(connectionId, session);
+        }
     }
 
     // public Task ClickChannel(ClickChannelDto dto, [FromServices] StatisticService service)

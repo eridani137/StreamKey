@@ -103,14 +103,16 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             Content = JsonContent.Create(tokenRequest)
         };
 
-        if (type == RequestTwitchPlaylistType.StreamAccessToken)
-        {
-            context.Request.Query.AddQueryDeviceId(request, deviceId);
-        }
-        else
-        {
-            context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
-        }
+        // if (type == RequestTwitchPlaylistType.StreamAccessToken)
+        // {
+        //     context.Request.Query.AddQueryDeviceId(request, deviceId);
+        // }
+        // else
+        // {
+        //     context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
+        // }
+        
+        context.Request.Query.AddQueryDeviceId(request, deviceId);
 
         using var response = await client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
