@@ -23,14 +23,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\StreamKey.Core\StreamKey.Core.csproj" />
-      <ProjectReference Include="..\StreamKey.Hub\StreamKey.Hub.csproj" />
       <ProjectReference Include="..\StreamKey.Infrastructure\StreamKey.Infrastructure.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\StreamKey.Hub\StreamKey.Hub.csproj">
-            <ExcludeAssets>contentFiles</ExcludeAssets>
-        </ProjectReference>
     </ItemGroup>
 
     <ItemGroup>

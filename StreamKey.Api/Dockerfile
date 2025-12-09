@@ -19,7 +19,6 @@ COPY ["StreamKey.Api/StreamKey.Api.csproj", "StreamKey.Api/"]
 COPY ["StreamKey.Core/StreamKey.Core.csproj", "StreamKey.Core/"]
 COPY ["StreamKey.Infrastructure/StreamKey.Infrastructure.csproj", "StreamKey.Infrastructure/"]
 COPY ["StreamKey.Shared/StreamKey.Shared.csproj", "StreamKey.Shared/"]
-COPY ["StreamKey.Hub/StreamKey.Hub.csproj", "StreamKey.Hub/"]
 
 RUN dotnet restore "StreamKey.Api/StreamKey.Api.csproj"
 
