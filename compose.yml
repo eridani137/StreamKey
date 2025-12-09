@@ -20,8 +20,8 @@
         hard: 1000000
     env_file:
       - .env
-#    ports:
-#      - "${API_PORT}:${API_PORT}" # TODO
+    #    ports:
+    #      - "${API_PORT}:${API_PORT}" # TODO
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,7 +36,7 @@
       - aspnet-keys:/root/.aspnet/DataProtection-Keys
     networks:
       - internal
-        
+  
   redis:
     image: redis:latest
     restart: unless-stopped
@@ -58,6 +58,16 @@
       retries: 5
     networks:
       - internal
+      
+  nats:
+    image: nats:latest
+    restart: unless-stopped
+    ports:
+      - "${NATS_PORT}:${NATS_PORT}"
+      - "${NATS_MONITORING_PORT}:${NATS_MONITORING_PORT}"
+    environment:
+      - NATS_USER=${NATS_USER}
+      - NATS_PASS=${NATS_PASSWORD}
   
   postgres:
     image: postgres:latest

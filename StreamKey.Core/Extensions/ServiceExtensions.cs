@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NATS.Client.Core;
 using StackExchange.Redis;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
@@ -99,16 +100,13 @@ public static class ServiceExtensions
                 .GetSection(nameof(RedisConfig))
                 .Get<RedisConfig>();
 
-            var redisHost = builder.Configuration.GetValue<string>("RedisHost");
+            if (redisConfig is null) return;
 
-            if (redisConfig is null || redisHost is null)
-                return;
-
-            if (isInternal) redisHost = "redis";
+            if (isInternal) redisConfig.Host = "redis";
 
             var configurationOptions = new ConfigurationOptions
             {
-                EndPoints = { $"{redisHost}:{redisConfig.Port}" },
+                EndPoints = { $"{redisConfig.Host}:{redisConfig.Port}" },
                 Password = redisConfig.Password,
                 KeepAlive = 60,
                 AbortOnConnectFail = false,
@@ -126,6 +124,32 @@ public static class ServiceExtensions
                     options.Configuration = configurationOptions;
                     options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
                 });
+        }
+
+        public void AddNats(bool isInternal)
+        {
+            var natsConfig = builder.Configuration
+                .GetSection(nameof(NatsConfig))
+                .Get<NatsConfig>();
+
+            if (natsConfig is null) return;
+            
+            if (isInternal) natsConfig.Url = $"nats://nats:{natsConfig.Port}";
+            
+            var options = new NatsOpts()
+            {
+                Url = natsConfig.Url,
+                Name = "StreamKey",
+                AuthOpts = NatsAuthOpts.Default with
+                {
+                    Username = natsConfig.User,
+                    Password = natsConfig.Password
+                }
+            };
+
+            builder.Services.AddSingleton<NatsConnection>(_ => new NatsConnection(options));
+            
+            builder.Services.AddHostedService<ConnectionListener>();
         }
 
         public void AddDefaultAuthorizationData()
