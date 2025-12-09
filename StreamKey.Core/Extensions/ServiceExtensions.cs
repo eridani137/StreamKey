@@ -93,11 +93,12 @@ public static class ServiceExtensions
 
     extension(IHostApplicationBuilder builder)
     {
-        public void AddRedisBackplane()
+        public void AddRedisBackplane(bool isInternal)
         {
             if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig &&
                 builder.Configuration.GetSection("RedisHost").Get<string>() is { } redisHost)
             {
+                if (isInternal) redisHost = "redis";
                 builder.Services.AddSignalR()
                     .AddMessagePackProtocol()
                     .AddStackExchangeRedis(options =>
