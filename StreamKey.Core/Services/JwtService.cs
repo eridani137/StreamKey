@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.Configs;
+using StreamKey.Shared.Configs;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;

@@ -1,4 +1,4 @@
-namespace StreamKey.Core.Configs;
+namespace StreamKey.Shared.Configs;
 
 public record JwtConfig
 {

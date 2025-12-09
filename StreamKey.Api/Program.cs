@@ -2,12 +2,14 @@ using System.ComponentModel;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;
+using StackExchange.Redis;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
 using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared;
+using StreamKey.Shared.Configs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,12 +25,21 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 
 builder.Services.AddHealthChecks();
 
-// builder.Services.AddSignalR()
-//     .AddMessagePackProtocol()
-//     .AddStackExchangeRedis("redis:6379", options =>
-//     {
-//         options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
-//     });
+if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig)
+{
+    builder.Services.AddSignalR()
+        .AddMessagePackProtocol()
+        .AddStackExchangeRedis(options =>
+        {
+            options.Configuration = new ConfigurationOptions
+            {
+                EndPoints = { $"redis:{redisConfig.Port}" },
+                Password = redisConfig.Password,
+                ChannelPrefix = RedisChannel.Literal("StreamKey")
+            };
+        });
+}
+
 
 builder.Services.AddApplication();
 
