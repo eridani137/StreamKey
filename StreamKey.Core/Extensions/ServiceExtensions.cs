@@ -12,7 +12,9 @@ using StreamKey.Core.Validation;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Services;
 using StreamKey.Shared;
+using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.Configs;
+using StreamKey.Shared.Stores;
 
 namespace StreamKey.Core.Extensions;
 
@@ -114,6 +116,8 @@ public static class ServiceExtensions
                 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
                     ConnectionMultiplexer.Connect($"{redisHost}:{redisConfig.Port},password={redisConfig.Password}"));
             }
+            
+            builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
         }
 
         public void AddDefaultAuthorizationData()

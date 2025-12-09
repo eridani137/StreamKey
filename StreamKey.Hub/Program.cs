@@ -17,8 +17,6 @@ builder.AddRedisBackplane(false);
 
 builder.Services.AddHealthChecks();
 
-builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
-
 var app = builder.Build();
 
 app.MapHub<BrowserExtensionHub>("/hubs/extension");
