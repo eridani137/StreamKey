@@ -1,10 +1,10 @@
 using DotNetEnv;
 using Serilog.Events;
-using StackExchange.Redis;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
 using StreamKey.Hub.Hubs;
-using StreamKey.Shared.Configs;
+using StreamKey.Shared.Abstractions;
+using StreamKey.Shared.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,23 +13,11 @@ Env.Load();
 ConfigureLogging.Configure(builder, LogEventLevel.Debug);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
+builder.AddRedisBackplane();
+
 builder.Services.AddHealthChecks();
 
-if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig &&
-    builder.Configuration.GetSection("RedisHost").Get<string>() is { } redisHost)
-{
-    builder.Services.AddSignalR()
-        .AddMessagePackProtocol()
-        .AddStackExchangeRedis(options =>
-        {
-            options.Configuration = new ConfigurationOptions
-            {
-                EndPoints = { $"{redisHost}:{redisConfig.Port}" },
-                Password = redisConfig.Password,
-                ChannelPrefix = RedisChannel.Literal("StreamKey")
-            };
-        });
-}
+builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
 
 var app = builder.Build();
 

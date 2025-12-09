@@ -6,7 +6,9 @@ using StreamKey.Shared.Types;
 
 namespace StreamKey.Hub.Hubs;
 
-public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
+public class BrowserExtensionHub(
+    IConnectionStore store,
+    ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
     public static ConcurrentDictionary<string, UserSession> Users { get; } = new();
@@ -32,7 +34,7 @@ public class BrowserExtensionHub(ILogger<BrowserExtensionHub> logger)
 
         var cts = new CancellationTokenSource();
         RegistrationTimeouts.TryAdd(connectionId, cts);
-        
+
         logger.LogInformation("Новое подключение: {ConnectionId}", connectionId);
 
         _ = Task.Run(async () =>

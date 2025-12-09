@@ -40,6 +40,7 @@ if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is 
         });
 }
 
+builder.AddRedisBackplane();
 
 builder.Services.AddApplication();
 
