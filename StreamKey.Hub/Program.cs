@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
-ConfigureLogging.Configure(builder, LogEventLevel.Debug);
+ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
 builder.AddRedisBackplane(false);
