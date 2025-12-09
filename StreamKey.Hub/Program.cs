@@ -1,8 +1,13 @@
+using Serilog.Core;
+using Serilog.Events;
 using StackExchange.Redis;
+using StreamKey.Core.Configuration;
 using StreamKey.Hub.Hubs;
 using StreamKey.Shared.Configs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ConfigureLogging.Configure(builder, LogEventLevel.Debug);
 
 if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig &&
     builder.Configuration.GetSection("RedisHost").Get<string>() is { } redisHost)

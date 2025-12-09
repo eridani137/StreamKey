@@ -10,20 +10,12 @@ namespace StreamKey.Core.Configuration;
 
 public static class ConfigureLogging
 {
-    public static void Configure(WebApplicationBuilder builder)
+    public static void Configure(WebApplicationBuilder builder, LogEventLevel logEventLevel = LogEventLevel.Information)
     {
-        const string logs = "logs";
-        var logsPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logs));
-
-        if (!Directory.Exists(logsPath))
-        {
-            Directory.CreateDirectory(logsPath);
-        }
-
         const string outputTemplate =
             "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
 
-        var levelSwitch = new LoggingLevelSwitch();
+        var levelSwitch = new LoggingLevelSwitch(logEventLevel);
         var seqEndpoint = EnvironmentHelper.GetSeqEndpoint();
         var seqApiKey = EnvironmentHelper.GetSeqApiKey();
 
@@ -33,7 +25,7 @@ public static class ConfigureLogging
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
             .MinimumLevel.Override("Polly", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.SignalR", LogEventLevel.Warning)
+            // .MinimumLevel.Override("Microsoft.AspNetCore.SignalR", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
