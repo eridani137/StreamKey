@@ -97,38 +97,39 @@ public static class ServiceExtensions
     {
         public void AddRedisBackplane(bool isInternal)
         {
-            if (builder.Configuration.GetSection(nameof(RedisConfig)).Get<RedisConfig>() is { } redisConfig &&
-                builder.Configuration.GetSection("RedisHost").Get<string>() is { } redisHost)
+            var redisConfig = builder.Configuration
+                .GetSection(nameof(RedisConfig))
+                .Get<RedisConfig>();
+
+            var redisHost = builder.Configuration.GetValue<string>("RedisHost");
+
+            if (redisConfig is null || redisHost is null)
+                return;
+
+            if (isInternal) redisHost = "redis";
+
+            var configurationOptions = new ConfigurationOptions
             {
-                if (isInternal) redisHost = "redis";
-                
-                builder.Services.AddSignalR()
-                    .AddMessagePackProtocol()
-                    .AddStackExchangeRedis(options =>
-                    {
-                        options.Configuration = new ConfigurationOptions
-                        {
-                            EndPoints = { $"{redisHost}:{redisConfig.Port}" },
-                            Password = redisConfig.Password,
-                            ChannelPrefix = RedisChannel.Literal("StreamKey")
-                        };
-                    });
+                EndPoints = { $"{redisHost}:{redisConfig.Port}" },
+                Password = redisConfig.Password,
+                KeepAlive = 60,
+                AbortOnConnectFail = false,
+                ReconnectRetryPolicy = new ExponentialRetry(5000)
+            };
 
-                builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-                {
-                    var configurationOptions = new ConfigurationOptions
-                    {
-                        EndPoints = { $"{redisHost}:{redisConfig.Port}" },
-                        Password = redisConfig.Password,
-                        KeepAlive = 15,
-                        AbortOnConnectFail = false
-                    };
+            builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+                ConnectionMultiplexer.Connect(configurationOptions)
+            );
 
-                    return ConnectionMultiplexer.Connect(configurationOptions);
-                });
-            }
-            
             builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
+
+            builder.Services.AddSignalR()
+                .AddMessagePackProtocol()
+                .AddStackExchangeRedis(options =>
+                {
+                    options.Configuration = configurationOptions;
+                    options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
+                });
         }
 
         public void AddDefaultAuthorizationData()
