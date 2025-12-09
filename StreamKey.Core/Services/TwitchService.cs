@@ -6,6 +6,7 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs.TwitchGraphQL;
+using StreamKey.Shared.Types;
 
 namespace StreamKey.Core.Services;
 
@@ -38,7 +39,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         var result =
             await SendTwitchGqlRequest<StreamPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
-                "StreamAccessToken");
+                RequestTwitchPlaylistType.StreamAccessToken);
 
         if (result?.Data?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             result?.Data.Data.StreamPlaybackAccessToken?.Value is null)
@@ -77,7 +78,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         var result =
             await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
-                "VodAccessToken");
+                RequestTwitchPlaylistType.VodAccessToken);
 
         if (result?.Data?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             result?.Data.Data?.VideoPlaybackAccessToken?.Value is null)
@@ -93,7 +94,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         object tokenRequest,
         string deviceId,
         HttpContext context,
-        string logPrefix)
+        RequestTwitchPlaylistType type)
         where T : class
     {
         using var client = clientFactory.CreateClient(ApplicationConstants.TwitchClientName);
@@ -102,7 +103,14 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             Content = JsonContent.Create(tokenRequest)
         };
 
-        context.Request.Query.AddQueryAuth(request, deviceId);
+        if (type == RequestTwitchPlaylistType.StreamAccessToken)
+        {
+            context.Request.Query.AddQueryDeviceId(request, deviceId);
+        }
+        else
+        {
+            context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
+        }
 
         using var response = await client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
@@ -110,7 +118,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         if (!response.IsSuccessStatusCode)
         {
             logger.LogWarning("{Prefix} Twitch GQL error {Status}. Body: {Body}",
-                logPrefix, response.StatusCode, body);
+                type, response.StatusCode, body);
             return null;
         }
 
@@ -122,7 +130,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         catch (JsonException ex)
         {
             logger.LogError(ex, "{Prefix} Ошибка десериализации Twitch JSON. Body: {Body}",
-                logPrefix, body);
+                type, body);
             return null;
         }
     }

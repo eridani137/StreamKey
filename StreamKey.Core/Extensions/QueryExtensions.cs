@@ -5,9 +5,11 @@ namespace StreamKey.Core.Extensions;
 
 public static class QueryExtensions
 {
+    private const string Scheme = "OAuth";
+    
     extension(IQueryCollection query)
     {
-        public void AddQueryAuth(HttpRequestMessage request, string deviceId)
+        public void AddQueryAuthAndDeviceId(HttpRequestMessage request, string deviceId)
         {
             const string scheme = "OAuth";
             
@@ -16,6 +18,13 @@ public static class QueryExtensions
                 : $"{scheme} {ApplicationConstants.DefaultAuthorization}";
 
             request.Headers.Add("Authorization", authorization);
+
+            request.Headers.Add("x-device-id", deviceId);
+        }
+        
+        public void AddQueryDeviceId(HttpRequestMessage request, string deviceId)
+        {
+            request.Headers.Add("Authorization", $"{Scheme} {ApplicationConstants.DefaultAuthorization}");
 
             request.Headers.Add("x-device-id", deviceId);
         }
