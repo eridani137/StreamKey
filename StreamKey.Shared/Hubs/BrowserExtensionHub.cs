@@ -9,7 +9,8 @@ using StreamKey.Shared.Types;
 namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
-    IConnectionStore store,
+    IConnectionStore connectionStore,
+    IStatisticStore statisticStore,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
@@ -34,7 +35,7 @@ public class BrowserExtensionHub(
             {
                 await Task.Delay(ConnectionTimeout, cts.Token);
 
-                var session = await store.GetSessionAsync(connectionId);
+                var session = await connectionStore.GetSessionAsync(connectionId);
                 if (session is null)
                 {
                     logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
@@ -61,7 +62,7 @@ public class BrowserExtensionHub(
             StartedAt = DateTimeOffset.UtcNow
         };
 
-        await store.AddConnectionAsync(connectionId, session);
+        await connectionStore.AddConnectionAsync(connectionId, session);
 
         CancelRegistrationTimeout(connectionId);
 
@@ -82,16 +83,16 @@ public class BrowserExtensionHub(
 
         CancelRegistrationTimeout(connectionId);
 
-        var session = await store.GetSessionAsync(connectionId);
+        var session = await connectionStore.GetSessionAsync(connectionId);
         if (session is not null)
         {
             if (session.UserId is not null)
             {
-                await store.MoveToDisconnectedAsync(connectionId, session);
+                await connectionStore.MoveToDisconnectedAsync(connectionId, session);
             }
             else
             {
-                await store.RemoveConnectionAsync(connectionId);
+                await connectionStore.RemoveConnectionAsync(connectionId);
             }
 
             logger.LogInformation("Пользователь отключен: {@Session}", session);
@@ -108,7 +109,7 @@ public class BrowserExtensionHub(
     {
         var connectionId = Context.ConnectionId;
 
-        var session = await store.GetSessionAsync(connectionId);
+        var session = await connectionStore.GetSessionAsync(connectionId);
         if (session == null) return;
 
         var now = DateTimeOffset.UtcNow;
@@ -125,14 +126,14 @@ public class BrowserExtensionHub(
             session.UpdatedAt = now;
             session.AccumulatedTime += MinimumSessionTime;
 
-            await store.AddConnectionAsync(connectionId, session);
+            await connectionStore.AddConnectionAsync(connectionId, session);
         }
     }
 
-    // public async Task ClickChannel(ClickChannel dto)
-    // {
-    //     await publisher.PublishAsync(RedisChannel.Literal(nameof(DTOs.ClickChannel)), dto);
-    // }
+    public async Task ClickChannel(ClickChannel dto)
+    {
+        await statisticStore.SaveClickAsync(dto);
+    }
     
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
     //     [FromServices] ITelegramUserRepository repository)

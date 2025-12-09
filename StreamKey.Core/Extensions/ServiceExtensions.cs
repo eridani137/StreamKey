@@ -121,6 +121,7 @@ public static class ServiceExtensions
             );
 
             builder.Services.AddSingleton<IConnectionStore, RedisConnectionStore>();
+            builder.Services.AddSingleton<IStatisticStore, RedisStatisticStore>();
 
             builder.Services.AddSignalR()
                 .AddMessagePackProtocol()
