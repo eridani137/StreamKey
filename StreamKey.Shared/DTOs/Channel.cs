@@ -10,4 +10,4 @@ public record ChannelDto(
     [property: Key("position")] int Position = 0
 );
 
-public record ClickChannelDto(string ChannelName, string UserId);
+public record ClickChannel(string ChannelName, string UserId);

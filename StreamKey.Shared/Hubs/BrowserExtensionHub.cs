@@ -1,14 +1,19 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.Events;
 using StreamKey.Shared.Types;
 
 namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
     IConnectionStore store,
+    IConnectionMultiplexer mux,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
@@ -128,17 +133,10 @@ public class BrowserExtensionHub(
         }
     }
 
-    // public Task ClickChannel(ClickChannelDto dto, [FromServices] StatisticService service)
-    // {
-    //     service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
-    //     {
-    //         ChannelName = dto.ChannelName,
-    //         UserId = dto.UserId,
-    //         DateTime = DateTime.UtcNow
-    //     });
-    //
-    //     return Task.CompletedTask;
-    // }
+    public async Task ClickChannel(ClickChannel dto, [FromKeyedServices] RedisPublisher publisher)
+    {
+        await publisher.PublishAsync(RedisChannel.Literal(nameof(DTOs.ClickChannel)), dto);
+    }
 
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
     //     [FromServices] ITelegramUserRepository repository)

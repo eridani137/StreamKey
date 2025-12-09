@@ -22,7 +22,7 @@ public class Activity : ICarterModule
             .WithSummary("Обновление активности пользователя");
 
         group.MapPost("/click",
-                (ClickChannelDto dto, StatisticService service) =>
+                (ClickChannel dto, StatisticService service) =>
                 {
                     service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
                     {

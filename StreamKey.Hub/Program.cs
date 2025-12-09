@@ -1,10 +1,8 @@
 using DotNetEnv;
-using Serilog.Events;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
-using StreamKey.Shared.Abstractions;
+using StreamKey.Shared.Events;
 using StreamKey.Shared.Hubs;
-using StreamKey.Shared.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +12,8 @@ ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
 builder.AddRedisBackplane(false);
+
+builder.Services.AddSingleton<RedisPublisher>();
 
 builder.Services.AddHealthChecks();
 

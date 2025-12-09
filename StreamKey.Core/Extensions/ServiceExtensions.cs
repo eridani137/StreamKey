@@ -14,6 +14,7 @@ using StreamKey.Infrastructure.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.Configs;
+using StreamKey.Shared.Events;
 using StreamKey.Shared.Stores;
 
 namespace StreamKey.Core.Extensions;
@@ -43,6 +44,11 @@ public static class ServiceExtensions
             services.AddHostedService<StatisticHandler>();
             services.AddHostedService<RestartHandler>();
             services.AddHostedService<TelegramHandler>();
+            
+            services.AddHostedService<EventsSubscriber>();
+            
+            
+            services.AddSingleton<RedisPublisher>();
 
             return services;
         }
