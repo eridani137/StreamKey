@@ -27,11 +27,14 @@
         condition: service_healthy
       redis:
         condition: service_healthy
+      nats:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:${API_PORT}/health || exit 1" ]
       interval: 3s
       timeout: 3s
       retries: 5
+      start_period: 7s
     volumes:
       - aspnet-keys:/root/.aspnet/DataProtection-Keys
     networks:
@@ -56,9 +59,10 @@
       interval: 3s
       timeout: 3s
       retries: 5
+      start_period: 7s
     networks:
       - internal
-      
+  
   nats:
     image: nats:latest
     restart: unless-stopped
@@ -68,6 +72,12 @@
     environment:
       - NATS_USER=${NATS_USER}
       - NATS_PASS=${NATS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${NATS_MONITORING_PORT}/healthz"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+      start_period: 7s
   
   postgres:
     image: postgres:latest
@@ -85,6 +95,7 @@
       interval: 3s
       timeout: 3s
       retries: 5
+      start_period: 7s
     networks:
       - internal
   
@@ -102,6 +113,7 @@
       interval: 3s
       timeout: 3s
       retries: 3
+      start_period: 7s
     networks:
       - internal
 
