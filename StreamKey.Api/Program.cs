@@ -53,15 +53,6 @@ TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof
 
 var app = builder.Build();
 
-app.Use(async (_, next) =>
-{
-    try { await next(); }
-    catch (Exception ex)
-    {
-        Log.Error(ex, "Ошибка");
-    }
-});
-
 app.MapOpenApi();
 app.MapScalarApiReference();
 
