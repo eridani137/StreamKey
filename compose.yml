@@ -73,7 +73,7 @@
       - NATS_USER=${NATS_USER}
       - NATS_PASS=${NATS_PASSWORD}
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "${NATS_PORT}"]
+      test: ["CMD", "nats-server", "--help"]
       interval: 15s
       timeout: 3s
       retries: 5
