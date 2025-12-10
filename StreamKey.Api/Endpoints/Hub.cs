@@ -1,5 +1,5 @@
 using Carter;
-using StreamKey.Core.Stores;
+using StreamKey.Core;
 using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Api.Endpoints;

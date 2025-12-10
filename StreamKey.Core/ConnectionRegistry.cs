@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
 using StreamKey.Shared.DTOs;
 
-namespace StreamKey.Core.Stores;
+namespace StreamKey.Core;
 
 public static class ConnectionRegistry
 {
-    private static readonly ConcurrentDictionary<string, UserSession> ActiveConnections = new();
-    private static readonly ConcurrentDictionary<string, UserSession> DisconnectedConnections = new();
+    public static readonly ConcurrentDictionary<string, UserSession> ActiveConnections = new();
+    public static readonly ConcurrentDictionary<string, UserSession> DisconnectedConnections = new();
 
     public static void AddConnection(string connectionId, UserSession session)
         => ActiveConnections[connectionId] = session;

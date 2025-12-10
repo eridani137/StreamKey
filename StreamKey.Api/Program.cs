@@ -22,6 +22,8 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
     ApplicationConstants.TelegramBotToken = token;
 }
 
+builder.Services.PostConfigureAll<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(1));
+
 builder.Services.AddHealthChecks();
 
 builder.AddNats(true);

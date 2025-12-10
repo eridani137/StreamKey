@@ -1,9 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
+using StreamKey.Shared.Hubs;
 
 namespace StreamKey.Core.BackgroundServices;
 
@@ -24,10 +26,23 @@ public class StatisticHandler(
 
         await Task.WhenAll(
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveViewStatistic, stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => RemoveOfflineUsers(false, ct), stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => SaveSessions(false, ct), stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => SaveHubSessions(false, ct), stoppingToken),
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveChannelClickStatistic, stoppingToken),
             _taskRunner.RunAsync(TimeSpan.FromMinutes(10), LogOnlineUsers, stoppingToken)
         );
+    }
+
+    public override async Task StopAsync(CancellationToken stoppingToken)
+    {
+        await Task.WhenAll(
+            SaveViewStatistic(CancellationToken.None),
+            SaveSessions(true, CancellationToken.None),
+            SaveHubSessions(true, CancellationToken.None),
+            SaveChannelClickStatistic(CancellationToken.None)
+        );
+
+        await base.StopAsync(stoppingToken);
     }
 
     private async Task SaveViewStatistic(CancellationToken cancellationToken)
@@ -58,7 +73,7 @@ public class StatisticHandler(
         }
     }
 
-    private async Task RemoveOfflineUsers(bool shutdown, CancellationToken cancellationToken)
+    private async Task SaveSessions(bool shutdown, CancellationToken cancellationToken)
     {
         try
         {
@@ -66,26 +81,26 @@ public class StatisticHandler(
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var userIds = shutdown
+            var sessionIds = shutdown
                 ? statisticService.OnlineUsers.Keys.ToList()
                 : statisticService.OnlineUsers
                     .Where(kvp => kvp.Value.UpdatedAt < DateTimeOffset.UtcNow.Subtract(UserOfflineTimeout))
                     .Select(kvp => kvp.Key)
                     .ToList();
 
-            foreach (var offlineUserId in userIds)
+            foreach (var sessionId in sessionIds)
             {
-                if (!statisticService.OnlineUsers.TryRemove(offlineUserId, out var offlineUser)) continue;
-                var sessionDuration = offlineUser.UpdatedAt - offlineUser.StartedAt;
+                if (!statisticService.OnlineUsers.TryRemove(sessionId, out var sessionEntity)) continue;
+                var sessionDuration = sessionEntity.UpdatedAt - sessionEntity.StartedAt;
                 if (sessionDuration < MinimumSessionDuration) continue;
 
                 try
                 {
-                    await repository.Add(offlineUser, cancellationToken);
+                    await repository.Add(sessionEntity, cancellationToken);
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Ошибка при сохранении оффлайн пользователя {UserId}", offlineUserId);
+                    logger.LogError(e, "Ошибка при сохранении сессии {SessionId}", sessionId);
                 }
             }
 
@@ -93,7 +108,41 @@ public class StatisticHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Ошибка при удалении оффлайн пользователей");
+            logger.LogError(e, "Ошибка при удалении сессий");
+        }
+    }
+
+    private async Task SaveHubSessions(bool shutdown, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            
+            var sessions = shutdown
+                ? ConnectionRegistry.ActiveConnections.Values.Select(v => v.Map()).ToList()
+                : ConnectionRegistry.DisconnectedConnections.Values.Select(v => v.Map()).ToList();
+            
+            ConnectionRegistry.DisconnectedConnections.Clear();
+
+            foreach (var session in sessions)
+            {
+                try
+                {
+                    await repository.Add(session, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Ошибка при сохранении сессии хаба {SessionId}", session.Id);
+                }
+            }
+            
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при удалении оффлайн сессий хаба");
         }
     }
 

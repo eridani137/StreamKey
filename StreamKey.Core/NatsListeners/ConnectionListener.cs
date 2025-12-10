@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.Stores;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
 
