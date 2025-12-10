@@ -12,9 +12,9 @@ public class ChannelEntity : BaseGuidEntity
 [MessagePackObject]
 public class ChannelInfo
 {
-    public required string Title { get; set; }
-    public required string Thumb { get; set; }
-    public required string Viewers { get; set; }
-    public required string Description { get; set; }
-    public required string Category { get; set; }
+    [Key("title")] public required string Title { get; set; }
+    [Key("thumb")] public required string Thumb { get; set; }
+    [Key("viewers")] public required string Viewers { get; set; }
+    [Key("description")] public required string Description { get; set; }
+    [Key("category")] public required string Category { get; set; }
 }
