@@ -8,7 +8,7 @@ const Config: AppConfig = {
     telegramChannelUrl: 'https://t.me/streamkey',
     extensionAuthorizationUrl: 'https://streamkey.ru/extension-authorization/',
     extensionStateKeyName: 'streamKeyEnabled',
-    extensionHub: 'https://service.streamkey.ru/hubs/extension',
+    extensionHub: 'http://5.129.226.150:7777/hubs/extension',
     twitchUrl: 'https://www.twitch.tv/'
   },
   keys: {

@@ -25,8 +25,8 @@ export class ActivityHandler {
 
     if (sessionId && userId) {
       await sendMessage('updateActivity', {
-        SessionId: sessionId,
-        UserId: userId,
+        sessionId: sessionId,
+        userId: userId,
       } as ActivityRequest);
     }
   }

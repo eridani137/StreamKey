@@ -1,10 +1,10 @@
 import * as utils from '@/utils';
 import Config from '@/config';
-// import extensionClient from '@/BrowserExtensionClient';
+import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
 import { loadTwitchRedirectRules } from '@/rules';
 import { HubConnectionState } from '@microsoft/signalr';
-import client from '@/client';
+// import client from '@/client';
 
 export default defineBackground(() => {
   registerMessageHandlers();
@@ -18,18 +18,22 @@ export default defineBackground(() => {
     await onStartup();
   });
 
-  browser.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name === Config.alarms.checkConnectionState) {
-      console.log(`[ALARM] ${alarm.name}`);
-      // if (extensionClient.connectionState === HubConnectionState.Disconnected) {
-      //   console.log(`Статус соединения ${extensionClient.connectionState}, пробуем переподключиться`);
-      //   const sessionId = await utils.createNewSession();
-      //   await extensionClient.startWithPersistentRetry(sessionId);
-      // } else {
-      //   console.log(`Статус соединения ${extensionClient.connectionState}, переподключение пропущено`);
-      // }
-    }
-  });
+  // browser.alarms.onAlarm.addListener(async (alarm) => {
+  //   if (alarm.name === Config.alarms.checkConnectionState) {
+  //     console.log(`[ALARM] ${alarm.name}`);
+  //     if (extensionClient.connectionState === HubConnectionState.Disconnected) {
+  //       console.log(
+  //         `Статус соединения ${extensionClient.connectionState}, пробуем переподключиться`
+  //       );
+  //       const sessionId = await utils.createNewSession();
+  //       await extensionClient.startWithPersistentRetry(sessionId);
+  //     } else {
+  //       console.log(
+  //         `Статус соединения ${extensionClient.connectionState}, переподключение пропущено`
+  //       );
+  //     }
+  //   }
+  // });
 });
 
 export async function onInstalled() {
@@ -38,42 +42,43 @@ export async function onInstalled() {
 }
 
 export async function onStartup() {
-  // const sessionId = await utils.createNewSession();
-  // await extensionClient.startWithPersistentRetry(sessionId);
-  // await utils.initUserProfile();
+  const sessionId = await utils.createNewSession();
+  await extensionClient.startWithPersistentRetry(sessionId);
+  await utils.initUserProfile();
+
   const isEnabled = await storage.getItem(Config.keys.extensionState);
   if (isEnabled) await loadTwitchRedirectRules();
 
   browser.alarms.create(Config.alarms.checkConnectionState, {
-    delayInMinutes: 0.5,
+    delayInMinutes: 1,
     periodInMinutes: 0.5,
   });
 }
 
 export function registerMessageHandlers() {
   onMessage('updateActivity', async (message) => {
-    // await extensionClient.updateActivity(message.data);
+    await extensionClient.updateActivity(message.data);
 
-    await client.updateActivity(message.data);
+    // await client.updateActivity(message.data);
   });
 
   onMessage('clickChannel', async (message) => {
-    // await extensionClient.clickChannel(message.data);
+    await extensionClient.clickChannel(message.data);
 
-    await client.clickChannel(message.data);
+    // await client.clickChannel(message.data);
   });
 
   onMessage('getChannels', async () => {
-    // return await extensionClient.getChannels();
+    return await extensionClient.getChannels();
 
-    return await client.getChannels();
+    // return await client.getChannels();
   });
 
-  // onMessage('getConnectionState', async () => {
-  //   return extensionClient.connectionState;
-  // });
+  onMessage('getConnectionState', async () => {
+    return extensionClient.connectionState;
+  });
 
-  // onMessage('checkMember', async (message) => {
-  //   await extensionClient.checkMember(message.data);
-  // });
+  onMessage('checkMember', async (message) => {
+    await extensionClient.checkMember(message.data);
+  });
 }

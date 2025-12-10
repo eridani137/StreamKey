@@ -1,7 +1,13 @@
 import { HubConnectionState } from '@microsoft/signalr';
-// import extensionClient from './BrowserExtensionClient';
+import extensionClient from './BrowserExtensionClient';
 import Config from './config';
-import { DeviceInfo, StatusType, TelegramUser, TelegramUserResponse } from './types';
+import {
+  DeviceInfo,
+  StatusType,
+  TelegramUser,
+  TelegramUserResponse,
+} from './types';
+// import client from './client';
 
 export function getDeviceInfo(): DeviceInfo {
   return {
@@ -85,14 +91,18 @@ export async function createNewSession(): Promise<string> {
 }
 
 export async function getUserProfile(): Promise<TelegramUser | null> {
-  const telegramUserId = (await browser.cookies.get({
-    url: Config.urls.streamKeyUrl,
-    name: 'tg_user_id'
-  }))?.value;
-  const telegramUserHash = (await browser.cookies.get({
-    url: Config.urls.streamKeyUrl,
-    name: 'tg_user_hash'
-  }))?.value;
+  const telegramUserId = (
+    await browser.cookies.get({
+      url: Config.urls.streamKeyUrl,
+      name: 'tg_user_id',
+    })
+  )?.value;
+  const telegramUserHash = (
+    await browser.cookies.get({
+      url: Config.urls.streamKeyUrl,
+      name: 'tg_user_hash',
+    })
+  )?.value;
 
   console.log('Обновление профиля');
 
@@ -101,37 +111,26 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
 
   if (telegramUserId && telegramUserHash) {
     try {
-      const responseData : TelegramUserResponse = {
-        UserId: Number(telegramUserId),
-        UserHash: telegramUserHash
-      }
+      const requestData: TelegramUserResponse = {
+        userId: Number(telegramUserId),
+        userHash: telegramUserHash,
+      };
 
-      // const response = await extensionClient.getTelegramUser(responseData);
-      // if (!response) {
-      //   console.log("Сервер не вернул пользователя");
-      //   return null;
-      // }
-
-      const response = await fetch(
-          `${Config.urls.apiUrl}/telegram/user/${telegramUserId}/${telegramUserHash}`,
-          {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          }
-      );
-
-      if (!response.ok) {
-        console.log('Сервер вернул ошибку: ' + response.status);
+      const response = await extensionClient.getTelegramUser(requestData);
+      if (!response) {
+        console.log('Сервер не вернул пользователя');
         return null;
       }
 
-      const text = await response.text();
+      // const response = await client.getTelegramUser(requestData);
+      // if (!response) {
+      //   console.log('Сервер не вернул пользователя');
+      //   return null;
+      // }
 
-      const data = text ? JSON.parse(text) as TelegramUser : null;
-      
       console.log('Сервер вернул пользователя', response);
 
-      return data;
+      return response;
     } catch (err) {
       console.error(err);
       return null;
@@ -146,7 +145,8 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
 export async function initUserProfile(
   telegramUser: TelegramUser | null = null
 ): Promise<void> {
-  let userData = telegramUser ?? await storage.getItem(Config.keys.userProfile);
+  let userData =
+    telegramUser ?? (await storage.getItem(Config.keys.userProfile));
 
   if (!userData) {
     userData = await getUserProfile();
@@ -159,7 +159,6 @@ export async function initUserProfile(
   }
 
   await storage.setItem(Config.keys.userProfile, userData); // TODO
-  
 }
 
 export const sleep = (ms: number): Promise<void> =>

@@ -131,7 +131,8 @@ public class BrowserExtensionHub(
             headers: null,
             requestSerializer: telegramUserRequestSerializer,
             replySerializer: telegramUserDtoSerializer,
-            cancellationToken: Context.ConnectionAborted
+            requestOpts: new NatsPubOpts(),
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
         );
 
         return response.Data;
@@ -148,7 +149,8 @@ public class BrowserExtensionHub(
             subject: NatsKeys.GetChannels,
             data: null,
             replySerializer: channelsResponseSerializer,
-            cancellationToken: Context.ConnectionAborted
+            requestOpts: new NatsPubOpts(),
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
         );
 
         var channels = response.Data ?? [];
@@ -169,7 +171,8 @@ public class BrowserExtensionHub(
             data: request,
             requestSerializer: checkMemberRequestSerializer,
             replySerializer: telegramUserDtoSerializer,
-            cancellationToken: Context.ConnectionAborted
+            requestOpts: new NatsPubOpts(),
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(30) }
         );
 
         if (response.Data is not null)

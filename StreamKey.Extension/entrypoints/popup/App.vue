@@ -1,8 +1,8 @@
 <template>
   <div class="popup-window">
-    <!-- <div class="status-container">
+    <div class="status-container">
       <StatusLabel @update-state="onStateUpdate" />
-    </div> -->
+    </div>
     <div class="circle-logo" @click="handleLogoClick">
       <StreamKeyLogo v-if="!showVideo" />
       <video
@@ -18,7 +18,7 @@
       />
     </div>
 
-    <!-- <div class="subscribe-status">
+    <div class="subscribe-status">
       <p>
         1440p:
         <span :class="statusColorClass">{{ statusText }}</span>
@@ -45,13 +45,13 @@
       color_active="#05825b"
       label="Проверить подписку"
       @click="checkMember"
-    /> -->
+    />
 
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
 
     <div class="authentication-block">
-      <!-- <span v-if="!telegramUser">*перейдите в меню выбора качества</span>
+      <span v-if="!telegramUser">*перейдите в меню выбора качества</span>
       <div v-else class="profile-block">
         <div class="avatar">
           <img
@@ -65,7 +65,7 @@
           <div class="nickname">{{ telegramUser.username }}</div>
           <div class="id">{{ telegramUser.id }}</div>
         </div>
-      </div> -->
+      </div>
 
       <button
         class="telegram-button"
@@ -103,29 +103,29 @@ import { sendMessage } from '@/messaging';
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
 const isLoading = ref(false);
-// const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotMember);
-// const telegramUser = ref<TelegramUser | undefined>(undefined);
-// const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
+const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotMember);
+const telegramUser = ref<TelegramUser | undefined>(undefined);
+const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
 
 const showVideo = computed(() => currentVideo.value !== undefined);
 const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
 
-// const STATUS_MAP = {
-//   [TelegramStatus.NotAuthorized]: {
-//     text: 'Не активирован*',
-//     class: 'status-inactive',
-//   },
-//   [TelegramStatus.NotMember]: {
-//     text: 'Нужно подписаться',
-//     class: 'status-inactive',
-//   },
-//   [TelegramStatus.Ok]: { text: 'Активирован', class: 'status-active' },
-// } as const;
+const STATUS_MAP = {
+  [TelegramStatus.NotAuthorized]: {
+    text: 'Не активирован*',
+    class: 'status-inactive',
+  },
+  [TelegramStatus.NotMember]: {
+    text: 'Нужно подписаться',
+    class: 'status-inactive',
+  },
+  [TelegramStatus.Ok]: { text: 'Активирован', class: 'status-active' },
+} as const;
 
-// const statusText = computed(() => STATUS_MAP[telegramStatus.value]?.text || '');
-// const statusColorClass = computed(
-//   () => STATUS_MAP[telegramStatus.value]?.class || ''
-// );
+const statusText = computed(() => STATUS_MAP[telegramStatus.value]?.text || '');
+const statusColorClass = computed(
+  () => STATUS_MAP[telegramStatus.value]?.class || ''
+);
 
 function handleVideoEnd() {
   if (currentVideo.value === EnableVideo) {
@@ -139,7 +139,7 @@ function handleVideoEnd() {
 async function handleLogoClick() {
   if (isLoading.value) return;
 
-  // if (signalrStatus.value !== StatusType.WORKING) return;
+  if (signalrStatus.value !== StatusType.WORKING) return;
 
   isLoading.value = true;
 
@@ -174,38 +174,38 @@ function openQA() {
   browser.tabs.create({ url: Config.urls.streamKeyQAUrl });
 }
 
-// async function checkMember() {
-//   const userId = (
-//     await browser.cookies.get({
-//       url: Config.urls.streamKeyUrl,
-//       name: 'tg_user_id',
-//     })
-//   )?.value;
+async function checkMember() {
+  const userId = (
+    await browser.cookies.get({
+      url: Config.urls.streamKeyUrl,
+      name: 'tg_user_id',
+    })
+  )?.value;
 
-//   console.log('userId', userId);
+  console.log('userId', userId);
 
-//   await sendMessage('checkMember', {
-//     UserId: Number(userId),
-//   } as CheckMemberResponse);
-//   await loadUserProfile();
-// }
+  await sendMessage('checkMember', {
+    userId: Number(userId),
+  } as CheckMemberResponse);
+  await loadUserProfile();
+}
 
-// async function onStateUpdate(state: StatusType) {
-//   signalrStatus.value = state;
-//   await initializeExtension(state);
-// }
+async function onStateUpdate(state: StatusType) {
+  signalrStatus.value = state;
+  await initializeExtension(state);
+}
 
 async function initializeExtension(state: StatusType | null = null) {
   const savedState = await storage.getItem<boolean>(Config.keys.extensionState);
   isEnabled.value = savedState ?? false;
 
-  // if (isEnabled.value && state === StatusType.WORKING) {
-  //   await loadTwitchRedirectRules();
-  //   currentVideo.value = EnabledVideo;
-  // } else {
-  //   await removeAllDynamicRules();
-  //   currentVideo.value = undefined;
-  // }
+  if (isEnabled.value && state === StatusType.WORKING) {
+    await loadTwitchRedirectRules();
+    currentVideo.value = EnabledVideo;
+  } else {
+    await removeAllDynamicRules();
+    currentVideo.value = undefined;
+  }
 
   if (isEnabled.value) {
     await loadTwitchRedirectRules();
@@ -216,32 +216,32 @@ async function initializeExtension(state: StatusType | null = null) {
   }
 }
 
-// async function loadUserProfile() {
-//   try {
-//     const userData = await storage.getItem<TelegramUser>(
-//       Config.keys.userProfile
-//     ); // TODO
-//     console.log('Загрузка профиля', userData);
-//     if (userData) {
-//       telegramUser.value = userData;
-//       if (userData.is_chat_member) {
-//         telegramStatus.value = TelegramStatus.Ok;
-//       } else {
-//         telegramStatus.value = TelegramStatus.NotMember;
-//       }
-//     } else {
-//       telegramUser.value = undefined;
-//       telegramStatus.value = TelegramStatus.NotAuthorized;
-//     }
-//   } catch (error) {
-//     telegramUser.value = undefined;
-//     telegramStatus.value = TelegramStatus.NotAuthorized;
-//   }
-// }
+async function loadUserProfile() {
+  try {
+    const userData = await storage.getItem<TelegramUser>(
+      Config.keys.userProfile
+    ); // TODO
+    console.log('Загрузка профиля', userData);
+    if (userData) {
+      telegramUser.value = userData;
+      if (userData.is_chat_member) {
+        telegramStatus.value = TelegramStatus.Ok;
+      } else {
+        telegramStatus.value = TelegramStatus.NotMember;
+      }
+    } else {
+      telegramUser.value = undefined;
+      telegramStatus.value = TelegramStatus.NotAuthorized;
+    }
+  } catch (error) {
+    telegramUser.value = undefined;
+    telegramStatus.value = TelegramStatus.NotAuthorized;
+  }
+}
 
 onMounted(async () => {
   await initializeExtension();
-  // await loadUserProfile();
+  await loadUserProfile();
 });
 </script>
 

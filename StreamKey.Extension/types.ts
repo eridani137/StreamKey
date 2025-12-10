@@ -77,23 +77,23 @@ export interface ChannelData {
 }
 
 export interface WithSessionId {
-  SessionId: string;
+  sessionId: string;
 }
 
 export interface WithUserId {
-  UserId: string;
+  userId: string;
 }
 
 export interface WithNumberUserId {
-  UserId: number;
+  userId: number;
 }
 
 export interface WithUserHash {
-  UserHash: string;
+  userHash: string;
 }
 
 export interface WithChannelName {
-  ChannelName: string;
+  channelName: string;
 }
 
 export interface ActivityRequest extends WithUserId, WithSessionId {}

@@ -1,5 +1,11 @@
 import Config from './config';
-import { ActivityRequest, ChannelData, ClickChannel } from './types';
+import {
+  ActivityRequest,
+  ChannelData,
+  ClickChannel,
+  TelegramUser,
+  TelegramUserResponse,
+} from './types';
 
 class HttpClient {
   async updateActivity(payload: ActivityRequest) {
@@ -7,8 +13,8 @@ class HttpClient {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sessionId: payload.SessionId,
-        userId: payload.UserId,
+        sessionId: payload.sessionId,
+        userId: payload.userId,
       }),
     });
 
@@ -16,7 +22,7 @@ class HttpClient {
       console.error('[updateActivity] Сервер вернул ошибку:', response.status);
     }
 
-    console.log('Активность обновлена', payload.UserId);
+    console.log('Активность обновлена', payload.userId);
   }
 
   async clickChannel(payload: ClickChannel) {
@@ -26,8 +32,8 @@ class HttpClient {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        channelName: payload.ChannelName,
-        userId: payload.UserId,
+        channelName: payload.channelName,
+        userId: payload.userId,
       }),
     });
 
@@ -35,14 +41,14 @@ class HttpClient {
       console.warn('[clickChannel] Сервер вернул ошибку: ' + response.status);
     }
 
-    console.log('Клик на канал', payload.ChannelName);
+    console.log('Клик на канал', payload.channelName);
   }
 
   async getChannels(): Promise<ChannelData[] | null> {
     const response = await fetch(`${Config.urls.apiUrl}/channels`, {
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     if (!response.ok) {
@@ -53,6 +59,29 @@ class HttpClient {
     const channels = (await response.json()) as ChannelData[];
 
     return channels;
+  }
+
+  async getTelegramUser(
+    requestData: TelegramUserResponse
+  ): Promise<TelegramUser | null> {
+    const response = await fetch(
+      `${Config.urls.apiUrl}/telegram/user/${requestData.userId}/${requestData.userHash}`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    if (!response.ok) {
+      console.log('Сервер вернул ошибку: ' + response.status);
+      return null;
+    }
+
+    const text = await response.text();
+
+    const data = text ? (JSON.parse(text) as TelegramUser) : null;
+
+    return data;
   }
 }
 

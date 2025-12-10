@@ -10,7 +10,7 @@ export class QualityMenu {
   async init(ctx: any): Promise<void> {
     this.ctx = ctx;
     this.startObserver();
-    // await this.setDefault();
+    await this.setDefault();
   }
 
   getResolutionElements(): HTMLElement[] {
@@ -79,180 +79,180 @@ export class QualityMenu {
     }
   }
 
-  // async block2KResolutionElement(): Promise<void> {
-  //   const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
-  //   if (tgUser?.is_chat_member) return;
+  async block2KResolutionElement(): Promise<void> {
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
+    if (tgUser?.is_chat_member) return;
 
-  //   this.addInstruction();
+    this.addInstruction();
 
-  //   const elements = this.getResolutionElements();
+    const elements = this.getResolutionElements();
 
-  //   const element1440 = elements.find((label) => {
-  //     const text = label.textContent ?? '';
-  //     return text.includes('1440');
-  //   });
-  //   if (!element1440) return;
+    const element1440 = elements.find((label) => {
+      const text = label.textContent ?? '';
+      return text.includes('1440');
+    });
+    if (!element1440) return;
 
-  //   const radioItem = element1440.closest<HTMLElement>(
-  //     Config.qualityMenu.qualityMenuSelectors.radioItems
-  //   );
-  //   if (!radioItem) return;
+    const radioItem = element1440.closest<HTMLElement>(
+      Config.qualityMenu.qualityMenuSelectors.radioItems
+    );
+    if (!radioItem) return;
 
-  //   const flexContainer = radioItem.parentElement;
-  //   if (!flexContainer || flexContainer.style.display !== 'flex') {
-  //     return;
-  //   }
+    const flexContainer = radioItem.parentElement;
+    if (!flexContainer || flexContainer.style.display !== 'flex') {
+      return;
+    }
 
-  //   if (flexContainer.getAttribute('data-streamkey-blocked') === 'true') {
-  //     return;
-  //   }
+    if (flexContainer.getAttribute('data-streamkey-blocked') === 'true') {
+      return;
+    }
 
-  //   const input = radioItem.querySelector<HTMLInputElement>(
-  //     "input[type='radio']"
-  //   );
+    const input = radioItem.querySelector<HTMLInputElement>(
+      "input[type='radio']"
+    );
 
-  //   if (!input) return;
+    if (!input) return;
 
-  //   if (input.checked) {
-  //     await this.autoSwitch();
-  //   }
+    if (input.checked) {
+      await this.autoSwitch();
+    }
 
-  //   flexContainer.setAttribute('data-streamkey-blocked', 'true');
-  //   flexContainer.style.opacity = '0.5';
-  //   flexContainer.style.cursor = 'not-allowed';
-  //   flexContainer.style.position = 'relative';
+    flexContainer.setAttribute('data-streamkey-blocked', 'true');
+    flexContainer.style.opacity = '0.5';
+    flexContainer.style.cursor = 'not-allowed';
+    flexContainer.style.position = 'relative';
 
-  //   input.disabled = true;
+    input.disabled = true;
 
-  //   const labelElement = radioItem.querySelector<HTMLLabelElement>('label');
-  //   if (labelElement) {
-  //     labelElement.removeAttribute('for');
-  //   }
+    const labelElement = radioItem.querySelector<HTMLLabelElement>('label');
+    if (labelElement) {
+      labelElement.removeAttribute('for');
+    }
 
-  //   const blockAllEvents = (e: Event): void => {
-  //     e.preventDefault();
-  //     e.stopPropagation();
-  //     e.stopImmediatePropagation();
-  //   };
+    const blockAllEvents = (e: Event): void => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    };
 
-  //   const events = [
-  //     'click',
-  //     'mousedown',
-  //     'mouseup',
-  //     'mousemove',
-  //     'pointerdown',
-  //     'pointerup',
-  //     'pointermove',
-  //     'touchstart',
-  //     'touchend',
-  //     'touchmove',
-  //     'change',
-  //     'input',
-  //   ];
+    const events = [
+      'click',
+      'mousedown',
+      'mouseup',
+      'mousemove',
+      'pointerdown',
+      'pointerup',
+      'pointermove',
+      'touchstart',
+      'touchend',
+      'touchmove',
+      'change',
+      'input',
+    ];
 
-  //   events.forEach((eventType) => {
-  //     flexContainer.addEventListener(eventType, blockAllEvents, true);
-  //   });
+    events.forEach((eventType) => {
+      flexContainer.addEventListener(eventType, blockAllEvents, true);
+    });
 
-  //   const overlay = document.createElement('div');
-  //   overlay.style.cssText = `
-  //       position: absolute;
-  //       top: 0;
-  //       left: 0;
-  //       width: 100%;
-  //       height: 100%;
-  //       cursor: not-allowed;
-  //       z-index: 10;
-  //       background: transparent;
-  //   `;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: not-allowed;
+        z-index: 10;
+        background: transparent;
+    `;
 
-  //   flexContainer.insertBefore(overlay, flexContainer.firstChild);
+    flexContainer.insertBefore(overlay, flexContainer.firstChild);
 
-  //   events.forEach((eventType) => {
-  //     overlay.addEventListener(eventType, blockAllEvents, true);
-  //   });
+    events.forEach((eventType) => {
+      overlay.addEventListener(eventType, blockAllEvents, true);
+    });
 
-  //   if (input.checked) {
-  //     input.checked = false;
-  //   }
+    if (input.checked) {
+      input.checked = false;
+    }
 
-  //   (flexContainer as any)._streamkeyBlockers = { blockAllEvents, overlay };
-  // }
+    (flexContainer as any)._streamkeyBlockers = { blockAllEvents, overlay };
+  }
 
-  // async autoSwitch(): Promise<void> {
-  //   const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
-  //   if (tgUser?.is_chat_member) return;
+  async autoSwitch(): Promise<void> {
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
+    if (tgUser?.is_chat_member) return;
 
-  //   await this.setDefault();
+    await this.setDefault();
 
-  //   const elements = this.getResolutionElements();
+    const elements = this.getResolutionElements();
 
-  //   const currentSelected = elements.find((label) => {
-  //     const radioItem = label.closest<HTMLElement>(
-  //       Config.qualityMenu.qualityMenuSelectors.radioItems
-  //     );
-  //     if (!radioItem) return false;
+    const currentSelected = elements.find((label) => {
+      const radioItem = label.closest<HTMLElement>(
+        Config.qualityMenu.qualityMenuSelectors.radioItems
+      );
+      if (!radioItem) return false;
 
-  //     const input = radioItem.querySelector<HTMLInputElement>(
-  //       "input[type='radio']"
-  //     );
-  //     return input?.checked === true;
-  //   });
+      const input = radioItem.querySelector<HTMLInputElement>(
+        "input[type='radio']"
+      );
+      return input?.checked === true;
+    });
 
-  //   if (!currentSelected) return;
+    if (!currentSelected) return;
 
-  //   const currentText = currentSelected.textContent ?? '';
-  //   const currentMatch = currentText.match(/(\d{3,4})p/i);
+    const currentText = currentSelected.textContent ?? '';
+    const currentMatch = currentText.match(/(\d{3,4})p/i);
 
-  //   if (!currentMatch || parseInt(currentMatch[1], 10) !== 1440) return;
+    if (!currentMatch || parseInt(currentMatch[1], 10) !== 1440) return;
 
-  //   const lowerResolutions = elements
-  //     .map((label) => {
-  //       const text = label.textContent ?? '';
-  //       const match = text.match(/(\d{3,4})p/i);
-  //       if (!match) return null;
+    const lowerResolutions = elements
+      .map((label) => {
+        const text = label.textContent ?? '';
+        const match = text.match(/(\d{3,4})p/i);
+        if (!match) return null;
 
-  //       const resolution = parseInt(match[1], 10);
-  //       const radioItem = label.closest<HTMLElement>(
-  //         Config.qualityMenu.qualityMenuSelectors.radioItems
-  //       );
+        const resolution = parseInt(match[1], 10);
+        const radioItem = label.closest<HTMLElement>(
+          Config.qualityMenu.qualityMenuSelectors.radioItems
+        );
 
-  //       return {
-  //         resolution,
-  //         label,
-  //         radioItem,
-  //       };
-  //     })
-  //     .filter(
-  //       (item): item is NonNullable<typeof item> =>
-  //         item !== null &&
-  //         item.resolution < 1440 &&
-  //         item.radioItem?.getAttribute('data-streamkey-blocked') !== 'true'
-  //     )
-  //     .sort((a, b) => b.resolution - a.resolution);
+        return {
+          resolution,
+          label,
+          radioItem,
+        };
+      })
+      .filter(
+        (item): item is NonNullable<typeof item> =>
+          item !== null &&
+          item.resolution < 1440 &&
+          item.radioItem?.getAttribute('data-streamkey-blocked') !== 'true'
+      )
+      .sort((a, b) => b.resolution - a.resolution);
 
-  //   if (lowerResolutions.length === 0) return;
+    if (lowerResolutions.length === 0) return;
 
-  //   const targetResolution = lowerResolutions[0];
-  //   const input = targetResolution.radioItem?.querySelector<HTMLInputElement>(
-  //     "input[type='radio']"
-  //   );
+    const targetResolution = lowerResolutions[0];
+    const input = targetResolution.radioItem?.querySelector<HTMLInputElement>(
+      "input[type='radio']"
+    );
 
-  //   if (input && !input.disabled) {
-  //     input.click();
-  //     console.log(
-  //       `Auto-switched from 1440p to ${targetResolution.resolution}p`
-  //     );
-  //   }
-  // }
+    if (input && !input.disabled) {
+      input.click();
+      console.log(
+        `Auto-switched from 1440p to ${targetResolution.resolution}p`
+      );
+    }
+  }
 
-  // async setDefault(): Promise<void> {
-  //   const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
-  //   if (tgUser?.is_chat_member) return;
+  async setDefault(): Promise<void> {
+    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
+    if (tgUser?.is_chat_member) return;
 
-  //   localStorage.setItem('s-qs-ts', String(Math.floor(Date.now())));
-  //   localStorage.setItem('video-quality', '{"default":"1080p60"}');
-  // }
+    localStorage.setItem('s-qs-ts', String(Math.floor(Date.now())));
+    localStorage.setItem('video-quality', '{"default":"1080p60"}');
+  }
 
   createBadge(): HTMLElement {
     const container = document.createElement('span');
@@ -317,7 +317,7 @@ export class QualityMenu {
 
         try {
           this.applyEnhancements();
-          // await this.block2KResolutionElement();
+          await this.block2KResolutionElement();
         } finally {
           this.observer!.observe(document.body, {
             childList: true,

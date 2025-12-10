@@ -178,8 +178,8 @@ export class ActiveChannels {
           const userId = getTwitchUserId();
           if (userId) {
             await sendMessage('clickChannel', {
-              ChannelName: item.channelName,
-              UserId: userId,
+              channelName: item.channelName,
+              userId: userId,
             } as ClickChannel);
           }
         } finally {
