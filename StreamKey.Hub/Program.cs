@@ -12,6 +12,12 @@ OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint()
 
 builder.Services.AddMemoryCache();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
+});
+
 builder.AddRedis(false);
 
 builder.AddNats(false);

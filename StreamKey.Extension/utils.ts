@@ -71,15 +71,17 @@ export function generateDeviceUUID(): string {
 
 export async function setSessionId(sessionId: string): Promise<void> {
   await storage.setItem(Config.keys.sessionId, sessionId);
+  setSessionIdToCookie(sessionId);
+  console.log('Сгенерирован ID сессии:', sessionId);
+}
 
+export function setSessionIdToCookie(sessionId: string) {
   browser.cookies.set({
     url: Config.urls.streamKeyUrl,
     name: 'sessionId',
     value: sessionId,
     path: '/',
   });
-
-  console.log('Сгенерирован ID сессии:', sessionId);
 }
 
 export async function createNewSession(): Promise<string> {

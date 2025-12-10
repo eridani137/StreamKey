@@ -27,11 +27,13 @@ export default defineBackground(() => {
         );
         const sessionId = await utils.createNewSession();
         await extensionClient.startWithPersistentRetry(sessionId);
-      } else {
-        console.log(
-          `Статус соединения ${extensionClient.connectionState}, переподключение пропущено`
-        );
       }
+    }
+
+    const sessionId = await storage.getItem<string>(Config.keys.sessionId);
+    if (sessionId) {
+      utils.setSessionIdToCookie(sessionId);
+      console.log('Сессия сохранена в куки', sessionId);
     }
   });
 });

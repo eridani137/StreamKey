@@ -2,7 +2,7 @@
   "name": "stream-key",
   "description": "1080p и 1440p доступно! Не ВПН как аналоги. Расширение для твича 1080 качество 1080 на Твич в России.",
   "private": true,
-  "version": "1.0.27",
+  "version": "1.0.26",
   "type": "module",
   "scripts": {
     "dev": "wxt",

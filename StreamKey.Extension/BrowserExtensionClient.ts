@@ -38,7 +38,7 @@ class BrowserExtensionClient {
         transport: HttpTransportType.WebSockets,
       })
       .withHubProtocol(new MessagePackHubProtocol())
-      .configureLogging(LogLevel.Debug) // TODO
+      .configureLogging(LogLevel.Error) // TODO
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds(retryContext) {
           const defaultDelays = [0, 1000, 3000, 5000, 10000, 15000];

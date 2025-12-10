@@ -115,7 +115,11 @@ public static class ServiceExtensions
             var redisConnectionString =
                 $"{redisConfig.Host}:{redisConfig.Port},password={redisConfig.Password},abortConnect=false,keepAlive=60";
 
-            builder.Services.AddSignalR()
+            builder.Services.AddSignalR(options =>
+                {
+                    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                    options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
+                })
                 .AddMessagePackProtocol()
                 .AddStackExchangeRedis(redisConnectionString,
                     options =>
