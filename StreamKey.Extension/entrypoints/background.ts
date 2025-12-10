@@ -18,22 +18,22 @@ export default defineBackground(() => {
     await onStartup();
   });
 
-  // browser.alarms.onAlarm.addListener(async (alarm) => {
-  //   if (alarm.name === Config.alarms.checkConnectionState) {
-  //     console.log(`[ALARM] ${alarm.name}`);
-  //     if (extensionClient.connectionState === HubConnectionState.Disconnected) {
-  //       console.log(
-  //         `Статус соединения ${extensionClient.connectionState}, пробуем переподключиться`
-  //       );
-  //       const sessionId = await utils.createNewSession();
-  //       await extensionClient.startWithPersistentRetry(sessionId);
-  //     } else {
-  //       console.log(
-  //         `Статус соединения ${extensionClient.connectionState}, переподключение пропущено`
-  //       );
-  //     }
-  //   }
-  // });
+  browser.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === Config.alarms.checkConnectionState) {
+      console.log(`[ALARM] ${alarm.name}`);
+      if (extensionClient.connectionState === HubConnectionState.Disconnected) {
+        console.log(
+          `Статус соединения ${extensionClient.connectionState}, пробуем переподключиться`
+        );
+        const sessionId = await utils.createNewSession();
+        await extensionClient.startWithPersistentRetry(sessionId);
+      } else {
+        console.log(
+          `Статус соединения ${extensionClient.connectionState}, переподключение пропущено`
+        );
+      }
+    }
+  });
 });
 
 export async function onInstalled() {
@@ -50,7 +50,7 @@ export async function onStartup() {
   if (isEnabled) await loadTwitchRedirectRules();
 
   browser.alarms.create(Config.alarms.checkConnectionState, {
-    delayInMinutes: 1,
+    delayInMinutes: 0.5,
     periodInMinutes: 0.5,
   });
 }
