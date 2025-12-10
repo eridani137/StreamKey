@@ -7,7 +7,7 @@ using StreamKey.Shared.Types;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class ConnectionListener(NatsConnection nats, ILogger<ConnectionListener> logger) : BackgroundService
+public class ConnectionListener(INatsConnection nats, ILogger<ConnectionListener> logger) : BackgroundService
 {
     private readonly MessagePackNatsSerializer<UserSessionMessage> _serializer = new();
     private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
@@ -66,6 +66,7 @@ public class ConnectionListener(NatsConnection nats, ILogger<ConnectionListener>
             try
             {
                 handle(msg);
+                logger.LogInformation("{@Message}", msg);
             }
             catch (Exception e)
             {

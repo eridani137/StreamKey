@@ -9,7 +9,7 @@ using StreamKey.Shared.Types;
 namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
-    NatsConnection nats,
+    INatsConnection nats,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {

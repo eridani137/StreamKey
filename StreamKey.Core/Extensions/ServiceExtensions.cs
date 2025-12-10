@@ -40,6 +40,8 @@ public static class ServiceExtensions
             services.AddHostedService<StatisticHandler>();
             services.AddHostedService<RestartHandler>();
             services.AddHostedService<TelegramHandler>();
+            
+            services.AddHostedService<ConnectionListener>();
 
             return services;
         }
@@ -145,9 +147,7 @@ public static class ServiceExtensions
                 }
             };
 
-            builder.Services.AddSingleton<NatsConnection>(_ => new NatsConnection(options));
-            
-            builder.Services.AddHostedService<ConnectionListener>();
+            builder.Services.AddSingleton<INatsConnection>(_ => new NatsConnection(options));
         }
 
         public void AddDefaultAuthorizationData()
