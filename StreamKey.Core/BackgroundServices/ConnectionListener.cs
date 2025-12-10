@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
-using Serilog;
 using StreamKey.Core.Stores;
 using StreamKey.Shared;
 using StreamKey.Shared.Types;
