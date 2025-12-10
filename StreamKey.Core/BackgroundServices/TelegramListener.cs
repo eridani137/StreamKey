@@ -28,13 +28,11 @@ public class TelegramListener(
 
         await foreach (var msg in subscription)
         {
-            logger.LogInformation("Получено сообщение от {Subject}", msg.Subject);
-            
             try
             {
                 if (msg.Data is null)
                 {
-                    logger.LogWarning("Получен запрос с null данными");
+                    logger.LogWarning("Получен запрос с null данными: {Subject}", msg.Subject);
                     continue;
                 }
                 
