@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Shared.Abstractions;
@@ -10,16 +11,21 @@ namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
     INatsConnection nats,
+    IMemoryCache cache,
     MessagePackNatsSerializer<UserSessionMessage> userSessionMessageSerializer,
     MessagePackNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
     MessagePackNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
     MessagePackNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
+    MessagePackNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
+    MessagePackNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
 
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
+    
+    private const string ChannelsCacheKey = "channels_list";
 
     public override async Task OnConnectedAsync()
     {
@@ -124,40 +130,50 @@ public class BrowserExtensionHub(
             headers: null,
             requestSerializer: telegramUserRequestSerializer,
             replySerializer: telegramUserDtoSerializer,
-            requestOpts: new NatsPubOpts(),
-            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
-            );
+            cancellationToken: Context.ConnectionAborted
+        );
 
         return response.Data;
     }
     
-    // public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service)
-    // {
-    //     var channels = await service.GetChannels(Context.ConnectionAborted);
-    //     return channels.Map();
-    // }
-    //
-    // public async Task CheckMember(CheckMemberRequest request,
-    //     [FromServices] ITelegramUserRepository repository,
-    //     [FromServices] ITelegramService service,
-    //     [FromServices] IUnitOfWork unitOfWork)
-    // {
-    //     var user = await repository.GetByTelegramId(request.UserId, Context.ConnectionAborted);
-    //     if (user is null) return;
-    //
-    //     var getChatMemberResponse = await service.GetChatMember(request.UserId, Context.ConnectionAborted);
-    //     if (getChatMemberResponse is null) return;
-    //
-    //     var isChatMember = getChatMemberResponse.IsChatMember();
-    //     if (user.IsChatMember != isChatMember)
-    //     {
-    //         user.IsChatMember = isChatMember;
-    //         user.UpdatedAt = DateTime.UtcNow;
-    //
-    //         repository.Update(user);
-    //         await unitOfWork.SaveChangesAsync(Context.ConnectionAborted);
-    //     }
-    //
-    //     await Clients.Caller.ReloadUserData(user.MapUserDto());
-    // }
+    public async Task<List<ChannelDto>> GetChannels()
+    {
+        if (cache.TryGetValue<List<ChannelDto>>(ChannelsCacheKey, out var cachedChannels))
+        {
+            return cachedChannels!;
+        }
+        
+        var response = await nats.RequestAsync<string?, List<ChannelDto>?>(
+            subject: NatsKeys.GetChannels,
+            data: null,
+            replySerializer: channelsResponseSerializer,
+            cancellationToken: Context.ConnectionAborted
+        );
+
+        var channels = response.Data ?? [];
+        
+        cache.Set(ChannelsCacheKey, channels, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+        });
+
+        return channels;
+    }
+
+    
+    public async Task CheckMember(CheckMemberRequest request)
+    {
+        var response = await nats.RequestAsync<CheckMemberRequest, TelegramUserDto?>(
+            subject: NatsKeys.CheckTelegramMember,
+            data: request,
+            requestSerializer: checkMemberRequestSerializer,
+            replySerializer: telegramUserDtoSerializer,
+            cancellationToken: Context.ConnectionAborted
+        );
+
+        if (response.Data is not null)
+        {
+            await Clients.Caller.ReloadUserData(response.Data);
+        }
+    }
 }

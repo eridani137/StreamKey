@@ -41,8 +41,10 @@ public record TelegramUserRequest
     [Key(1)] public required string UserHash { get; set; }
 }
 
+[MessagePackObject]
 public record CheckMemberRequest
 {
+    [Key(0)]
     public required long UserId { get; set; }
 }
 

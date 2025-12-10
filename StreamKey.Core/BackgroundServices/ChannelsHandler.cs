@@ -6,14 +6,14 @@ using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class ChannelHandler(ILogger<ChannelHandler> logger, IServiceScopeFactory scopeFactory)
+public class ChannelsHandler(ILogger<ChannelsHandler> logger, IServiceScopeFactory scopeFactory)
     : BackgroundService
 {
-    private readonly PeriodicTaskRunner<ChannelHandler> _taskRunner = new(logger);
+    private readonly PeriodicTaskRunner<ChannelsHandler> _taskRunner = new(logger);
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return _taskRunner.RunAsync(TimeSpan.FromMinutes(1), UpdateAllChannels, stoppingToken);
+        return _taskRunner.RunAsync(TimeSpan.FromMinutes(3), UpdateAllChannels, stoppingToken);
     }
 
     private async Task UpdateAllChannels(CancellationToken cancellationToken)

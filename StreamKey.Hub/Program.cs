@@ -10,6 +10,8 @@ Env.Load();
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddSignalR()
     .AddMessagePackProtocol();
 

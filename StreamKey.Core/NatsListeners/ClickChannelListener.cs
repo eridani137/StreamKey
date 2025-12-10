@@ -8,7 +8,7 @@ using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.NatsListeners;
 
-public class ChannelListener(
+public class ClickChannelListener(
     INatsConnection nats,
     INatsSubscriptionProcessor<ClickChannelRequest> processor,
     MessagePackNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
