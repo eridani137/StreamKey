@@ -44,7 +44,7 @@ public static class ServiceExtensions
             services.AddHostedService<StatisticHandler>();
             services.AddHostedService<RestartHandler>();
             services.AddHostedService<TelegramHandler>();
-            
+
             services.AddHostedService<ConnectionListener>();
             services.AddHostedService<ClickChannelListener>();
             services.AddHostedService<ChannelsListener>();
@@ -107,31 +107,21 @@ public static class ServiceExtensions
             var redisConfig = builder.Configuration
                 .GetSection(nameof(RedisConfig))
                 .Get<RedisConfig>();
-        
+
             if (redisConfig is null) return;
-        
+
             if (isInternal) redisConfig.Host = "redis";
-        
-            var configurationOptions = new ConfigurationOptions
-            {
-                EndPoints = { $"{redisConfig.Host}:{redisConfig.Port}" },
-                Password = redisConfig.Password,
-                KeepAlive = 60,
-                AbortOnConnectFail = false,
-                ReconnectRetryPolicy = new ExponentialRetry(5000)
-            };
-        
-            // builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-            //     ConnectionMultiplexer.Connect(configurationOptions)
-            // );
-        
+
+            var redisConnectionString =
+                $"{redisConfig.Host}:{redisConfig.Port},password={redisConfig.Password},abortConnect=false,keepAlive=60";
+
             builder.Services.AddSignalR()
                 .AddMessagePackProtocol()
-                .AddStackExchangeRedis(options =>
-                {
-                    options.Configuration = configurationOptions;
-                    options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
-                });
+                .AddStackExchangeRedis(redisConnectionString,
+                    options =>
+                    {
+                        options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
+                    });
         }
 
         public void AddNats(bool isInternal)
@@ -141,9 +131,9 @@ public static class ServiceExtensions
                 .Get<NatsConfig>();
 
             if (natsConfig is null) return;
-            
+
             if (isInternal) natsConfig.Url = $"nats://nats:{natsConfig.Port}";
-            
+
             var options = new NatsOpts()
             {
                 Url = natsConfig.Url,
@@ -156,7 +146,7 @@ public static class ServiceExtensions
             };
 
             builder.Services.AddSingleton<INatsConnection>(_ => new NatsConnection(options));
-            
+
             builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
             builder.Services.AddScoped(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
             builder.Services.AddScoped(typeof(MessagePackNatsSerializer<>));
