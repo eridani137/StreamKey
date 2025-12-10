@@ -21,9 +21,7 @@ public record TelegramAuthDto
 [MessagePackObject]
 public record TelegramUserDto
 {
-    [Key("id")]
-    [JsonPropertyName("id")] 
-    public long Id { get; set; }
+    [Key("id")] [JsonPropertyName("id")] public long Id { get; set; }
 
     [Key("username")]
     [JsonPropertyName("username")]
@@ -38,10 +36,11 @@ public record TelegramUserDto
     public bool IsChatMember { get; set; }
 }
 
+[MessagePackObject]
 public record TelegramUserRequest
 {
-    public required long UserId { get; set; }
-    public required string UserHash { get; set; }
+    [Key(0)] public required long UserId { get; set; }
+    [Key(1)] public required string UserHash { get; set; }
 }
 
 public record CheckMemberRequest
@@ -52,7 +51,7 @@ public record CheckMemberRequest
 public record TelegramAuthDtoWithSessionId : TelegramAuthDto
 {
     public Guid SessionId { get; init; }
-    
+
     public TelegramAuthDtoWithSessionId(TelegramAuthDto dto, Guid sessionId)
     {
         AuthDate = dto.AuthDate;
@@ -61,7 +60,7 @@ public record TelegramAuthDtoWithSessionId : TelegramAuthDto
         Id = dto.Id;
         PhotoUrl = dto.PhotoUrl;
         Username = dto.Username;
-        
+
         SessionId = sessionId;
     }
 }
