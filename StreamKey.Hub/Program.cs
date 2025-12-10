@@ -12,6 +12,9 @@ OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint()
 
 // builder.AddRedisBackplane(false);
 
+builder.Services.AddSignalR()
+    .AddMessagePackProtocol();
+
 builder.AddNats(false);
 
 builder.Services.AddHealthChecks();
