@@ -17,14 +17,15 @@ public class BrowserExtensionHub(
     MessagePackNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
     MessagePackNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
     MessagePackNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
-    MessagePackNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer,
-    ILogger<BrowserExtensionHub> logger)
+    MessagePackNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer
+    // ILogger<BrowserExtensionHub> logger
+)
     : Hub<IBrowserExtensionHub>
 {
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
 
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
-    
+
     private const string ChannelsCacheKey = "channels_list";
 
     public override async Task OnConnectedAsync()
@@ -33,14 +34,14 @@ public class BrowserExtensionHub(
         var cts = new CancellationTokenSource();
         RegistrationTimeouts[connectionId] = cts;
 
-        logger.LogInformation("Новое подключение: {ConnectionId}", connectionId);
+        // logger.LogInformation("Новое подключение: {ConnectionId}", connectionId);
 
         _ = Task.Run(async () =>
         {
             try
             {
                 await Task.Delay(ConnectionTimeout, cts.Token);
-                logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
+                // logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
                 Context.Abort();
             }
             catch (TaskCanceledException)
@@ -71,7 +72,7 @@ public class BrowserExtensionHub(
         await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: userSessionMessageSerializer);
         CancelRegistrationTimeout(connectionId);
 
-        logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
+        // logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
     }
 
     private void CancelRegistrationTimeout(string connectionId)
@@ -94,7 +95,7 @@ public class BrowserExtensionHub(
 
         await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: userSessionMessageSerializer);
 
-        logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
+        // logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
 
         await base.OnDisconnectedAsync(exception);
     }
@@ -135,14 +136,14 @@ public class BrowserExtensionHub(
 
         return response.Data;
     }
-    
+
     public async Task<List<ChannelDto>> GetChannels()
     {
         if (cache.TryGetValue<List<ChannelDto>>(ChannelsCacheKey, out var cachedChannels))
         {
             return cachedChannels!;
         }
-        
+
         var response = await nats.RequestAsync<string?, List<ChannelDto>?>(
             subject: NatsKeys.GetChannels,
             data: null,
@@ -151,7 +152,7 @@ public class BrowserExtensionHub(
         );
 
         var channels = response.Data ?? [];
-        
+
         cache.Set(ChannelsCacheKey, channels, new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
@@ -160,7 +161,7 @@ public class BrowserExtensionHub(
         return channels;
     }
 
-    
+
     public async Task CheckMember(CheckMemberRequest request)
     {
         var response = await nats.RequestAsync(
