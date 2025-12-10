@@ -1,6 +1,4 @@
 using DotNetEnv;
-using MessagePack;
-using MessagePack.Resolvers;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
 using StreamKey.Shared.Hubs;
@@ -13,13 +11,7 @@ ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
 builder.Services.AddSignalR()
-    .AddMessagePackProtocol(options =>
-    {
-        options.SerializerOptions =
-            MessagePackSerializerOptions.Standard.WithResolver(
-                ContractlessStandardResolver.Instance
-            );
-    });
+    .AddMessagePackProtocol();
 
 builder.AddNats(false);
 

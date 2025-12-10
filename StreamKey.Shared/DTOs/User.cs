@@ -10,8 +10,10 @@ public record UserSessionMessage
     [Key(1)] public UserSession? Session { get; set; }
 }
 
+[MessagePackObject]
 public record EntrancedUserData
 {
+    [Key(0)]
     public required Guid SessionId { get; set; }
 }
 

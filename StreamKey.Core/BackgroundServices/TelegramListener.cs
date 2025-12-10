@@ -28,9 +28,19 @@ public class TelegramListener(
 
         await foreach (var msg in subscription)
         {
+            logger.LogInformation("Получено сообщение от {Subject}", msg.Subject);
+            
             try
             {
-                var response = await FetchTelegramUserAsync(msg.Data!, stoppingToken);
+                if (msg.Data is null)
+                {
+                    logger.LogWarning("Получен запрос с null данными");
+                    continue;
+                }
+                
+                logger.LogInformation("Обработка запроса: {@Data}", msg.Data);
+                
+                var response = await FetchTelegramUserAsync(msg.Data, stoppingToken);
                 await nats.PublishAsync(msg.ReplyTo!, response, serializer: telegramUserDtoSerializer,
                     cancellationToken: stoppingToken);
             }
@@ -74,7 +84,6 @@ public class TelegramListener(
             return null;
         }
 
-        var userDto = user.MapUserDto();
-        return userDto;
+        return user.MapUserDto();
     }
 }
