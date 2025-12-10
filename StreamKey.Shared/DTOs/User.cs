@@ -5,17 +5,17 @@ namespace StreamKey.Shared.DTOs;
 [MessagePackObject]
 public record UserSessionMessage
 {
-    [Key(0)] public required string ConnectionId { get; init; }
+    public required string ConnectionId { get; init; }
 
-    [Key(1)] public UserSession? Session { get; set; }
+    public UserSession? Session { get; set; }
 }
 
 [MessagePackObject]
 public record UserSession
 {
-    [Key(0)] public string? UserId { get; set; }
-    [Key(1)] public Guid SessionId { get; set; }
-    [IgnoreMember] public DateTimeOffset StartedAt { get; set; }
-    [IgnoreMember] public DateTimeOffset UpdatedAt { get; set; }
-    [IgnoreMember] public TimeSpan AccumulatedTime { get; set; }
+    public string? UserId { get; set; }
+    public Guid SessionId { get; set; }
+    public DateTimeOffset StartedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public TimeSpan AccumulatedTime { get; set; }
 }

@@ -60,7 +60,7 @@ class BrowserExtensionClient {
 
     connection.on('ReloadUserData', async (userArray: any[]) => {
       const user = utils.mapUser(userArray);
-      await utils.initUserProfile(user);
+      await storage.setItem(Config.keys.userProfile, user); // TODO
     });
 
     this.setupConnectionHandlers(connection);
@@ -215,10 +215,10 @@ class BrowserExtensionClient {
     payload: TelegramUserResponse
   ): Promise<TelegramUser | null> {
     const userArray =
-      (await this.connection.invoke('GetTelegramUser', [
+      await this.connection.invoke('GetTelegramUser', [
         payload.userId,
         payload.userHash,
-      ])) || null;
+      ]);
 
     const user = utils.mapUser(userArray);
 

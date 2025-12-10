@@ -106,8 +106,6 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
     })
   )?.value;
 
-  console.log('Обновление профиля');
-
   console.log('tgUserId:', telegramUserId);
   console.log('tgUserHash:', telegramUserHash);
 
@@ -144,15 +142,9 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
   return null;
 }
 
-export async function initUserProfile(
-  telegramUser: TelegramUser | null = null
-): Promise<void> {
-  let userData =
-    telegramUser ?? (await storage.getItem(Config.keys.userProfile));
+export async function initUserProfile(): Promise<void> {
 
-  if (!userData) {
-    userData = await getUserProfile();
-  }
+  const userData = getUserProfile();
 
   if (!userData) {
     await storage.removeItem(Config.keys.userProfile); // TODO
@@ -218,7 +210,7 @@ export function getTwitchUserId(): string | null {
 
 export function mapUser(userArray: any): TelegramUser | null {
   console.log("userArray", userArray);
-  if (userArray[0] && userArray[1] && userArray[2] && userArray[3]) {
+  if (userArray && userArray[0] && userArray[1] && userArray[2] && userArray[3]) {
     const user: TelegramUser = {
       id: userArray[0],
       username: userArray[1],

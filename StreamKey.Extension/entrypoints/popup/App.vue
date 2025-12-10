@@ -99,6 +99,7 @@ import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
 import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
 import { sendMessage } from '@/messaging';
+import { getUserProfile } from '@/utils';
 
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
@@ -240,6 +241,8 @@ async function loadUserProfile() {
 }
 
 onMounted(async () => {
+  const profile = await sendMessage('getProfile');
+  console.log(profile);
   await initializeExtension();
   await loadUserProfile();
 });

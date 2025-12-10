@@ -153,7 +153,7 @@ public static class ServiceExtensions
 
             builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
             builder.Services.AddScoped(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
-            builder.Services.AddScoped(typeof(MessagePackNatsSerializer<>));
+            builder.Services.AddScoped(typeof(JsonNatsSerializer<>));
         }
 
         public void AddDefaultAuthorizationData()

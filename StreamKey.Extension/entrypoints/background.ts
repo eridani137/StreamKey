@@ -83,4 +83,8 @@ export function registerMessageHandlers() {
   onMessage('checkMember', async (message) => {
     await extensionClient.checkMember(message.data);
   });
+
+  onMessage('getProfile', async () => {
+    return await utils.getUserProfile();
+  });
 }

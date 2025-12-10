@@ -21,30 +21,25 @@ public record TelegramAuthDto
 [MessagePackObject]
 public record TelegramUserDto
 {
-    [Key(0)]
     public long Id { get; set; }
 
-    [Key(1)]
     public string Username { get; set; } = string.Empty;
 
-    [Key(2)]
     public string PhotoUrl { get; set; } = string.Empty;
 
-    [Key(3)]
     public bool IsChatMember { get; set; }
 }
 
 [MessagePackObject]
 public record TelegramUserRequest
 {
-    [Key(0)] public required long UserId { get; set; }
-    [Key(1)] public required string UserHash { get; set; }
+    public required long UserId { get; set; }
+    public required string UserHash { get; set; }
 }
 
 [MessagePackObject]
 public record CheckMemberRequest
 {
-    [Key(0)]
     public required long UserId { get; set; }
 }
 
