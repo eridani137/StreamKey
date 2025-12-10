@@ -213,3 +213,13 @@ export function getTwitchUserId(): string | null {
   const userIdRaw = localStorage.getItem(Config.keys.twId);
   return userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
 }
+
+export function mapUser(userArray: any[]): TelegramUser {
+  const user: TelegramUser = {
+    id: userArray[0],
+    username: userArray[1],
+    photo_url: userArray[2],
+    is_chat_member: userArray[3],
+  };
+  return user;
+}

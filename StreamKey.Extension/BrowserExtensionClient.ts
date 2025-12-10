@@ -55,13 +55,8 @@ class BrowserExtensionClient {
       await connection.invoke('EntranceUserData', [this.sessionId]);
     });
 
-    connection.on('ReloadUserData', async (userArray: any): Promise<void> => {
-      const user: TelegramUser = {
-        id: userArray[0],
-        username: userArray[1],
-        photo_url: userArray[2],
-        is_chat_member: userArray[3],
-      };
+    connection.on('ReloadUserData', async (userArray: any[]): Promise<void> => {
+      const user = utils.mapUser(userArray);
       await utils.initUserProfile(user);
     });
 
@@ -222,12 +217,7 @@ class BrowserExtensionClient {
         payload.userHash,
       ])) || null;
 
-    const user: TelegramUser = {
-      id: userArray[0],
-      username: userArray[1],
-      photo_url: userArray[2],
-      is_chat_member: userArray[3],
-    };
+    const user = utils.mapUser(userArray);
 
     return user;
   }
