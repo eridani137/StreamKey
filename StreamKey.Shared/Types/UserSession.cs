@@ -2,23 +2,6 @@ using MessagePack;
 
 namespace StreamKey.Shared.Types;
 
-// public class UserSession
-// {
-//     public string? UserId { get; set; }
-//     public required Guid SessionId { get; set; }
-//     public DateTimeOffset StartedAt { get; set; }
-//     public DateTimeOffset UpdatedAt { get; set; }
-//     public TimeSpan AccumulatedTime { get; set; }
-// }
-
-[MessagePackObject]
-public record UserSessionMessage
-{
-    [Key(0)] public required string ConnectionId { get; set; }
-
-    [Key(1)] public UserSession? Session { get; set; }
-}
-
 [MessagePackObject]
 public record UserSession
 {

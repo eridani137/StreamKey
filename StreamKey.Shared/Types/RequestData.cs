@@ -1,10 +1,10 @@
 namespace StreamKey.Shared.Types;
 
-public class RequestData
+public record RequestData
 {
-    public required string ChannelName { get; set; }
+    public required string ChannelName { get; init; }
     public required int ChannelId { get; set; }
-    public required string UserIp { get; set; }
-    public required string UserId { get; set; }
-    public required string DeviceId { get; set; }
+    public required string UserIp { get; init; }
+    public required string UserId { get; init; }
+    public required string DeviceId { get; init; }
 }

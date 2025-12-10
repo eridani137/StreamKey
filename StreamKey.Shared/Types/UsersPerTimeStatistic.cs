@@ -1,6 +1,6 @@
 namespace StreamKey.Shared.Types;
 
-public class UsersPerTimeStatistic
+public record UsersPerTimeStatistic
 {
     public int UniqueUsersCount { get; set; }
 }

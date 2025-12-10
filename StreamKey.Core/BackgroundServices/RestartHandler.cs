@@ -7,52 +7,42 @@ using StreamKey.Shared.Entities;
 namespace StreamKey.Core.BackgroundServices;
 
 public class RestartHandler(
-    IServiceProvider serviceProvider,
+    IServiceScopeFactory scopeFactory,
     IHostApplicationLifetime appLifetime,
     ILogger<RestartHandler> logger)
     : BackgroundService
 {
-    private readonly TimeSpan _time = new(1, 0, 0);
-    private readonly TimeSpan _checkDelay = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _restartTime = new(1, 0, 0); // 01:00
+    
+    private readonly PeriodicTaskRunner<RestartHandler> _taskRunner = new(logger);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            using var scope = serviceProvider.CreateScope();
-            var repository = scope.ServiceProvider.GetRequiredService<IRestartRepository>();
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        return _taskRunner.RunAsync(TimeSpan.FromMinutes(1), CheckAndRestartIfNeeded, stoppingToken);
+    }
 
-            var lastRestartEntity = await repository.GetLastRestart(stoppingToken);
+    private async Task CheckAndRestartIfNeeded(CancellationToken cancellationToken)
+    {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IRestartRepository>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var now = DateTime.UtcNow;
-            var timeToday = new DateTime(now.Year, now.Month, now.Day, _time.Hours, _time.Minutes, _time.Seconds);
+        var lastRestart = await repository.GetLastRestart(cancellationToken);
 
-            if (now >= timeToday)
-            {
-                if (lastRestartEntity == null || lastRestartEntity.DateTime.Date < now.Date)
-                {
-                    logger.LogInformation("Плановый перезапуск");
+        var now = DateTime.UtcNow;
+        var restartToday = new DateTime(now.Year, now.Month, now.Day, _restartTime.Hours, _restartTime.Minutes, _restartTime.Seconds);
 
-                    await repository.Add(new RestartEntity
-                    {
-                        DateTime = now
-                    }, stoppingToken);
-                    await unitOfWork.SaveChangesAsync(stoppingToken);
+        if (now < restartToday)
+            return; // ещё не наступило время
 
-                    appLifetime.StopApplication();
-                    break;
-                }
-            }
+        if (lastRestart != null && lastRestart.DateTime.Date >= now.Date)
+            return; // уже был сегодня
 
-            try
-            {
-                await Task.Delay(_checkDelay, stoppingToken);
-            }
-            catch (TaskCanceledException)
-            {
-                break;
-            }
-        }
+        logger.LogInformation("Плановый перезапуск приложения");
+
+        await repository.Add(new RestartEntity { DateTime = now }, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        appLifetime.StopApplication();
     }
 }

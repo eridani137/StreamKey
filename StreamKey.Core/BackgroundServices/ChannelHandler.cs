@@ -6,39 +6,29 @@ using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class ChannelHandler(
-    ILogger<ChannelHandler> logger,
-    IServiceProvider serviceProvider)
+public class ChannelHandler(ILogger<ChannelHandler> logger, IServiceScopeFactory scopeFactory)
     : BackgroundService
 {
-    private static readonly TimeSpan UpdateInterval = TimeSpan.FromMinutes(1);
+    private readonly PeriodicTaskRunner<ChannelHandler> _taskRunner = new(logger);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await Task.Delay(UpdateInterval, stoppingToken);
+        return _taskRunner.RunAsync(TimeSpan.FromMinutes(1), UpdateAllChannels, stoppingToken);
+    }
 
-        while (!stoppingToken.IsCancellationRequested)
+    private async Task UpdateAllChannels(CancellationToken cancellationToken)
+    {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
+        var channelService = scope.ServiceProvider.GetRequiredService<IChannelService>();
+
+        var channels = await channelRepository.GetAll(cancellationToken);
+
+        foreach (var channel in channels)
         {
             try
             {
-                await using var scope = serviceProvider.CreateAsyncScope();
-                var channelRepository = scope.ServiceProvider.GetRequiredService<IChannelRepository>();
-                var channelService = scope.ServiceProvider.GetRequiredService<IChannelService>();
-
-                var channels = await channelRepository.GetAll(stoppingToken);
-                foreach (var channel in channels)
-                {
-                    try
-                    {
-                        await channelService.UpdateChannelInfo(channel, stoppingToken);
-                    }
-                    catch (Exception e)
-                    {
-                        logger.LogError(e, "Ошибка при обновлении информации канала {@Channel}", channel);
-                    }
-                }
-                
-                await Task.Delay(UpdateInterval, stoppingToken);
+                await channelService.UpdateChannelInfo(channel, cancellationToken);
             }
             catch (Exception e)
             {
