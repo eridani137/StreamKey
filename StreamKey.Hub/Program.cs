@@ -1,5 +1,6 @@
 using DotNetEnv;
-using Serilog.Events;
+using MessagePack;
+using MessagePack.Resolvers;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
 using StreamKey.Shared.Hubs;
@@ -8,11 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
-ConfigureLogging.Configure(builder, LogEventLevel.Debug);
+ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
 builder.Services.AddSignalR()
-    .AddMessagePackProtocol();
+    .AddMessagePackProtocol(options =>
+    {
+        options.SerializerOptions =
+            MessagePackSerializerOptions.Standard.WithResolver(
+                ContractlessStandardResolver.Instance
+            );
+    });
 
 builder.AddNats(false);
 
