@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace StreamKey.Core.Http;
+namespace StreamKey.Core.Observability;
 
 public class FilterNotFoundHandler : DelegatingHandler
 {
