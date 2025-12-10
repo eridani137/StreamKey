@@ -163,7 +163,7 @@ public class BrowserExtensionHub(
     
     public async Task CheckMember(CheckMemberRequest request)
     {
-        var response = await nats.RequestAsync<CheckMemberRequest, TelegramUserDto?>(
+        var response = await nats.RequestAsync(
             subject: NatsKeys.CheckTelegramMember,
             data: request,
             requestSerializer: checkMemberRequestSerializer,
