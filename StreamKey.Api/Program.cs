@@ -2,14 +2,12 @@ using System.ComponentModel;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;
-using StackExchange.Redis;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
 using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared;
-using StreamKey.Shared.Configs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +23,9 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 
 builder.Services.AddHealthChecks();
 
-builder.AddRedisBackplane(true);
+// builder.AddRedisBackplane(true);
 
-// builder.AddNats(true);
+builder.AddNats(true);
 
 builder.Services.AddApplication();
 

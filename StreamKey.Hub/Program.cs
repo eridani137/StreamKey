@@ -10,7 +10,7 @@ Env.Load();
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
-builder.AddRedisBackplane(false);
+// builder.AddRedisBackplane(false);
 
 builder.AddNats(false);
 
