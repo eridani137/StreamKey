@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
+using StackExchange.Redis;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.Messaging;
@@ -101,37 +102,37 @@ public static class ServiceExtensions
 
     extension(IHostApplicationBuilder builder)
     {
-        // public void AddRedisBackplane(bool isInternal)
-        // {
-        //     var redisConfig = builder.Configuration
-        //         .GetSection(nameof(RedisConfig))
-        //         .Get<RedisConfig>();
-        //
-        //     if (redisConfig is null) return;
-        //
-        //     if (isInternal) redisConfig.Host = "redis";
-        //
-        //     var configurationOptions = new ConfigurationOptions
-        //     {
-        //         EndPoints = { $"{redisConfig.Host}:{redisConfig.Port}" },
-        //         Password = redisConfig.Password,
-        //         KeepAlive = 60,
-        //         AbortOnConnectFail = false,
-        //         ReconnectRetryPolicy = new ExponentialRetry(5000)
-        //     };
-        //
-        //     builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-        //         ConnectionMultiplexer.Connect(configurationOptions)
-        //     );
-        //
-        //     builder.Services.AddSignalR()
-        //         .AddMessagePackProtocol()
-        //         .AddStackExchangeRedis(options =>
-        //         {
-        //             options.Configuration = configurationOptions;
-        //             options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
-        //         });
-        // }
+        public void AddRedis(bool isInternal)
+        {
+            var redisConfig = builder.Configuration
+                .GetSection(nameof(RedisConfig))
+                .Get<RedisConfig>();
+        
+            if (redisConfig is null) return;
+        
+            if (isInternal) redisConfig.Host = "redis";
+        
+            var configurationOptions = new ConfigurationOptions
+            {
+                EndPoints = { $"{redisConfig.Host}:{redisConfig.Port}" },
+                Password = redisConfig.Password,
+                KeepAlive = 60,
+                AbortOnConnectFail = false,
+                ReconnectRetryPolicy = new ExponentialRetry(5000)
+            };
+        
+            // builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+            //     ConnectionMultiplexer.Connect(configurationOptions)
+            // );
+        
+            builder.Services.AddSignalR()
+                .AddMessagePackProtocol()
+                .AddStackExchangeRedis(options =>
+                {
+                    options.Configuration = configurationOptions;
+                    options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
+                });
+        }
 
         public void AddNats(bool isInternal)
         {

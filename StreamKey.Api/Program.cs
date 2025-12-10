@@ -27,6 +27,8 @@ builder.Services.PostConfigureAll<HostOptions>(options => options.ShutdownTimeou
 
 builder.Services.AddHealthChecks();
 
+builder.AddRedis(true);
+
 builder.AddNats(true);
 
 builder.Services.AddApplication();

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.DTOs.Telegram;
 
 namespace StreamKey.Core.Common;
 
@@ -7,7 +8,17 @@ public static class ConnectionRegistry
 {
     public static readonly ConcurrentDictionary<string, UserSession> ActiveConnections = new();
     public static readonly ConcurrentDictionary<string, UserSession> DisconnectedConnections = new();
+    
+    public static readonly ConcurrentQueue<TelegramAuthDtoWithSessionId> NewTelegramUsers = new();
 
+    public static string? GetConnectionIdBySessionId(Guid sessionId)
+    {
+        var client = ActiveConnections.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
+        return !string.IsNullOrEmpty(client.Key)
+            ? client.Key
+            : null;
+    }
+    
     public static void AddConnection(string connectionId, UserSession session)
         => ActiveConnections[connectionId] = session;
 

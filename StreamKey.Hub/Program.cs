@@ -12,8 +12,7 @@ OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint()
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddSignalR()
-    .AddMessagePackProtocol();
+builder.AddRedis(false);
 
 builder.AddNats(false);
 

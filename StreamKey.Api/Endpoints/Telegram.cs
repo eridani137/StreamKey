@@ -2,6 +2,7 @@ using Carter;
 using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
+using StreamKey.Core.Common;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Shared.DTOs;
@@ -19,17 +20,17 @@ public class Telegram : ICarterModule
         group.MapPost("/login/{sessionId:guid}",
                 (TelegramAuthDto dto, Guid sessionId) =>
                 {
-                    // if (string.IsNullOrEmpty(dto.Hash))
-                    // {
-                    //     return Results.BadRequest();
-                    // }
-                    //
-                    // if (TelegramHandler.NewUsers.Any(u => u.Id == dto.Id))
-                    // {
-                    //     return Results.BadRequest("Запрос уже в обработке");
-                    // }
-                    //
-                    // TelegramHandler.NewUsers.Enqueue(new TelegramAuthDtoWithSessionId(dto, sessionId));
+                    if (string.IsNullOrEmpty(dto.Hash))
+                    {
+                        return Results.BadRequest();
+                    }
+                    
+                    if (ConnectionRegistry.NewTelegramUsers.Any(u => u.Id == dto.Id))
+                    {
+                        return Results.BadRequest("Запрос уже в обработке");
+                    }
+                    
+                    ConnectionRegistry.NewTelegramUsers.Enqueue(new TelegramAuthDtoWithSessionId(dto, sessionId));
 
                     return Results.Ok();
                 })

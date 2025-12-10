@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
