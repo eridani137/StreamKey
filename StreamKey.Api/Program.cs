@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Carter;
 using DotNetEnv;
 using Scalar.AspNetCore;
+using Serilog;
 using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
@@ -51,6 +52,15 @@ builder.Services.AddProblemDetails();
 TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
 
 var app = builder.Build();
+
+app.Use(async (_, next) =>
+{
+    try { await next(); }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Ошибка");
+    }
+});
 
 app.MapOpenApi();
 app.MapScalarApiReference();
