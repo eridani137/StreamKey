@@ -216,12 +216,17 @@ export function getTwitchUserId(): string | null {
   return userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
 }
 
-export function mapUser(userArray: any[]): TelegramUser {
-  const user: TelegramUser = {
-    id: userArray[0],
-    username: userArray[1],
-    photo_url: userArray[2],
-    is_chat_member: userArray[3],
-  };
-  return user;
+export function mapUser(userArray: any): TelegramUser | null {
+  console.log("userArray", userArray);
+  if (userArray[0] && userArray[1] && userArray[2] && userArray[3]) {
+    const user: TelegramUser = {
+      id: userArray[0],
+      username: userArray[1],
+      photo_url: userArray[2],
+      is_chat_member: userArray[3],
+    };
+    return user;
+  }
+
+  return null;
 }
