@@ -142,9 +142,11 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
   return null;
 }
 
-export async function initUserProfile(): Promise<void> {
-
-  const userData = getUserProfile();
+export async function initUserProfile(
+    telegramUser: TelegramUser | null = null
+): Promise<void> {
+  let userData =
+      telegramUser ?? (await getUserProfile());
 
   if (!userData) {
     await storage.removeItem(Config.keys.userProfile); // TODO
@@ -206,19 +208,4 @@ export function getStateClass(state: HubConnectionState) {
 export function getTwitchUserId(): string | null {
   const userIdRaw = localStorage.getItem(Config.keys.twId);
   return userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
-}
-
-export function mapUser(userArray: any): TelegramUser | null {
-  console.log("userArray", userArray);
-  if (userArray && userArray[0] && userArray[1] && userArray[2] && userArray[3]) {
-    const user: TelegramUser = {
-      id: userArray[0],
-      username: userArray[1],
-      photo_url: userArray[2],
-      is_chat_member: userArray[3],
-    };
-    return user;
-  }
-
-  return null;
 }

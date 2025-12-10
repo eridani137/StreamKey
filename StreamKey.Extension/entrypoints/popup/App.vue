@@ -242,7 +242,7 @@ async function loadUserProfile() {
 
 onMounted(async () => {
   const profile = await sendMessage('getProfile');
-  console.log(profile);
+  console.log('getProfile', profile);
   await initializeExtension();
   await loadUserProfile();
 });

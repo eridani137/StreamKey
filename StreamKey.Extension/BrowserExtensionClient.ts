@@ -58,9 +58,8 @@ class BrowserExtensionClient {
       await connection.invoke('EntranceUserData', this.sessionId);
     });
 
-    connection.on('ReloadUserData', async (userArray: any[]) => {
-      const user = utils.mapUser(userArray);
-      await storage.setItem(Config.keys.userProfile, user); // TODO
+    connection.on('ReloadUserData', async (user) => {
+      await utils.initUserProfile(user);
     });
 
     this.setupConnectionHandlers(connection);
@@ -164,6 +163,8 @@ class BrowserExtensionClient {
 
     while (this.shouldReconnect) {
       try {
+        if (this.connection.state === HubConnectionState.Connected) break;
+
         console.log('Попытка подключения...');
         await this.connection.start();
 
@@ -214,14 +215,7 @@ class BrowserExtensionClient {
   async getTelegramUser(
     payload: TelegramUserResponse
   ): Promise<TelegramUser | null> {
-    const userArray =
-      await this.connection.invoke('GetTelegramUser', [
-        payload.userId,
-        payload.userHash,
-      ]);
-
-    const user = utils.mapUser(userArray);
-
+    const user = await this.connection.invoke('GetTelegramUser', payload);
     return user;
   }
 
@@ -234,7 +228,7 @@ class BrowserExtensionClient {
   }
 
   async checkMember(payload: CheckMemberResponse): Promise<void> {
-    await this.connection.invoke('CheckMember', [payload.userId]);
+    await this.connection.invoke('CheckMember', payload);
   }
 }
 
