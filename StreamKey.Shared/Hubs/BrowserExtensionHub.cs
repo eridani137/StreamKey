@@ -116,21 +116,16 @@ public class BrowserExtensionHub(
         await nats.PublishAsync(NatsKeys.ClickChannel, dto, serializer: clickChannelRequestSerializer);
     }
 
-    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request)
     {
         var response = await nats.RequestAsync(
-            NatsKeys.GetTelegramUser,
-            request,
+            subject: NatsKeys.GetTelegramUser,
+            data: request,
             headers: null,
-            telegramUserRequestSerializer,
-            telegramUserDtoSerializer,
-            new NatsPubOpts(),
-            new NatsSubOpts
-            {
-                Timeout = TimeSpan.FromSeconds(5)
-            },
-            cancellationToken
+            requestSerializer: telegramUserRequestSerializer,
+            replySerializer: telegramUserDtoSerializer,
+            requestOpts: new NatsPubOpts(),
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(5) }
         );
 
         return response.Data;
