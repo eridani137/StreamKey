@@ -5,7 +5,7 @@ namespace StreamKey.Shared.DTOs;
 
 [MessagePackObject]
 public record ChannelDto(
-    [property: Key("channelName")] string ChannelName,
-    [property: Key("info")] ChannelInfo? Info,
-    [property: Key("position")] int Position = 0
+    [property: Key(0)] string ChannelName,
+    [property: Key(1)] ChannelInfo? Info,
+    [property: Key(2)] int Position = 0
 );

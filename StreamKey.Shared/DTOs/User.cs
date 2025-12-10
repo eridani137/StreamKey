@@ -13,8 +13,8 @@ public record UserSessionMessage
 [MessagePackObject]
 public record UserSession
 {
-    [Key("userId")] public string? UserId { get; set; }
-    [Key("sessionId")] public Guid SessionId { get; set; }
+    [Key(0)] public string? UserId { get; set; }
+    [Key(1)] public Guid SessionId { get; set; }
     [IgnoreMember] public DateTimeOffset StartedAt { get; set; }
     [IgnoreMember] public DateTimeOffset UpdatedAt { get; set; }
     [IgnoreMember] public TimeSpan AccumulatedTime { get; set; }

@@ -54,11 +54,11 @@ class BrowserExtensionClient {
     connection.keepAliveIntervalInMilliseconds = 15000;
     connection.serverTimeoutInMilliseconds = 60000;
 
-    connection.on('RequestUserData', async (): Promise<void> => {
+    connection.on('RequestUserData', async () => {
       await connection.invoke('EntranceUserData', this.sessionId);
     });
 
-    connection.on('ReloadUserData', async (userArray: any[]): Promise<void> => {
+    connection.on('ReloadUserData', async (userArray: any[]) => {
       const user = utils.mapUser(userArray);
       await utils.initUserProfile(user);
     });
