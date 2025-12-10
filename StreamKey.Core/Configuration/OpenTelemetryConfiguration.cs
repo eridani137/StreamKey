@@ -8,6 +8,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using StreamKey.Core.Extensions;
+using StreamKey.Core.Observability;
 
 namespace StreamKey.Core.Configuration;
 

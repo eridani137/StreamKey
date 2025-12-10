@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace StreamKey.Core;
+namespace StreamKey.Core.Common;
 
 public class PeriodicTaskRunner<T>(ILogger<T> logger)
 {

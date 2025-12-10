@@ -7,6 +7,7 @@ using StreamKey.Core;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Converters;
 using StreamKey.Core.Extensions;
+using StreamKey.Core.Http;
 using StreamKey.Infrastructure.Extensions;
 using StreamKey.Shared;
 

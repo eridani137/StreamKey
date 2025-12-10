@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using StreamKey.Shared.DTOs;
 
-namespace StreamKey.Core;
+namespace StreamKey.Core.Common;
 
 public static class ConnectionRegistry
 {

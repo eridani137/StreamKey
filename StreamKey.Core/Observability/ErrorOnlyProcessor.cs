@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using OpenTelemetry;
 
-namespace StreamKey.Core;
+namespace StreamKey.Core.Observability;
 
 public class ErrorOnlyProcessor : BaseProcessor<Activity>
 {

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 
-namespace StreamKey.Core;
+namespace StreamKey.Core.Messaging;
 
 public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
     ILogger<NatsRequestReplyProcessor<TRequest, TResponse>> logger)

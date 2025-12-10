@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Common;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
