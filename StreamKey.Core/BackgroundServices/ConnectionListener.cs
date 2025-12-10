@@ -66,7 +66,6 @@ public class ConnectionListener(INatsConnection nats, ILogger<ConnectionListener
             try
             {
                 handle(msg);
-                logger.LogInformation("Поступило NATS-сообщение: {Subject}", msg.Subject);
             }
             catch (Exception e)
             {
