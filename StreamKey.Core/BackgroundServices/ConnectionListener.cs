@@ -1,17 +1,18 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
+using StreamKey.Core.Abstractions;
 using StreamKey.Core.Stores;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class ConnectionListener(INatsConnection nats, ILogger<ConnectionListener> logger) : BackgroundService
+public class ConnectionListener(
+    INatsConnection nats,
+    INatsSubscriptionProcessor<UserSessionMessage> processor,
+    MessagePackNatsSerializer<UserSessionMessage> userSessionMessageSerializer) : BackgroundService
 {
-    private readonly MessagePackNatsSerializer<UserSessionMessage> _userSessionSerializer = new();
-    private readonly MessagePackNatsSerializer<ClickChannelRequest> _clickChannelSerializer = new();
-    
     private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,42 +37,10 @@ public class ConnectionListener(INatsConnection nats, ILogger<ConnectionListener
             }
         };
 
-        var userSessionTasks = userSessionHandlers.Select(kv =>
-        {
-            var subscription = nats.SubscribeAsync(kv.Key, serializer: _userSessionSerializer, cancellationToken: stoppingToken);
-            return ProcessSubscription(subscription, kv.Value, stoppingToken);
-        });
+        var userSessionTasks = userSessionHandlers.Select(kvp => processor.ProcessAsync(
+            nats.SubscribeAsync(kvp.Key, serializer: userSessionMessageSerializer, cancellationToken: stoppingToken),
+            kvp.Value, stoppingToken));
 
-        var clickChannelSubscription = nats.SubscribeAsync(NatsKeys.ClickChannel, serializer: _clickChannelSerializer, cancellationToken: stoppingToken);
-        var clickChannelTask = ProcessSubscription(clickChannelSubscription, HandleClickChannel, stoppingToken);
-
-        await Task.WhenAll(userSessionTasks.Append(clickChannelTask));
-    }
-
-    private async Task ProcessSubscription<T>(
-        IAsyncEnumerable<NatsMsg<T>> subscription,
-        Func<T, Task> handle,
-        CancellationToken token)
-    {
-        await foreach (var msg in subscription.WithCancellation(token))
-        {
-            try
-            {
-                if (msg.Data is not null)
-                {
-                    await handle(msg.Data);
-                }
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Ошибка при обработке NATS-сообщения: {Subject}", msg.Subject);
-            }
-        }
-    }
-    
-    private Task HandleClickChannel(ClickChannelRequest dto)
-    {
-        logger.LogInformation("ClickChannel received: {ChannelId}", dto.ChannelName);
-        return Task.CompletedTask;
+        await Task.WhenAll(userSessionTasks);
     }
 }

@@ -23,8 +23,6 @@ if (builder.Configuration.GetSection("TelegramAuthorizationBotToken").Get<string
 
 builder.Services.AddHealthChecks();
 
-// builder.AddRedisBackplane(true);
-
 builder.AddNats(true);
 
 builder.Services.AddApplication();

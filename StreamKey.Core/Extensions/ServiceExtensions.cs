@@ -42,6 +42,8 @@ public static class ServiceExtensions
             services.AddHostedService<TelegramHandler>();
             
             services.AddHostedService<ConnectionListener>();
+            services.AddHostedService<ChannelListener>();
+            services.AddHostedService<TelegramListener>();
 
             return services;
         }
@@ -148,6 +150,9 @@ public static class ServiceExtensions
             };
 
             builder.Services.AddSingleton<INatsConnection>(_ => new NatsConnection(options));
+            
+            builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
+            builder.Services.AddScoped(typeof(MessagePackNatsSerializer<>));
         }
 
         public void AddDefaultAuthorizationData()

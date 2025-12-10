@@ -4,17 +4,19 @@ using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.DTOs.Telegram;
 
 namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
     INatsConnection nats,
+    MessagePackNatsSerializer<UserSessionMessage> userSessionMessageSerializer,
+    MessagePackNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
+    MessagePackNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
+    MessagePackNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
-    private readonly MessagePackNatsSerializer<UserSessionMessage> _userSessionSerializer = new();
-    private readonly MessagePackNatsSerializer<ClickChannelRequest> _clickChannelSerializer = new();
-    
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
 
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
@@ -35,14 +37,16 @@ public class BrowserExtensionHub(
                 logger.LogWarning("Таймаут регистрации пользователя: {ConnectionId}", connectionId);
                 Context.Abort();
             }
-            catch (TaskCanceledException) { }
+            catch (TaskCanceledException)
+            {
+            }
         }, cts.Token);
 
         await Clients.Caller.RequestUserData();
         await base.OnConnectedAsync();
     }
-    
-    
+
+
     public async Task EntranceUserData(EntrancedUserData userData)
     {
         var connectionId = Context.ConnectionId;
@@ -58,20 +62,20 @@ public class BrowserExtensionHub(
             }
         };
 
-        await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: _userSessionSerializer);
+        await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: userSessionMessageSerializer);
         CancelRegistrationTimeout(connectionId);
 
         logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
     }
-    
+
     private void CancelRegistrationTimeout(string connectionId)
     {
         if (!RegistrationTimeouts.TryRemove(connectionId, out var cts)) return;
-    
+
         cts.Cancel();
         cts.Dispose();
     }
-    
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connectionId = Context.ConnectionId;
@@ -81,19 +85,19 @@ public class BrowserExtensionHub(
         {
             ConnectionId = connectionId
         };
-        
-        await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: _userSessionSerializer);
-    
+
+        await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: userSessionMessageSerializer);
+
         logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
-        
+
         await base.OnDisconnectedAsync(exception);
     }
-    
+
     public async Task UpdateActivity(UpdateUserActivityRequest updateUserActivityRequest)
     {
         var connectionId = Context.ConnectionId;
         var now = DateTimeOffset.UtcNow;
-        
+
         var message = new UserSessionMessage
         {
             ConnectionId = connectionId,
@@ -103,15 +107,35 @@ public class BrowserExtensionHub(
                 UpdatedAt = now
             }
         };
-        
-        await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: _userSessionSerializer);
+
+        await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: userSessionMessageSerializer);
     }
 
     public async Task ClickChannel(ClickChannelRequest dto)
     {
-        await nats.PublishAsync(NatsKeys.ClickChannel, dto, serializer: _clickChannelSerializer);
+        await nats.PublishAsync(NatsKeys.ClickChannel, dto, serializer: clickChannelRequestSerializer);
     }
-    
+
+    public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await nats.RequestAsync(
+            NatsKeys.GetTelegramUser,
+            request,
+            headers: null,
+            telegramUserRequestSerializer,
+            telegramUserDtoSerializer,
+            new NatsPubOpts(),
+            new NatsSubOpts
+            {
+                Timeout = TimeSpan.FromSeconds(5)
+            },
+            cancellationToken
+        );
+
+        return response.Data;
+    }
+
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
     //     [FromServices] ITelegramUserRepository repository)
     // {
