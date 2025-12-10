@@ -125,7 +125,7 @@ public class BrowserExtensionHub(
             requestSerializer: telegramUserRequestSerializer,
             replySerializer: telegramUserDtoSerializer,
             requestOpts: new NatsPubOpts(),
-            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(5) }
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(30) }
         );
 
         return response.Data;

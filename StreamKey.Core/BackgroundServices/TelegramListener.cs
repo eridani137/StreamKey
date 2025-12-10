@@ -39,6 +39,23 @@ public class TelegramListener(
                 logger.LogError(e,
                     "Ошибка при обработке NATS-сообщения: {Subject}",
                     msg.Subject);
+                
+                if (!string.IsNullOrEmpty(msg.ReplyTo))
+                {
+                    try
+                    {
+                        await nats.PublishAsync(
+                            msg.ReplyTo, 
+                            null, 
+                            serializer: telegramUserDtoSerializer,
+                            cancellationToken: stoppingToken
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Не удалось отправить error response");
+                    }
+                }
             }
         }
     }
@@ -57,6 +74,7 @@ public class TelegramListener(
             return null;
         }
 
-        return user.MapUserDto();
+        var userDto = user.MapUserDto();
+        return userDto;
     }
 }
