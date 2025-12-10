@@ -12,7 +12,8 @@ public class BrowserExtensionHub(
     ILogger<BrowserExtensionHub> logger)
     : Hub<IBrowserExtensionHub>
 {
-    private readonly MessagePackNatsSerializer<UserSessionMessage> _serializer = new();
+    private readonly MessagePackNatsSerializer<UserSessionMessage> _userSessionSerializer = new();
+    private readonly MessagePackNatsSerializer<ClickChannelRequest> _clickChannelSerializer = new();
     
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> RegistrationTimeouts = new();
 
@@ -57,7 +58,7 @@ public class BrowserExtensionHub(
             }
         };
 
-        await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: _serializer);
+        await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: _userSessionSerializer);
         CancelRegistrationTimeout(connectionId);
 
         logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
@@ -81,7 +82,7 @@ public class BrowserExtensionHub(
             ConnectionId = connectionId
         };
         
-        await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: _serializer);
+        await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: _userSessionSerializer);
     
         logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
         
@@ -103,12 +104,12 @@ public class BrowserExtensionHub(
             }
         };
         
-        await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: _serializer);
+        await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: _userSessionSerializer);
     }
 
     public async Task ClickChannel(ClickChannelRequest dto)
     {
-        // await nats.PublishAsync(NatsKeys.ClickChannel, )
+        await nats.PublishAsync(NatsKeys.ClickChannel, dto, serializer: _clickChannelSerializer);
     }
     
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
