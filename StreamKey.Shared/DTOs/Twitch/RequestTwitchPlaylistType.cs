@@ -1,4 +1,4 @@
-namespace StreamKey.Shared.Types;
+namespace StreamKey.Shared.DTOs.Twitch;
 
 public enum RequestTwitchPlaylistType
 {

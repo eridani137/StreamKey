@@ -5,8 +5,8 @@ using StreamKey.Core.Extensions;
 using StreamKey.Core.Results;
 using StreamKey.Core.Services;
 using StreamKey.Shared;
+using StreamKey.Shared.DTOs.Twitch;
 using StreamKey.Shared.Entities;
-using StreamKey.Shared.Types;
 
 namespace StreamKey.Api.Endpoints;
 
@@ -124,7 +124,7 @@ public class Playlist : ICarterModule
         return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);
     }
 
-    private static RequestData? ProcessRequest(HttpContext context, ILogger<Playlist> logger)
+    private static UserTokenData? ProcessRequest(HttpContext context, ILogger<Playlist> logger)
     {
         if (!context.Request.Query.TryGetValue("token", out var tokenValue))
         {
@@ -165,7 +165,7 @@ public class Playlist : ICarterModule
             return null;
         }
 
-        return new RequestData()
+        return new UserTokenData()
         {
             ChannelName = channel,
             ChannelId = channelId.Value,

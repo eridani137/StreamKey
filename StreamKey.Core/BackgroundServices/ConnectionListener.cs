@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Core.Stores;
 using StreamKey.Shared;
-using StreamKey.Shared.Types;
+using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.BackgroundServices;
 

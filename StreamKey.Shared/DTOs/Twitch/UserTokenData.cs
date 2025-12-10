@@ -1,6 +1,6 @@
-namespace StreamKey.Shared.Types;
+namespace StreamKey.Shared.DTOs.Twitch;
 
-public record RequestData
+public record UserTokenData
 {
     public required string ChannelName { get; init; }
     public required int ChannelId { get; set; }

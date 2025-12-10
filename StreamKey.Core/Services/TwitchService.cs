@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +6,6 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs.Twitch;
-using StreamKey.Shared.Types;
 
 namespace StreamKey.Core.Services;
 

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
-using StreamKey.Shared.Types;
 
 namespace StreamKey.Shared.Hubs;
 
@@ -43,7 +42,7 @@ public class BrowserExtensionHub(
     }
     
     
-    public async Task EntranceUserData(UserData userData)
+    public async Task EntranceUserData(EntrancedUserData userData)
     {
         var connectionId = Context.ConnectionId;
         var now = DateTimeOffset.UtcNow;
@@ -107,10 +106,10 @@ public class BrowserExtensionHub(
         await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: _serializer);
     }
 
-    // public async Task ClickChannel(ClickChannel dto)
-    // {
-    //     await statisticStore.SaveClickAsync(dto);
-    // }
+    public async Task ClickChannel(ClickChannelRequest dto)
+    {
+        // await nats.PublishAsync(NatsKeys.ClickChannel, )
+    }
     
     // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
     //     [FromServices] ITelegramUserRepository repository)

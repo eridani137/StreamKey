@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using StreamKey.Shared.Types;
+using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.Stores;
 

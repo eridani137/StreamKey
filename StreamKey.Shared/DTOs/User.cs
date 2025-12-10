@@ -1,6 +1,19 @@
 using MessagePack;
 
-namespace StreamKey.Shared.Types;
+namespace StreamKey.Shared.DTOs;
+
+[MessagePackObject]
+public record UserSessionMessage
+{
+    [Key(0)] public required string ConnectionId { get; init; }
+
+    [Key(1)] public UserSession? Session { get; set; }
+}
+
+public record EntrancedUserData
+{
+    public required Guid SessionId { get; set; }
+}
 
 [MessagePackObject]
 public record UserSession

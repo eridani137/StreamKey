@@ -1,5 +1,5 @@
+using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
-using StreamKey.Shared.Types;
 
 namespace StreamKey.Core.Mappers;
 
