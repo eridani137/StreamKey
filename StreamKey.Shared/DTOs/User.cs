@@ -11,13 +11,6 @@ public record UserSessionMessage
 }
 
 [MessagePackObject]
-public record EntrancedUserData
-{
-    [Key("sessionId")]
-    public required Guid SessionId { get; set; }
-}
-
-[MessagePackObject]
 public record UserSession
 {
     [Key("userId")] public string? UserId { get; set; }

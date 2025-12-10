@@ -51,8 +51,11 @@ class BrowserExtensionClient {
       })
       .build();
 
+    connection.keepAliveIntervalInMilliseconds = 15000;
+    connection.serverTimeoutInMilliseconds = 60000;
+
     connection.on('RequestUserData', async (): Promise<void> => {
-      await connection.invoke('EntranceUserData', [this.sessionId]);
+      await connection.invoke('EntranceUserData', this.sessionId);
     });
 
     connection.on('ReloadUserData', async (userArray: any[]): Promise<void> => {
@@ -231,9 +234,7 @@ class BrowserExtensionClient {
   }
 
   async checkMember(payload: CheckMemberResponse): Promise<void> {
-    await this.connection.invoke('CheckMember', [
-      payload.userId
-    ]);
+    await this.connection.invoke('CheckMember', [payload.userId]);
   }
 }
 

@@ -53,7 +53,7 @@ public class BrowserExtensionHub(
     }
 
 
-    public async Task EntranceUserData(EntrancedUserData userData)
+    public async Task EntranceUserData(Guid sessionId)
     {
         var connectionId = Context.ConnectionId;
         var now = DateTimeOffset.UtcNow;
@@ -63,7 +63,7 @@ public class BrowserExtensionHub(
             ConnectionId = connectionId,
             Session = new UserSession
             {
-                SessionId = userData.SessionId,
+                SessionId = sessionId,
                 StartedAt = now
             }
         };
