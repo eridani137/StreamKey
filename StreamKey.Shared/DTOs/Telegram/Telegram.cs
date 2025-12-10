@@ -25,10 +25,10 @@ public record TelegramUserDto
     public long Id { get; set; }
 
     [Key(1)]
-    public required string Username { get; set; }
+    public string Username { get; set; } = string.Empty;
 
     [Key(2)]
-    public required string PhotoUrl { get; set; }
+    public string PhotoUrl { get; set; } = string.Empty;
 
     [Key(3)]
     public bool IsChatMember { get; set; }
