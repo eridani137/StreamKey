@@ -14,18 +14,18 @@ public class ConnectionListener(INatsConnection nats, ILogger<ConnectionListener
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var addSub = nats.SubscribeAsync<UserSessionMessage>(
-            "connections.add",
+        var addSub = nats.SubscribeAsync(
+            NatsKeys.Connection,
             serializer: _serializer,
             cancellationToken: stoppingToken);
 
-        var removeSub = nats.SubscribeAsync<UserSessionMessage>(
-            "connections.remove",
+        var removeSub = nats.SubscribeAsync(
+            NatsKeys.Disconnection,
             serializer: _serializer,
             cancellationToken: stoppingToken);
 
-        var activitySub = nats.SubscribeAsync<UserSessionMessage>(
-            "connections.activity",
+        var activitySub = nats.SubscribeAsync(
+            NatsKeys.UpdateActivity,
             serializer: _serializer,
             cancellationToken: stoppingToken);
 
@@ -66,11 +66,11 @@ public class ConnectionListener(INatsConnection nats, ILogger<ConnectionListener
             try
             {
                 handle(msg);
-                logger.LogInformation("{@Message}", msg);
+                logger.LogInformation("Поступило NATS-сообщение: {Subject}", msg.Subject);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Ошибка при обработке NATS-сообщения: {@Message}", msg);
+                logger.LogError(e, "Ошибка при обработке NATS-сообщения: {Subject}", msg.Subject);
             }
         }
     }

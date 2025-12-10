@@ -1,0 +1,8 @@
+namespace StreamKey.Shared;
+
+public static class NatsKeys
+{
+    public const string Connection = "connection";
+    public const string Disconnection = "disconnection";
+    public const string UpdateActivity = "update.activity";
+}

@@ -58,7 +58,7 @@ public class BrowserExtensionHub(
             }
         };
 
-        await nats.PublishAsync("connections.add", sessionMessage, serializer: _serializer);
+        await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: _serializer);
         CancelRegistrationTimeout(connectionId);
 
         logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
@@ -82,7 +82,7 @@ public class BrowserExtensionHub(
             ConnectionId = connectionId
         };
         
-        await nats.PublishAsync("connections.remove", message, serializer: _serializer);
+        await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: _serializer);
     
         logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
         
@@ -104,7 +104,7 @@ public class BrowserExtensionHub(
             }
         };
         
-        await nats.PublishAsync("connections.activity", message, serializer: _serializer);
+        await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: _serializer);
     }
 
     // public async Task ClickChannel(ClickChannel dto)
