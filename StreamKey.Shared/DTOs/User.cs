@@ -13,16 +13,16 @@ public record UserSessionMessage
 [MessagePackObject]
 public record EntrancedUserData
 {
-    [Key(0)]
+    [Key("sessionId")]
     public required Guid SessionId { get; set; }
 }
 
 [MessagePackObject]
 public record UserSession
 {
-    [Key(0)] public string? UserId { get; set; }
-    [Key(1)] public Guid SessionId { get; set; }
-    [Key(2)] public DateTimeOffset StartedAt { get; set; }
-    [Key(3)] public DateTimeOffset UpdatedAt { get; set; }
-    [Key(4)] public TimeSpan AccumulatedTime { get; set; }
+    [Key("userId")] public string? UserId { get; set; }
+    [Key("sessionId")] public Guid SessionId { get; set; }
+    [IgnoreMember] public DateTimeOffset StartedAt { get; set; }
+    [IgnoreMember] public DateTimeOffset UpdatedAt { get; set; }
+    [IgnoreMember] public TimeSpan AccumulatedTime { get; set; }
 }

@@ -21,30 +21,30 @@ public record TelegramAuthDto
 [MessagePackObject]
 public record TelegramUserDto
 {
-    [Key(0)]
+    [Key("id")]
     public long Id { get; set; }
 
-    [Key(1)]
+    [Key("username")]
     public string Username { get; set; } = string.Empty;
 
-    [Key(2)]
+    [Key("photo_url")]
     public string PhotoUrl { get; set; } = string.Empty;
 
-    [Key(3)]
+    [Key("is_chat_member")]
     public bool IsChatMember { get; set; }
 }
 
 [MessagePackObject]
 public record TelegramUserRequest
 {
-    [Key(0)] public required long UserId { get; set; }
-    [Key(1)] public required string UserHash { get; set; }
+    [Key("userId")] public required long UserId { get; set; }
+    [Key("userHash")] public required string UserHash { get; set; }
 }
 
 [MessagePackObject]
 public record CheckMemberRequest
 {
-    [Key(0)]
+    [Key("userId")]
     public required long UserId { get; set; }
 }
 

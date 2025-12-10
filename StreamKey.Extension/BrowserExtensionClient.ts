@@ -55,12 +55,15 @@ class BrowserExtensionClient {
       await connection.invoke('EntranceUserData', [this.sessionId]);
     });
 
-    connection.on(
-      'ReloadUserData',
-      async (user: TelegramUser): Promise<void> => {
-        await utils.initUserProfile(user);
-      }
-    );
+    connection.on('ReloadUserData', async (userArray: any): Promise<void> => {
+      const user: TelegramUser = {
+        id: userArray[0],
+        username: userArray[1],
+        photo_url: userArray[2],
+        is_chat_member: userArray[3],
+      };
+      await utils.initUserProfile(user);
+    });
 
     this.setupConnectionHandlers(connection);
 
@@ -213,10 +216,20 @@ class BrowserExtensionClient {
   async getTelegramUser(
     payload: TelegramUserResponse
   ): Promise<TelegramUser | null> {
-    return (await this.connection.invoke('GetTelegramUser', [
-      payload.userId,
-      payload.userHash
-    ])) || null;
+    const userArray =
+      (await this.connection.invoke('GetTelegramUser', [
+        payload.userId,
+        payload.userHash,
+      ])) || null;
+
+    const user: TelegramUser = {
+      id: userArray[0],
+      username: userArray[1],
+      photo_url: userArray[2],
+      is_chat_member: userArray[3],
+    };
+
+    return user;
   }
 
   async getChannels(): Promise<ChannelData[] | null> {
@@ -228,7 +241,9 @@ class BrowserExtensionClient {
   }
 
   async checkMember(payload: CheckMemberResponse): Promise<void> {
-    await this.connection.invoke('CheckMember', payload);
+    await this.connection.invoke('CheckMember', [
+      payload.userId
+    ]);
   }
 }
 
