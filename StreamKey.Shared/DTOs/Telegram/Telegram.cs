@@ -21,18 +21,16 @@ public record TelegramAuthDto
 [MessagePackObject]
 public record TelegramUserDto
 {
-    [Key("id")] [JsonPropertyName("id")] public long Id { get; set; }
+    [Key(0)]
+    public long Id { get; set; }
 
-    [Key("username")]
-    [JsonPropertyName("username")]
+    [Key(1)]
     public required string Username { get; set; }
 
-    [Key("photo_url")]
-    [JsonPropertyName("photo_url")]
+    [Key(2)]
     public required string PhotoUrl { get; set; }
 
-    [Key("is_chat_member")]
-    [JsonPropertyName("is_chat_member")]
+    [Key(3)]
     public bool IsChatMember { get; set; }
 }
 
