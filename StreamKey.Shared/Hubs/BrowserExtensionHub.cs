@@ -146,7 +146,7 @@ public class BrowserExtensionHub(
 
         var response = await nats.RequestAsync<string?, List<ChannelDto>?>(
             subject: NatsKeys.GetChannels,
-            data: null,
+            data: "channels",
             replySerializer: channelsResponseSerializer,
             requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
