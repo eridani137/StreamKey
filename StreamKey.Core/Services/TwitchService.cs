@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Shared;
-using StreamKey.Shared.DTOs.TwitchGraphQL;
+using StreamKey.Shared.DTOs.Twitch;
 using StreamKey.Shared.Types;
 
 namespace StreamKey.Core.Services;

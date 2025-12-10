@@ -1,13 +1,13 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace StreamKey.Shared.DTOs;
+namespace StreamKey.Shared.DTOs.Telegram;
 
 public record GetChatMemberResponse
 {
-    [JsonPropertyName("ok")]  public bool Ok { get; set; }
+    [JsonPropertyName("ok")]  public bool Ok { get; init; }
     
-    [JsonPropertyName("result")] public ChatMemberResult? Result { get; set; }
+    [JsonPropertyName("result")] public ChatMemberResult? Result { get; init; }
 }
 
 public record ChatMemberResult

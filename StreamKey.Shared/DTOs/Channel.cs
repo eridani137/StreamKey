@@ -9,9 +9,3 @@ public record ChannelDto(
     [property: Key("info")] ChannelInfo? Info,
     [property: Key("position")] int Position = 0
 );
-
-[MessagePackObject]
-public record ClickChannel(
-    [property: Key("channelName")] string ChannelName,
-    [property: Key("userId")] string UserId
-);

@@ -13,16 +13,16 @@ public class Activity : ICarterModule
             .WithTags("Активность");
 
         group.MapPost("/update",
-                (ActivityRequest activityRequest, StatisticService statisticService) =>
+                (UpdateUserActivityRequest updateUserActivityRequest, StatisticService statisticService) =>
                 {
-                    statisticService.UpdateUserActivity(activityRequest);
+                    statisticService.UpdateUserActivity(updateUserActivityRequest);
 
                     return Results.Ok();
                 })
             .WithSummary("Обновление активности пользователя");
 
         group.MapPost("/click",
-                (ClickChannel dto, StatisticService service) =>
+                (ClickChannelRequest dto, StatisticService service) =>
                 {
                     service.ChannelActivityQueue.Enqueue(new ClickChannelEntity()
                     {

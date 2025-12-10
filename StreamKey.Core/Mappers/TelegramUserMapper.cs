@@ -1,4 +1,5 @@
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.DTOs.Telegram;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Mappers;

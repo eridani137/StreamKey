@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using StreamKey.Core.Abstractions;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.DTOs.Telegram;
 
 namespace StreamKey.Core.Services;
 

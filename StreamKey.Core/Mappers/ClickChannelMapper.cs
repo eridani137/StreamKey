@@ -5,7 +5,7 @@ namespace StreamKey.Core.Mappers;
 
 public static class ClickChannelMapper
 {
-    extension(ClickChannel dto)
+    extension(ClickChannelRequest dto)
     {
         public ClickChannelEntity Map()
         {

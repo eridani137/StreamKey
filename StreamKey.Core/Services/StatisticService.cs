@@ -12,18 +12,18 @@ public class StatisticService
     
     public ConcurrentQueue<ClickChannelEntity> ChannelActivityQueue { get; } = new();
 
-    public void UpdateUserActivity(ActivityRequest activityRequest)
+    public void UpdateUserActivity(UpdateUserActivityRequest updateUserActivityRequest)
     {
         var currentTime = DateTimeOffset.UtcNow;
     
         var session = OnlineUsers.GetOrAdd(
-            activityRequest.UserId, 
+            updateUserActivityRequest.UserId, 
             _ => new UserSessionEntity 
             { 
                 StartedAt = currentTime,
                 UpdatedAt = currentTime,
-                UserId = activityRequest.UserId,
-                SessionId  = activityRequest.SessionId,
+                UserId = updateUserActivityRequest.UserId,
+                SessionId  = updateUserActivityRequest.SessionId,
             }
         );
         

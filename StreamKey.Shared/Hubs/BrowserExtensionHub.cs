@@ -89,7 +89,7 @@ public class BrowserExtensionHub(
         await base.OnDisconnectedAsync(exception);
     }
     
-    public async Task UpdateActivity(ActivityRequest activityRequest)
+    public async Task UpdateActivity(UpdateUserActivityRequest updateUserActivityRequest)
     {
         var connectionId = Context.ConnectionId;
         var now = DateTimeOffset.UtcNow;
@@ -99,7 +99,7 @@ public class BrowserExtensionHub(
             ConnectionId = connectionId,
             Session = new UserSession
             {
-                UserId = activityRequest.UserId,
+                UserId = updateUserActivityRequest.UserId,
                 UpdatedAt = now
             }
         };

@@ -1,4 +1,5 @@
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.DTOs.Telegram;
 
 namespace StreamKey.Shared.Abstractions;
 

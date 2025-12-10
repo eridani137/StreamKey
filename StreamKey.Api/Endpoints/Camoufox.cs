@@ -19,7 +19,6 @@ public class Camoufox : ICarterModule
                     var result = await service.GetPageHtml(dto);
                     return Results.Ok(result);
                 })
-            .Produces<CamoufoxHtmlResponse>()
             .WithSummary("Получить HTML");
 
         group.MapPost("/screenshot",
