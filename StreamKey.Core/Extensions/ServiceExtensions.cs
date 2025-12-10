@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
+using StreamKey.Core.NatsListeners;
 using StreamKey.Core.Services;
 using StreamKey.Core.Validation;
 using StreamKey.Infrastructure.Abstractions;
@@ -43,7 +44,7 @@ public static class ServiceExtensions
             
             services.AddHostedService<ConnectionListener>();
             services.AddHostedService<ChannelListener>();
-            services.AddHostedService<TelegramListener>();
+            services.AddHostedService<TelegramGetUserListener>();
 
             return services;
         }
@@ -152,6 +153,7 @@ public static class ServiceExtensions
             builder.Services.AddSingleton<INatsConnection>(_ => new NatsConnection(options));
             
             builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
+            builder.Services.AddScoped(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
             builder.Services.AddScoped(typeof(MessagePackNatsSerializer<>));
         }
 

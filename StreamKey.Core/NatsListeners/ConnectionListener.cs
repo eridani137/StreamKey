@@ -1,12 +1,11 @@
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Stores;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
 
-namespace StreamKey.Core.BackgroundServices;
+namespace StreamKey.Core.NatsListeners;
 
 public class ConnectionListener(
     INatsConnection nats,

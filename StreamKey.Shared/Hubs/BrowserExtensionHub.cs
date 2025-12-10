@@ -126,25 +126,11 @@ public class BrowserExtensionHub(
             replySerializer: telegramUserDtoSerializer,
             requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
-        );
+            );
 
         return response.Data;
     }
-
-    // public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request,
-    //     [FromServices] ITelegramUserRepository repository)
-    // {
-    //     var user = await repository.GetByTelegramIdNotTracked(request.UserId, Context.ConnectionAborted);
-    //     if (user is null) return null;
-    //
-    //     if (!string.Equals(request.UserHash, user.Hash, StringComparison.Ordinal))
-    //     {
-    //         return null;
-    //     }
-    //
-    //     return user.MapUserDto();
-    // }
-    //
+    
     // public async Task<List<ChannelDto>> GetChannels([FromServices] IChannelService service)
     // {
     //     var channels = await service.GetChannels(Context.ConnectionAborted);

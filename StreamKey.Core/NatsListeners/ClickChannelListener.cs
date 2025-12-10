@@ -6,7 +6,7 @@ using StreamKey.Core.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
 
-namespace StreamKey.Core.BackgroundServices;
+namespace StreamKey.Core.NatsListeners;
 
 public class ChannelListener(
     INatsConnection nats,
