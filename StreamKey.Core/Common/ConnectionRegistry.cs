@@ -8,68 +8,71 @@ public static class ConnectionRegistry
 {
     public static readonly ConcurrentDictionary<string, UserSession> ActiveConnections = new();
     public static readonly ConcurrentDictionary<string, UserSession> DisconnectedConnections = new();
-
     public static readonly ConcurrentQueue<TelegramAuthDtoWithSessionId> NewTelegramUsers = new();
 
-    private static readonly TimeSpan AddingSessionTime = TimeSpan.FromMinutes(1);
-    
     public static string? GetConnectionIdBySessionId(Guid sessionId)
     {
-        var client = ActiveConnections.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
-        return !string.IsNullOrEmpty(client.Key)
-            ? client.Key
-            : null;
+        return (from kvp in ActiveConnections where kvp.Value.SessionId == sessionId select kvp.Key).FirstOrDefault();
     }
 
-    public static void AddConnection(string connectionId, UserSession session)
-        => ActiveConnections[connectionId] = session;
-
-    public static void RemoveConnection(string connectionId)
+    public static bool AddConnection(string connectionId, UserSession session)
     {
-        ActiveConnections.TryRemove(connectionId, out _);
+        ArgumentNullException.ThrowIfNull(connectionId);
+        ArgumentNullException.ThrowIfNull(session);
+
+        return ActiveConnections.TryAdd(connectionId, session);
+    }
+
+    public static bool RemoveConnection(string connectionId)
+    {
+        var removed = ActiveConnections.TryRemove(connectionId, out _);
         DisconnectedConnections.TryRemove(connectionId, out _);
+        return removed;
     }
 
-    public static void MoveToDisconnected(string connectionId)
+    public static bool MoveToDisconnected(string connectionId)
     {
-        if (ActiveConnections.TryRemove(connectionId, out var session))
-        {
-            DisconnectedConnections[connectionId] = session;
-        }
+        if (!ActiveConnections.TryRemove(connectionId, out var session)) return false;
+
+        return DisconnectedConnections.TryAdd(connectionId, session);
     }
 
-    public static void UpdateActivity(string connectionId, UserSession activity)
+    public static void UpdateActivity(string connectionId, UserSession activityUpdate)
     {
+        ArgumentNullException.ThrowIfNull(connectionId);
+        ArgumentNullException.ThrowIfNull(activityUpdate);
+
         var now = DateTimeOffset.UtcNow;
 
-        if (!ActiveConnections.TryGetValue(connectionId, out var session))
-        {
-            activity.StartedAt = now;
-            ActiveConnections[connectionId] = activity;
-            return;
-        }
-
-        session.UserId ??= activity.UserId;
-
-        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-AddingSessionTime))
-        {
-            if (session.UpdatedAt == DateTimeOffset.MinValue)
+        ActiveConnections.AddOrUpdate(
+            connectionId,
+            _ =>
             {
-                session.StartedAt = now;
-            }
-            else
+                activityUpdate.StartedAt = now;
+                return activityUpdate;
+            },
+            (_, existingSession) =>
             {
-                session.AccumulatedTime += AddingSessionTime;
+                existingSession.UserId ??= activityUpdate.UserId;
+
+                if (existingSession.UpdatedAt != DateTimeOffset.MinValue)
+                {
+                    var delta = now - existingSession.UpdatedAt;
+                    if (delta.TotalMilliseconds > 0)
+                    {
+                        existingSession.AccumulatedTime += delta;
+                    }
+                }
+
+                existingSession.UpdatedAt = now;
+                return existingSession;
             }
-            
-            session.UpdatedAt = now;
-            ActiveConnections[connectionId] = session;
-        }
+        );
     }
 
     public static UserSession? GetConnection(string connectionId)
         => ActiveConnections.TryGetValue(connectionId, out var session) ? session : null;
 
-    public static IEnumerable<UserSession> GetAllActive() => ActiveConnections.Values;
-    public static IEnumerable<UserSession> GetAllDisconnected() => DisconnectedConnections.Values;
+    public static IEnumerable<UserSession> GetAllActive() => ActiveConnections.Values.ToList();
+    public static IEnumerable<UserSession> GetAllDisconnected() => DisconnectedConnections.Values.ToList();
 }
