@@ -1,4 +1,5 @@
 using Carter;
+using StreamKey.Core.Common;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Repositories;
 using StreamKey.Shared.DTOs;
@@ -33,7 +34,10 @@ public class Statistic : ICarterModule
             .WithSummary("Time Spent")
             .RequireAuthorization();
 
-        group.MapGet("/online", (StatisticService statisticService) => Results.Ok(new OnlineResponse(statisticService.OnlineUsers.Count)))
+        group.MapGet("/online",
+                (StatisticService statisticService) =>
+                    Results.Ok(new OnlineResponse(statisticService.OnlineUsers.Count +
+                                                  ConnectionRegistry.ActiveConnections.Count)))
             .WithSummary("Получить число онлайн пользователей")
             .RequireAuthorization()
             .Produces<OnlineResponse>();
@@ -53,7 +57,8 @@ public class Statistic : ICarterModule
             .Produces<UsersPerTimeStatistic>();
 
         group.MapGet("/channels/clicks",
-                async (string channelName, int hours, ChannelClickRepository repository, CancellationToken cancellationToken) =>
+                async (string channelName, int hours, ChannelClickRepository repository,
+                    CancellationToken cancellationToken) =>
                 {
                     if (hours <= 0) return Results.BadRequest("Часов должно быть больше 0");
 

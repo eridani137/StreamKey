@@ -178,7 +178,8 @@ public class StatisticHandler(
 
     private Task LogOnlineUsers(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Текущий онлайн: {OnlineUsers}", statisticService.OnlineUsers.Count);
+        logger.LogInformation("Текущий онлайн: {OnlineUsers}",
+            statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count);
         return Task.CompletedTask;
     }
 }
