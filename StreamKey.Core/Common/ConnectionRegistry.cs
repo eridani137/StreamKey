@@ -43,6 +43,7 @@ public static class ConnectionRegistry
         ArgumentNullException.ThrowIfNull(activityUpdate);
 
         var now = DateTimeOffset.UtcNow;
+        const int minUpdateIntervalSeconds = 60;
 
         ActiveConnections.AddOrUpdate(
             connectionId,
@@ -54,6 +55,12 @@ public static class ConnectionRegistry
             (_, existingSession) =>
             {
                 existingSession.UserId ??= activityUpdate.UserId;
+                
+                var timeSinceLastUpdate = now - existingSession.UpdatedAt;
+                if (timeSinceLastUpdate.TotalSeconds < minUpdateIntervalSeconds)
+                {
+                    return existingSession;
+                }
 
                 if (existingSession.UpdatedAt != DateTimeOffset.MinValue)
                 {
@@ -65,6 +72,7 @@ public static class ConnectionRegistry
                 }
 
                 existingSession.UpdatedAt = now;
+                
                 return existingSession;
             }
         );
