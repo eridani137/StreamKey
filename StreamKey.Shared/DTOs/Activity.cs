@@ -2,7 +2,11 @@ using MessagePack;
 
 namespace StreamKey.Shared.DTOs;
 
-public record UpdateUserActivityRequest(string UserId);
+public record UpdateUserActivityRequest
+{
+    [Obsolete("Не при SignalR соединении")] public Guid SessionId { get; set; }
+    public string UserId { get; set; } = string.Empty;
+}
 
 public record OnlineResponse(int OnlineUserCount);
 
