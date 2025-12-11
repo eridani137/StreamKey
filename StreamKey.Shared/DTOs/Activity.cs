@@ -9,6 +9,6 @@ public record OnlineResponse(int OnlineUserCount);
 [MessagePackObject]
 public record ClickChannelRequest
 {
-    [Key("channelName")] public required string ChannelName { get; set; }
-    [Key("userId")] public required string UserId { get; set; }
+    [Key("channelName")] public string ChannelName { get; init; } = string.Empty;
+    [Key("userId")] public string UserId { get; init; } = string.Empty;
 }
