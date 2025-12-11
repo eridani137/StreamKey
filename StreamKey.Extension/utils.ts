@@ -139,7 +139,7 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
   return null;
 }
 
-const userProfileFetcher = new ThrottledFetcher(getUserProfile, 30_000);
+const userProfileFetcher = new ThrottledFetcher(getUserProfile, 15_000);
 
 export async function initUserProfile(): Promise<void> {
   let userData = await userProfileFetcher.fetch();

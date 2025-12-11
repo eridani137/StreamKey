@@ -12,8 +12,8 @@ const Config: AppConfig = {
     twitchUrl: 'https://www.twitch.tv/'
   },
   keys: {
-    sessionId: 'local:sessionId',
-    userProfile: 'local:userProfile',
+    sessionId: 'session:sessionId',
+    userProfile: 'session:userProfile',
     extensionState: 'local:streamKeyEnabled',
     twId: 'local_copy_unique_id',
   },
