@@ -120,11 +120,12 @@ public class StatisticHandler(
             await using var scope = scopeFactory.CreateAsyncScope();
             var repository = scope.ServiceProvider.GetRequiredService<UserSessionRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            
+
             var sessions = shutdown
                 ? ConnectionRegistry.ActiveConnections.Values.Select(v => v.Map()).ToList()
-                : ConnectionRegistry.DisconnectedConnections.Values.Select(v => v.Map()).ToList();
-            
+                : ConnectionRegistry.DisconnectedConnections.Values
+                    .Where(s => s.AccumulatedTime > MinimumSessionDuration).Select(v => v.Map()).ToList();
+
             ConnectionRegistry.DisconnectedConnections.Clear();
 
             foreach (var session in sessions)
@@ -138,7 +139,7 @@ public class StatisticHandler(
                     logger.LogError(e, "Ошибка при сохранении сессии хаба {SessionId}", session.Id);
                 }
             }
-            
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)
