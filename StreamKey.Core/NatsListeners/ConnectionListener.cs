@@ -9,8 +9,7 @@ namespace StreamKey.Core.NatsListeners;
 
 public class ConnectionListener(
     INatsConnection nats,
-    INatsSubscriptionProcessor<UserSessionMessage> processor,
-    JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer) : BackgroundService
+    INatsSubscriptionProcessor<UserSessionMessage> processor) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -40,7 +39,7 @@ public class ConnectionListener(
         };
 
         var userSessionTasks = userSessionHandlers.Select(kvp => processor.ProcessAsync(
-            nats.SubscribeAsync(kvp.Key, serializer: userSessionMessageSerializer, cancellationToken: stoppingToken),
+            nats.SubscribeAsync<UserSessionMessage>(kvp.Key, cancellationToken: stoppingToken),
             kvp.Value, stoppingToken));
 
         await Task.WhenAll(userSessionTasks);

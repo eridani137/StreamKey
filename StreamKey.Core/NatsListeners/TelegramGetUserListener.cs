@@ -12,16 +12,13 @@ namespace StreamKey.Core.NatsListeners;
 public class TelegramGetUserListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
-    INatsRequestReplyProcessor<TelegramUserRequest, TelegramUserDto?> processor,
-    JsonNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
-    JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer
+    INatsRequestReplyProcessor<TelegramUserRequest, TelegramUserDto?> processor
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var subscription = nats.SubscribeAsync(
+        var subscription = nats.SubscribeAsync<TelegramUserRequest>(
             NatsKeys.GetTelegramUser,
-            serializer: telegramUserRequestSerializer,
             cancellationToken: stoppingToken
         );
 
@@ -29,7 +26,6 @@ public class TelegramGetUserListener(
             subscription,
             request => FetchTelegramUserAsync(request, stoppingToken),
             nats,
-            telegramUserDtoSerializer,
             stoppingToken
         );
     }
@@ -41,8 +37,7 @@ public class TelegramGetUserListener(
         var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
 
         var user = await repository.GetByTelegramIdNotTracked(request.UserId, cancellationToken);
-        if (user is null) return null;
 
-        return user.MapUserDto();
+        return user?.MapUserDto();
     }
 }

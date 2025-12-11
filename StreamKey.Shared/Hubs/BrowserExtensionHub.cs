@@ -10,14 +10,7 @@ namespace StreamKey.Shared.Hubs;
 
 public class BrowserExtensionHub(
     INatsConnection nats,
-    IMemoryCache cache,
-    JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer,
-    JsonNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
-    JsonNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
-    JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
-    JsonNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
-    JsonNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer
-    // ILogger<BrowserExtensionHub> logger
+    IMemoryCache cache
 )
     : Hub<IBrowserExtensionHub>
 {
@@ -68,7 +61,7 @@ public class BrowserExtensionHub(
             }
         };
 
-        await nats.PublishAsync(NatsKeys.Connection, sessionMessage, serializer: userSessionMessageSerializer);
+        await nats.PublishAsync(NatsKeys.Connection, sessionMessage);
         CancelRegistrationTimeout(connectionId);
 
         // logger.LogInformation("Пользователь зарегистрирован: {@UserData}", userData);
@@ -92,7 +85,7 @@ public class BrowserExtensionHub(
             ConnectionId = connectionId
         };
 
-        await nats.PublishAsync(NatsKeys.Disconnection, message, serializer: userSessionMessageSerializer);
+        await nats.PublishAsync(NatsKeys.Disconnection, message);
 
         // logger.LogInformation("Пользователь отключен: {ConnectionId}", connectionId);
 
@@ -112,23 +105,19 @@ public class BrowserExtensionHub(
             }
         };
 
-        await nats.PublishAsync(NatsKeys.UpdateActivity, message, serializer: userSessionMessageSerializer);
+        await nats.PublishAsync(NatsKeys.UpdateActivity, message);
     }
 
     public async Task ClickChannel(ClickChannelRequest dto)
     {
-        await nats.PublishAsync(NatsKeys.ClickChannel, dto, serializer: clickChannelRequestSerializer);
+        await nats.PublishAsync(NatsKeys.ClickChannel, dto);
     }
 
     public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request)
     {
-        var response = await nats.RequestAsync(
+        var response = await nats.RequestAsync<TelegramUserRequest, TelegramUserDto?>(
             subject: NatsKeys.GetTelegramUser,
             data: request,
-            headers: null,
-            requestSerializer: telegramUserRequestSerializer,
-            replySerializer: telegramUserDtoSerializer,
-            requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
         );
 
@@ -145,8 +134,6 @@ public class BrowserExtensionHub(
         var response = await nats.RequestAsync<string?, List<ChannelDto>?>(
             subject: NatsKeys.GetChannels,
             data: "channels",
-            replySerializer: channelsResponseSerializer,
-            requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
         );
 
@@ -163,12 +150,9 @@ public class BrowserExtensionHub(
 
     public async Task CheckMember(CheckMemberRequest request)
     {
-        var response = await nats.RequestAsync(
+        var response = await nats.RequestAsync<CheckMemberRequest, TelegramUserDto?>(
             subject: NatsKeys.CheckTelegramMember,
             data: request,
-            requestSerializer: checkMemberRequestSerializer,
-            replySerializer: telegramUserDtoSerializer,
-            requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(30) }
         );
 
