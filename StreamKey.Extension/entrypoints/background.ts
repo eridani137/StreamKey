@@ -2,7 +2,7 @@ import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
-import { loadTwitchRedirectRules } from '@/rules';
+import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
 import { HubConnectionState } from '@microsoft/signalr';
 // import client from '@/client';
 
@@ -44,6 +44,7 @@ export async function onInstalled() {
 }
 
 export async function onStartup() {
+  await removeAllDynamicRules();
   const sessionId = await utils.createNewSession();
   await extensionClient.startWithPersistentRetry(sessionId);
   await utils.initUserProfile();
@@ -87,4 +88,8 @@ export function registerMessageHandlers() {
   onMessage('getProfile', async () => {
     return await utils.getUserProfile();
   });
+
+  onMessage('initProfile', async () => {
+    await utils.initUserProfile();
+  })
 }

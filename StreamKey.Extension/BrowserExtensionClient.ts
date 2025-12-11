@@ -10,7 +10,15 @@ import Config from '@/config';
 import * as utils from '@/utils';
 import { sendMessage } from './messaging';
 import { loadTwitchRedirectRules, removeAllDynamicRules } from './rules';
-import { ActivityRequest, ChannelData, CheckMemberResponse, ClickChannel, TelegramUser, TelegramUserResponse, WithUserId } from './types/messaging';
+import {
+  ActivityRequest,
+  ChannelData,
+  CheckMemberResponse,
+  ClickChannel,
+  TelegramUser,
+  TelegramUserResponse,
+  WithUserId,
+} from './types/messaging';
 
 class BrowserExtensionClient {
   private connection: HubConnection;
@@ -49,8 +57,8 @@ class BrowserExtensionClient {
       await connection.invoke('EntranceUserData', this.sessionId);
     });
 
-    connection.on('ReloadUserData', async (user) => {
-      await utils.initUserProfile(user);
+    connection.on('ReloadUserData', async (user: TelegramUser) => {
+      await utils.saveUserProfile(user);
     });
 
     this.setupConnectionHandlers(connection);

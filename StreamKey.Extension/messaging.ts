@@ -12,6 +12,7 @@ interface ProtocolMap {
   setConnectionState(payload: HubConnectionState): Promise<void>;
   
   getProfile(): Promise<TelegramUser | null>;
+  initProfile(): Promise<void>;
 }
 
 export const { sendMessage, onMessage } =

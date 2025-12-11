@@ -25,7 +25,8 @@
       </p>
     </div>
 
-    <ActivateButton
+    <template v-if="telegramStatus !== TelegramStatus.None">
+      <ActivateButton
       v-if="telegramStatus === TelegramStatus.NotAuthorized"
       label="Подключить 1440p"
       @click="openTelegramAuthentication"
@@ -46,6 +47,7 @@
       label="Проверить подписку"
       @click="checkMember"
     />
+    </template>
 
     <h1 class="stream-key-title">STREAM KEY</h1>
     <p class="stream-key-subtitle">Твой ключ от мира стриминга</p>
@@ -93,14 +95,13 @@ import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
 import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
 import { sendMessage } from '@/messaging';
-import { getUserProfile } from '@/utils';
 import { StatusType, TelegramStatus } from '@/types/common';
 import { TelegramUser, CheckMemberResponse } from '@/types/messaging';
 
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
 const isLoading = ref(false);
-const telegramStatus = ref<TelegramStatus>(TelegramStatus.NotMember);
+const telegramStatus = ref<TelegramStatus>(TelegramStatus.None);
 const telegramUser = ref<TelegramUser | undefined>(undefined);
 const signalrStatus = ref<StatusType>(StatusType.MAINTENANCE);
 
@@ -108,6 +109,10 @@ const showVideo = computed(() => currentVideo.value !== undefined);
 const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
 
 const STATUS_MAP = {
+  [TelegramStatus.None]: {
+    text: '',
+    class: ''
+  },
   [TelegramStatus.NotAuthorized]: {
     text: 'Не активирован*',
     class: 'status-inactive',
@@ -215,6 +220,7 @@ async function initializeExtension(state: StatusType | null = null) {
 
 async function loadUserProfile() {
   try {
+    await sendMessage('initProfile');
     const userData = await storage.getItem<TelegramUser>(
       Config.keys.userProfile
     ); // TODO
@@ -237,8 +243,6 @@ async function loadUserProfile() {
 }
 
 onMounted(async () => {
-  const profile = await sendMessage('getProfile');
-  console.log('getProfile', profile);
   await initializeExtension();
   await loadUserProfile();
 });

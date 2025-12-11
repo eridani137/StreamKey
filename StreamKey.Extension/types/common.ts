@@ -8,6 +8,7 @@ export interface StreamkeyBlockedElement extends HTMLElement {
 }
 
 export enum TelegramStatus {
+  None,
   NotAuthorized,
   NotMember,
   Ok,

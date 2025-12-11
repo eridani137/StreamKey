@@ -50,6 +50,7 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
       removeRuleIds: ruleIdsToRemove,
       addRules: newRules,
     });
+    
     const rules = await getDynamicRules();
     console.log('Динамические правила обновлены', rules);
   } catch (err) {

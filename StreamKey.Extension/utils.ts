@@ -3,6 +3,7 @@ import extensionClient from './BrowserExtensionClient';
 import Config from './config';
 import { DeviceInfo, StatusType } from './types/common';
 import { TelegramUser, TelegramUserResponse } from './types/messaging';
+import { ThrottledFetcher } from './throttler';
 // import client from './client';
 
 export function getDeviceInfo(): DeviceInfo {
@@ -138,11 +139,14 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
   return null;
 }
 
-export async function initUserProfile(
-    telegramUser: TelegramUser | null = null
-): Promise<void> {
-  let userData =
-      telegramUser ?? (await getUserProfile());
+const userProfileFetcher = new ThrottledFetcher(getUserProfile, 30_000);
+
+export async function initUserProfile(): Promise<void> {
+  let userData = await userProfileFetcher.fetch();
+
+  if (!userData) {
+    userData = await storage.getItem<TelegramUser>(Config.keys.userProfile);
+  }
 
   if (!userData) {
     await storage.removeItem(Config.keys.userProfile); // TODO
@@ -150,7 +154,11 @@ export async function initUserProfile(
     return;
   }
 
-  await storage.setItem(Config.keys.userProfile, userData); // TODO
+  await saveUserProfile(userData);
+}
+
+export async function saveUserProfile(telegramUser: TelegramUser) {
+  await storage.setItem(Config.keys.userProfile, telegramUser);  // TODO
 }
 
 export const sleep = (ms: number): Promise<void> =>
