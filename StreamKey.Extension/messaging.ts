@@ -13,6 +13,9 @@ interface ProtocolMap {
   
   getProfile(): Promise<TelegramUser | null>;
   initProfile(): Promise<void>;
+
+  getSessionId(): Promise<string | null>;
+  getProfileFromStorage(): Promise<TelegramUser | null>;
 }
 
 export const { sendMessage, onMessage } =

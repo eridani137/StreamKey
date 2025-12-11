@@ -13,7 +13,7 @@ const Config: AppConfig = {
   },
   keys: {
     sessionId: 'session:sessionId',
-    userProfile: 'local:userProfile',
+    userProfile: 'session:userProfile',
     extensionState: 'local:streamKeyEnabled',
     twId: 'local_copy_unique_id',
   },

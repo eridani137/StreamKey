@@ -4,6 +4,7 @@ import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
 import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from '@/rules';
 import { HubConnectionState } from '@microsoft/signalr';
+import { TelegramUser } from '@/types/messaging';
 // import client from '@/client';
 
 export default defineBackground(() => {
@@ -88,5 +89,15 @@ export function registerMessageHandlers() {
 
   onMessage('initProfile', async () => {
     await utils.initUserProfile();
-  })
+  });
+
+  onMessage('getSessionId', async () => {
+    const sessionId = await storage.getItem<string>(Config.keys.sessionId);
+    return sessionId;
+  });
+
+  onMessage('getProfileFromStorage', async () => {
+    const userData = await storage.getItem<TelegramUser>(Config.keys.userProfile);
+    return userData;
+  });
 }

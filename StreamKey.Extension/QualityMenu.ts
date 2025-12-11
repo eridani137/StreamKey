@@ -1,6 +1,7 @@
 import Config from '@/config';
 import { Nullable } from './types/common';
 import { TelegramUser } from './types/messaging';
+import { sendMessage } from './messaging';
 
 export class QualityMenu {
   private ctx: any = null;
@@ -81,7 +82,7 @@ export class QualityMenu {
   }
 
   async block2KResolutionElement(): Promise<void> {
-    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
+    const tgUser = await sendMessage('getProfileFromStorage');
     if (tgUser?.is_chat_member) return;
 
     this.addInstruction();
@@ -181,7 +182,7 @@ export class QualityMenu {
   }
 
   async autoSwitch(): Promise<void> {
-    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
+    const tgUser = await sendMessage('getProfileFromStorage');
     if (tgUser?.is_chat_member) return;
 
     await this.setDefault();
@@ -248,7 +249,7 @@ export class QualityMenu {
   }
 
   async setDefault(): Promise<void> {
-    const tgUser = await storage.getItem<TelegramUser>(Config.keys.userProfile); // TODO
+    const tgUser = await sendMessage('getProfileFromStorage');
     if (tgUser?.is_chat_member) return;
 
     localStorage.setItem('s-qs-ts', String(Math.floor(Date.now())));

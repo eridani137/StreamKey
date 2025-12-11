@@ -16,7 +16,7 @@ export class ActivityHandler {
   }
 
   async updateActivity() {
-    const sessionId = await storage.getItem(Config.keys.sessionId);
+    const sessionId = await sendMessage('getSessionId');
     const userId = getTwitchUserId();
 
     console.log('Обновление активности');
