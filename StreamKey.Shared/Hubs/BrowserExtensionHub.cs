@@ -109,8 +109,7 @@ public class BrowserExtensionHub(
             ConnectionId = connectionId,
             Session = new UserSession
             {
-                UserId = updateUserActivityRequest.UserId,
-                UpdatedAt = now
+                UserId = updateUserActivityRequest.UserId
             }
         };
 
