@@ -20,13 +20,13 @@ export class ActivityHandler {
     const userId = getTwitchUserId();
 
     console.log('Обновление активности');
+
     console.log('sessionId', sessionId);
     console.log('userId', userId);
 
     if (sessionId && userId) {
       await sendMessage('updateActivity', {
-        sessionId: sessionId,
-        userId: userId,
+        userId: userId
       } as ActivityRequest);
     }
   }
