@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
+using NATS.Client.Hosting;
 using StackExchange.Redis;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
@@ -148,8 +149,18 @@ public static class ServiceExtensions
                     Password = natsConfig.Password
                 }
             };
-
-            builder.Services.AddSingleton<INatsConnection>(_ => new NatsConnection(options));
+            
+            builder.Services.AddNats(configureOpts: opts => opts with
+                {
+                    Url = natsConfig.Url,
+                    Name = "StreamKey",
+                    AuthOpts = NatsAuthOpts.Default with
+                    {
+                        Username = natsConfig.User,
+                        Password = natsConfig.Password
+                    }
+                }
+            );
 
             builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
             builder.Services.AddScoped(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
