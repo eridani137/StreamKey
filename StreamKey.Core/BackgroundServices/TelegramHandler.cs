@@ -92,24 +92,20 @@ public class TelegramHandler(
                 {
                     var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
 
+                    var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
+                    if (chatMember is null) continue;
+                    
                     if (user is null)
                     {
                         user = dto.Map();
+                        user.UpdateUserProperties(dto, chatMember.IsChatMember());
                         await repository.Add(user, cancellationToken);
                     }
-
-                    var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
-                    if (chatMember is null) continue;
-
-                    user.FirstName = dto.FirstName;
-                    user.Username = dto.Username;
-                    user.AuthDate = dto.AuthDate;
-                    user.PhotoUrl = dto.PhotoUrl;
-                    user.Hash = dto.Hash;
-                    user.IsChatMember = chatMember.IsChatMember();
-                    user.AuthorizedAt = DateTime.UtcNow;
-
-                    repository.Update(user);
+                    else
+                    {
+                        user.UpdateUserProperties(dto, chatMember.IsChatMember());
+                        repository.Update(user);
+                    }
                     
                     if (ConnectionRegistry.GetConnectionIdBySessionId(dto.SessionId) is { } connectionId)
                     {

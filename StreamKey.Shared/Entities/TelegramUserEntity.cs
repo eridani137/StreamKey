@@ -2,7 +2,7 @@ namespace StreamKey.Shared.Entities;
 
 public class TelegramUserEntity : BaseIntEntity
 {
-    public long TelegramId { get; set; }
+    public long TelegramId { get; init; }
     
     public string FirstName { get; set; } = string.Empty;
     
