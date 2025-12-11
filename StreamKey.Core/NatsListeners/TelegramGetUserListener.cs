@@ -13,8 +13,8 @@ public class TelegramGetUserListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
     INatsRequestReplyProcessor<TelegramUserRequest, TelegramUserDto?> processor,
-    ProtobufNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
-    ProtobufNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer
+    JsonNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
+    JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
