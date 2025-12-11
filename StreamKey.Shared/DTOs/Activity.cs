@@ -5,7 +5,10 @@ namespace StreamKey.Shared.DTOs;
 [MessagePackObject]
 public record UpdateUserActivityRequest
 {
-    [Obsolete("Не при SignalR соединении")] public Guid SessionId { get; set; }
+    [Obsolete("Не нужен при SignalR соединении")]
+    [Key("sessionId")]
+    public Guid SessionId { get; set; }
+
     [Key("userId")] public string UserId { get; set; } = string.Empty;
 }
 
