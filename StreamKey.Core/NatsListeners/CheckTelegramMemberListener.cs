@@ -14,8 +14,8 @@ namespace StreamKey.Core.NatsListeners;
 public class CheckTelegramMemberListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
-    JsonNatsSerializer<CheckMemberRequest> requestSerializer,
-    JsonNatsSerializer<TelegramUserDto?> responseSerializer,
+    ProtobufNatsSerializer<CheckMemberRequest> requestSerializer,
+    ProtobufNatsSerializer<TelegramUserDto?> responseSerializer,
     INatsRequestReplyProcessor<CheckMemberRequest, TelegramUserDto?> processor) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

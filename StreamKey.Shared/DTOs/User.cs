@@ -1,13 +1,15 @@
 using MessagePack;
+using ProtoBuf;
 
 namespace StreamKey.Shared.DTOs;
 
+[ProtoContract]
 [MessagePackObject]
 public record UserSessionMessage
 {
-    public required string ConnectionId { get; init; }
+    [ProtoMember(1)] public required string ConnectionId { get; init; }
 
-    public UserSession? Session { get; set; }
+    [ProtoMember(2)] public UserSession? Session { get; set; }
 }
 
 [MessagePackObject]

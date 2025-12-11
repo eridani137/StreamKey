@@ -11,7 +11,7 @@ namespace StreamKey.Core.NatsListeners;
 public class ChannelsListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
-    JsonNatsSerializer<List<ChannelDto>?> responseSerializer,
+    ProtobufNatsSerializer<List<ChannelDto>?> responseSerializer,
     INatsRequestReplyProcessor<string?, List<ChannelDto>?> processor
 ) : BackgroundService
 {

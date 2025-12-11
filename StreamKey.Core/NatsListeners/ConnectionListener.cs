@@ -10,7 +10,7 @@ namespace StreamKey.Core.NatsListeners;
 public class ConnectionListener(
     INatsConnection nats,
     INatsSubscriptionProcessor<UserSessionMessage> processor,
-    JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer) : BackgroundService
+    ProtobufNatsSerializer<UserSessionMessage> userSessionMessageSerializer) : BackgroundService
 {
     private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
 

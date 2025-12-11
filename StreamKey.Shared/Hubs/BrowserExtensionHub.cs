@@ -11,12 +11,12 @@ namespace StreamKey.Shared.Hubs;
 public class BrowserExtensionHub(
     INatsConnection nats,
     IMemoryCache cache,
-    JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer,
-    JsonNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
-    JsonNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
-    JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
-    JsonNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
-    JsonNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer
+    ProtobufNatsSerializer<UserSessionMessage> userSessionMessageSerializer,
+    ProtobufNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
+    ProtobufNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
+    ProtobufNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
+    ProtobufNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
+    ProtobufNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer
     // ILogger<BrowserExtensionHub> logger
 )
     : Hub<IBrowserExtensionHub>

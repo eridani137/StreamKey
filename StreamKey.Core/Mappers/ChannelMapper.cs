@@ -23,7 +23,12 @@ public static class ChannelMapper
     {
         public ChannelDto Map()
         {
-            return new ChannelDto(channel.Name, channel.Info, channel.Position);
+            return new ChannelDto()
+            {
+                ChannelName = channel.Name,
+                Info = channel.Info,
+                Position = channel.Position
+            };
         }
     }
 
