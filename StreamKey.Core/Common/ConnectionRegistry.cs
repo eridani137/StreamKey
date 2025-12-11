@@ -36,7 +36,7 @@ public static class ConnectionRegistry
         }
     }
 
-    public static void UpdateActivity(string connectionId, UserSession activity, TimeSpan minimumSessionTime)
+    public static void UpdateActivity(string connectionId, UserSession activity, TimeSpan addingSessionTime)
     {
         var now = DateTimeOffset.UtcNow;
         
@@ -49,7 +49,7 @@ public static class ConnectionRegistry
         
         session.UserId ??= activity.UserId;
 
-        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-minimumSessionTime))
+        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-addingSessionTime))
         {
             if (session.UpdatedAt == DateTimeOffset.MinValue)
             {
@@ -57,7 +57,7 @@ public static class ConnectionRegistry
             }
 
             session.UpdatedAt = now;
-            session.AccumulatedTime += minimumSessionTime;
+            session.AccumulatedTime += addingSessionTime;
 
             ActiveConnections[connectionId] = session;
         }

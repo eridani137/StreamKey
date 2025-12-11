@@ -12,7 +12,7 @@ public class ConnectionListener(
     INatsSubscriptionProcessor<UserSessionMessage> processor,
     JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer) : BackgroundService
 {
-    private static readonly TimeSpan MinimumSessionTime = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan AddingSessionTime = TimeSpan.FromMinutes(1);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -20,7 +20,10 @@ public class ConnectionListener(
         {
             [NatsKeys.Connection] = msg =>
             {
-                if (msg.Session is not null) ConnectionRegistry.AddConnection(msg.ConnectionId, msg.Session);
+                if (msg.Session is not null)
+                {
+                    ConnectionRegistry.AddConnection(msg.ConnectionId, msg.Session);
+                }
                 return Task.CompletedTask;
             },
             [NatsKeys.Disconnection] = msg =>
@@ -31,7 +34,9 @@ public class ConnectionListener(
             [NatsKeys.UpdateActivity] = msg =>
             {
                 if (msg.Session is not null)
-                    ConnectionRegistry.UpdateActivity(msg.ConnectionId, msg.Session, MinimumSessionTime);
+                {
+                    ConnectionRegistry.UpdateActivity(msg.ConnectionId, msg.Session, AddingSessionTime);
+                }
                 return Task.CompletedTask;
             }
         };
