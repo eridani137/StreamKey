@@ -55,10 +55,12 @@ public static class ConnectionRegistry
             {
                 session.StartedAt = now;
             }
-
+            else
+            {
+                session.AccumulatedTime += addingSessionTime;
+            }
+            
             session.UpdatedAt = now;
-            session.AccumulatedTime += addingSessionTime;
-
             ActiveConnections[connectionId] = session;
         }
     }
