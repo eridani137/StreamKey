@@ -38,22 +38,17 @@ public class Telegram : ICarterModule
 
         var userGroup = group.MapGroup("/user");
 
-        userGroup.MapGet("/{id:long}/{hash}",
-                async (long id, string hash, ITelegramUserRepository repository, CancellationToken cancellationToken) =>
+        userGroup.MapGet("/{id:long}",
+                async (long id, ITelegramUserRepository repository, CancellationToken cancellationToken) =>
                 {
                     var user = await repository.GetByTelegramIdNotTracked(id, cancellationToken);
                     if (user is null) return Results.NotFound();
-
-                    if (!string.Equals(hash, user.Hash, StringComparison.Ordinal))
-                    {
-                        return Results.Forbid();
-                    }
 
                     return Results.Ok(user.MapUserDto());
                 })
             .WithSummary("Получение данных о пользователе");
 
-        userGroup.MapGet("/{id:long}",
+        userGroup.MapGet("/check/{id:long}",
                 async (long id, ITelegramService service, CancellationToken cancellationToken) =>
                 {
                     var getChatMemberResponse = await service.GetChatMember(id, cancellationToken);

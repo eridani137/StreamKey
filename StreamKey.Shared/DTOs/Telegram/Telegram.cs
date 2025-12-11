@@ -34,7 +34,6 @@ public record TelegramUserDto
 public record TelegramUserRequest
 {
     [Key("userId")] public long UserId { get; set; }
-    [Key("userHash")] public string UserHash { get; set; } = string.Empty;
 }
 
 [MessagePackObject]

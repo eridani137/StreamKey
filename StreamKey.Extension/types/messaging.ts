@@ -41,7 +41,7 @@ export interface WithChannelName {
 
 export interface ActivityRequest extends WithUserId, WithSessionId {}
 
-export interface TelegramUserResponse extends WithNumberUserId, WithUserHash {}
+export interface TelegramUserResponse extends WithNumberUserId {}
 
 export interface ClickChannel extends WithUserId, WithChannelName {}
 

@@ -43,11 +43,6 @@ public class TelegramGetUserListener(
         var user = await repository.GetByTelegramIdNotTracked(request.UserId, cancellationToken);
         if (user is null) return null;
 
-        if (!string.Equals(request.UserHash, user.Hash, StringComparison.Ordinal))
-        {
-            return null;
-        }
-
         return user.MapUserDto();
     }
 }

@@ -110,7 +110,7 @@ export async function getUserProfile(): Promise<TelegramUser | null> {
     try {
       const requestData: TelegramUserResponse = {
         userId: Number(telegramUserId),
-        userHash: telegramUserHash,
+        // userHash: telegramUserHash,
       };
 
       const response = await extensionClient.getTelegramUser(requestData);

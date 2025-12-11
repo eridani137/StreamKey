@@ -59,7 +59,7 @@ class HttpClient {
     requestData: TelegramUserResponse
   ): Promise<TelegramUser | null> {
     const response = await fetch(
-      `${Config.urls.apiUrl}/telegram/user/${requestData.userId}/${requestData.userHash}`,
+      `${Config.urls.apiUrl}/telegram/user/${requestData.userId}`,
       {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
