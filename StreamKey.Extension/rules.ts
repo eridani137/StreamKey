@@ -1,5 +1,5 @@
 import Config from './config';
-import { Rule } from './types';
+import { Rule } from './types/common';
 
 export async function getDynamicRules(): Promise<Rule[]> {
   try {

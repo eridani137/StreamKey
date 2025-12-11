@@ -1,4 +1,4 @@
-import { AppConfig } from './types';
+import { AppConfig } from './types/config';
 
 const Config: AppConfig = {
   urls: {

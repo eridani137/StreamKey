@@ -1,7 +1,7 @@
 import Config from '@/config';
 import { sendMessage } from '@/messaging';
-import { ActivityRequest, WithUserId } from '@/types';
 import { getTwitchUserId } from './utils';
+import { ActivityRequest } from './types/messaging';
 
 export class ActivityHandler {
   private ctx: any = null;

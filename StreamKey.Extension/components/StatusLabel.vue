@@ -8,9 +8,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { onMessage, sendMessage } from '@/messaging';
-import { StatusType } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr';
 import { getStateClass } from '@/utils';
+import { StatusType } from '@/types/common';
 
 const emit = defineEmits(['updateState']);
 

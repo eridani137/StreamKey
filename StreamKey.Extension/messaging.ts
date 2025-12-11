@@ -1,6 +1,6 @@
 import { defineExtensionMessaging } from '@webext-core/messaging';
-import { ActivityRequest, ChannelData, CheckMemberResponse, ClickChannel, TelegramUser } from '@/types';
 import { HubConnectionState } from '@microsoft/signalr';
+import { ActivityRequest, ChannelData, CheckMemberResponse, ClickChannel, TelegramUser } from './types/messaging';
 
 interface ProtocolMap {
   updateActivity(payload: ActivityRequest): Promise<void>;

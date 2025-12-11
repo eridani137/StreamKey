@@ -6,20 +6,11 @@ import {
   LogLevel,
 } from '@microsoft/signalr';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
-import {
-  ActivityRequest,
-  ChannelData,
-  CheckMemberResponse,
-  ClickChannel,
-  TelegramUser,
-  TelegramUserResponse,
-  WithSessionId,
-  WithUserId,
-} from '@/types';
 import Config from '@/config';
 import * as utils from '@/utils';
 import { sendMessage } from './messaging';
 import { loadTwitchRedirectRules, removeAllDynamicRules } from './rules';
+import { ActivityRequest, ChannelData, CheckMemberResponse, ClickChannel, TelegramUser, TelegramUserResponse, WithUserId } from './types/messaging';
 
 class BrowserExtensionClient {
   private connection: HubConnection;

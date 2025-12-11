@@ -81,12 +81,6 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import Config from '@/config';
-import {
-  CheckMemberResponse,
-  StatusType,
-  TelegramStatus,
-  TelegramUser,
-} from '@/types';
 
 import StreamKeyLogo from '@/components/StreamKeyLogo.vue';
 import TelegramCircle from '@/components/TelegramCircle.vue';
@@ -100,6 +94,8 @@ import DisableVideo from '~/assets/disable.webm';
 import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
 import { sendMessage } from '@/messaging';
 import { getUserProfile } from '@/utils';
+import { StatusType, TelegramStatus } from '@/types/common';
+import { TelegramUser, CheckMemberResponse } from '@/types/messaging';
 
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);

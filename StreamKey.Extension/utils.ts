@@ -1,12 +1,8 @@
 import { HubConnectionState } from '@microsoft/signalr';
 import extensionClient from './BrowserExtensionClient';
 import Config from './config';
-import {
-  DeviceInfo,
-  StatusType,
-  TelegramUser,
-  TelegramUserResponse,
-} from './types';
+import { DeviceInfo, StatusType } from './types/common';
+import { TelegramUser, TelegramUserResponse } from './types/messaging';
 // import client from './client';
 
 export function getDeviceInfo(): DeviceInfo {

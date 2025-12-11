@@ -1,5 +1,6 @@
-import { Nullable, TelegramUser } from '@/types';
 import Config from '@/config';
+import { Nullable } from './types/common';
+import { TelegramUser } from './types/messaging';
 
 export class QualityMenu {
   private ctx: any = null;

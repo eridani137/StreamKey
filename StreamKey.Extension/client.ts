@@ -1,11 +1,5 @@
 import Config from './config';
-import {
-  ActivityRequest,
-  ChannelData,
-  ClickChannel,
-  TelegramUser,
-  TelegramUserResponse,
-} from './types';
+import { ActivityRequest, ClickChannel, ChannelData, TelegramUserResponse, TelegramUser } from './types/messaging';
 
 class HttpClient {
   async updateActivity(payload: ActivityRequest) {
