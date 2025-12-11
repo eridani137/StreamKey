@@ -50,7 +50,7 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
       removeRuleIds: ruleIdsToRemove,
       addRules: newRules,
     });
-    
+
     const rules = await getDynamicRules();
     console.log('Динамические правила обновлены', rules);
   } catch (err) {
@@ -59,7 +59,10 @@ export async function updateDynamicRules(newRules: Rule[]): Promise<void> {
   }
 }
 
-export async function loadTwitchRedirectRules(): Promise<void> {
+export async function loadTwitchRedirectDynamicRules(): Promise<void> {
+  const isEnabled = await storage.getItem<boolean>(Config.keys.extensionState);
+  if (!isEnabled) return;
+
   const auth = (await browser.cookies.get({url: Config.urls.twitchUrl, name: 'auth-token'}))?.value || '';
 
   console.log('auth', auth);

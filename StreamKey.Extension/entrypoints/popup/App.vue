@@ -93,7 +93,7 @@ import StatusLabel from '@/components/StatusLabel.vue';
 import EnableVideo from '~/assets/enable.webm';
 import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
-import { loadTwitchRedirectRules, removeAllDynamicRules } from '@/rules';
+import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from '@/rules';
 import { sendMessage } from '@/messaging';
 import { StatusType, TelegramStatus } from '@/types/common';
 import { TelegramUser, CheckMemberResponse } from '@/types/messaging';
@@ -149,7 +149,7 @@ async function handleLogoClick() {
     const newState = !isEnabled.value;
 
     if (newState) {
-      await loadTwitchRedirectRules();
+      await loadTwitchRedirectDynamicRules();
       currentVideo.value = EnableVideo;
     } else {
       await removeAllDynamicRules();
@@ -194,26 +194,22 @@ async function checkMember() {
 
 async function onStateUpdate(state: StatusType) {
   signalrStatus.value = state;
-  await initializeExtension(state);
+  await initializeState(state);
 }
 
-async function initializeExtension(state: StatusType | null = null) {
+async function initializeState(state: StatusType | null = null) {
   const savedState = await storage.getItem<boolean>(Config.keys.extensionState);
   isEnabled.value = savedState ?? false;
 
   if (isEnabled.value && state === StatusType.WORKING) {
-    await loadTwitchRedirectRules();
     currentVideo.value = EnabledVideo;
   } else {
-    await removeAllDynamicRules();
     currentVideo.value = undefined;
   }
 
   if (isEnabled.value) {
-    await loadTwitchRedirectRules();
     currentVideo.value = EnabledVideo;
   } else {
-    await removeAllDynamicRules();
     currentVideo.value = undefined;
   }
 }
@@ -243,7 +239,7 @@ async function loadUserProfile() {
 }
 
 onMounted(async () => {
-  await initializeExtension();
+  await initializeState();
   await loadUserProfile();
 });
 </script>
