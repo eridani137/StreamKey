@@ -14,12 +14,15 @@ namespace StreamKey.Core.NatsListeners;
 public class CheckTelegramMemberListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
+    JsonNatsSerializer<CheckMemberRequest> requestSerializer,
+    JsonNatsSerializer<TelegramUserDto?> responseSerializer,
     INatsRequestReplyProcessor<CheckMemberRequest, TelegramUserDto?> processor) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var subscription = nats.SubscribeAsync<CheckMemberRequest>(
+        var subscription = nats.SubscribeAsync(
             NatsKeys.CheckTelegramMember,
+            serializer: requestSerializer,
             cancellationToken: stoppingToken
         );
 
@@ -27,6 +30,7 @@ public class CheckTelegramMemberListener(
             subscription,
             request => CheckMemberAsync(request, stoppingToken),
             nats,
+            responseSerializer,
             stoppingToken
         );
     }

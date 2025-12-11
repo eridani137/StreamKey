@@ -11,12 +11,14 @@ namespace StreamKey.Core.NatsListeners;
 public class ClickChannelListener(
     INatsConnection nats,
     INatsSubscriptionProcessor<ClickChannelRequest> processor,
+    JsonNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
     StatisticService statisticService) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return processor.ProcessAsync(
-            nats.SubscribeAsync<ClickChannelRequest>(NatsKeys.ClickChannel, cancellationToken: stoppingToken),
+            nats.SubscribeAsync(NatsKeys.ClickChannel, serializer: clickChannelRequestSerializer,
+                cancellationToken: stoppingToken),
             HandleClickChannel, stoppingToken);
     }
 

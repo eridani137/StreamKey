@@ -4,8 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
-using NATS.Client.Hosting;
-using NATS.Client.Serializers.Json;
 using StackExchange.Redis;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
@@ -18,8 +16,6 @@ using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.Configs;
-using StreamKey.Shared.DTOs;
-using StreamKey.Shared.DTOs.Telegram;
 
 namespace StreamKey.Core.Extensions;
 
@@ -126,7 +122,10 @@ public static class ServiceExtensions
                 })
                 .AddMessagePackProtocol()
                 .AddStackExchangeRedis(redisConnectionString,
-                    options => { options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey"); });
+                    options =>
+                    {
+                        options.Configuration.ChannelPrefix = RedisChannel.Literal("StreamKey");
+                    });
         }
 
         public void AddNats(bool isInternal)
@@ -139,20 +138,23 @@ public static class ServiceExtensions
 
             if (isInternal) natsConfig.Url = $"nats://nats:{natsConfig.Port}";
 
-            builder.Services.AddNats(configureOpts: opts => opts with
+            var options = new NatsOpts()
+            {
+                Url = natsConfig.Url,
+                Name = "StreamKey",
+                AuthOpts = NatsAuthOpts.Default with
                 {
-                    Url = natsConfig.Url,
-                    Name = "StreamKey",
-                    AuthOpts = NatsAuthOpts.Default with
-                    {
-                        Username = natsConfig.User,
-                        Password = natsConfig.Password
-                    }
+                    Username = natsConfig.User,
+                    Password = natsConfig.Password
                 }
-            );
+            };
+
+            builder.Services.AddSingleton<INatsConnection>(_ => new NatsConnection(options));
 
             builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
             builder.Services.AddScoped(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
+            
+            builder.Services.AddSingleton(typeof(JsonNatsSerializer<>));
         }
 
         public void AddDefaultAuthorizationData()

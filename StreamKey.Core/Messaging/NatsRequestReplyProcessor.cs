@@ -12,6 +12,7 @@ public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
         IAsyncEnumerable<NatsMsg<TRequest>> subscription,
         Func<TRequest, Task<TResponse>> handle,
         INatsConnection nats,
+        INatsSerialize<TResponse?>? responseSerializer,
         CancellationToken token)
     {
         await foreach (var msg in subscription.WithCancellation(token))
@@ -21,26 +22,28 @@ public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
                 if (msg.Data is null)
                 {
                     logger.LogWarning("Получен запрос с null данными: {Subject}", msg.Subject);
-                    await SendResponseAsync(nats, msg.ReplyTo, default, token);
+                    await SendResponseAsync(nats, msg.ReplyTo, default, responseSerializer, token);
                     continue;
                 }
 
+                logger.LogDebug("Обработка запроса: {Subject}", msg.Subject);
+
                 var response = await handle(msg.Data);
-                await SendResponseAsync(nats, msg.ReplyTo, response, token);
+                await SendResponseAsync(nats, msg.ReplyTo, response, responseSerializer, token);
             }
             catch (Exception e)
             {
                 logger.LogError(e, "Ошибка при обработке NATS-сообщения: {Subject}", msg.Subject);
-
+                
                 if (!string.IsNullOrEmpty(msg.ReplyTo))
                 {
                     try
                     {
-                        await nats.PublishAsync<TResponse?>(
+                        await nats.PublishAsync(
                             msg.ReplyTo,
                             default,
-                            cancellationToken: token
-                        );
+                            serializer: responseSerializer,
+                            cancellationToken: token);
                     }
                     catch (Exception ex)
                     {
@@ -55,6 +58,7 @@ public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
         INatsConnection nats,
         string? replyTo,
         TResponse? response,
+        INatsSerialize<TResponse?>? serializer,
         CancellationToken token)
     {
         if (string.IsNullOrEmpty(replyTo))
@@ -63,6 +67,6 @@ public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
             return;
         }
 
-        await nats.PublishAsync(replyTo, response, cancellationToken: token);
+        await nats.PublishAsync(replyTo, response, serializer: serializer, cancellationToken: token);
     }
 }

@@ -8,5 +8,6 @@ public interface INatsRequestReplyProcessor<TRequest, TResponse>
         IAsyncEnumerable<NatsMsg<TRequest>> subscription,
         Func<TRequest, Task<TResponse>> handle,
         INatsConnection nats,
+        INatsSerialize<TResponse?>? responseSerializer,
         CancellationToken token);
 }
