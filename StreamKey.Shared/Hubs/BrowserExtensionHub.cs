@@ -102,7 +102,6 @@ public class BrowserExtensionHub(
     public async Task UpdateActivity(UpdateUserActivityRequest updateUserActivityRequest)
     {
         var connectionId = Context.ConnectionId;
-        var now = DateTimeOffset.UtcNow;
 
         var message = new UserSessionMessage
         {

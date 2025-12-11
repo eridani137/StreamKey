@@ -11,6 +11,8 @@ public static class ConnectionRegistry
 
     public static readonly ConcurrentQueue<TelegramAuthDtoWithSessionId> NewTelegramUsers = new();
 
+    private static readonly TimeSpan AddingSessionTime = TimeSpan.FromMinutes(1);
+    
     public static string? GetConnectionIdBySessionId(Guid sessionId)
     {
         var client = ActiveConnections.FirstOrDefault(kvp => kvp.Value.SessionId == sessionId);
@@ -36,7 +38,7 @@ public static class ConnectionRegistry
         }
     }
 
-    public static void UpdateActivity(string connectionId, UserSession activity, TimeSpan addingSessionTime)
+    public static void UpdateActivity(string connectionId, UserSession activity)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -49,14 +51,17 @@ public static class ConnectionRegistry
 
         session.UserId ??= activity.UserId;
 
-        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-addingSessionTime))
+        if (session.UpdatedAt == DateTimeOffset.MinValue || session.UpdatedAt >= now.Add(-AddingSessionTime))
         {
             if (session.UpdatedAt == DateTimeOffset.MinValue)
             {
                 session.StartedAt = now;
             }
-
-            session.AccumulatedTime += addingSessionTime;
+            else
+            {
+                session.AccumulatedTime += AddingSessionTime;
+            }
+            
             session.UpdatedAt = now;
             ActiveConnections[connectionId] = session;
         }

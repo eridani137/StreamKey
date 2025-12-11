@@ -2,7 +2,7 @@ using MessagePack;
 
 namespace StreamKey.Shared.DTOs;
 
-public record UpdateUserActivityRequest(Guid SessionId, string UserId);
+public record UpdateUserActivityRequest(string UserId);
 
 public record OnlineResponse(int OnlineUserCount);
 

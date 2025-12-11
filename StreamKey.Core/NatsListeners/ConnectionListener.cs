@@ -12,8 +12,6 @@ public class ConnectionListener(
     INatsSubscriptionProcessor<UserSessionMessage> processor,
     JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer) : BackgroundService
 {
-    private static readonly TimeSpan AddingSessionTime = TimeSpan.FromMinutes(1);
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var userSessionHandlers = new Dictionary<string, Func<UserSessionMessage, Task>>
@@ -35,7 +33,7 @@ public class ConnectionListener(
             {
                 if (msg.Session is not null)
                 {
-                    ConnectionRegistry.UpdateActivity(msg.ConnectionId, msg.Session, AddingSessionTime);
+                    ConnectionRegistry.UpdateActivity(msg.ConnectionId, msg.Session);
                 }
                 return Task.CompletedTask;
             }

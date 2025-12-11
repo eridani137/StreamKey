@@ -39,7 +39,7 @@ export interface WithChannelName {
   channelName: string;
 }
 
-export interface ActivityRequest extends WithUserId, WithSessionId {}
+export interface ActivityRequest extends WithUserId {}
 
 export interface TelegramUserResponse extends WithNumberUserId {}
 

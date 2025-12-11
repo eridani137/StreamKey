@@ -1,5 +1,11 @@
 import Config from './config';
-import { ActivityRequest, ClickChannel, ChannelData, TelegramUserResponse, TelegramUser } from './types/messaging';
+import {
+  ActivityRequest,
+  ClickChannel,
+  ChannelData,
+  TelegramUserResponse,
+  TelegramUser,
+} from './types/messaging';
 
 class HttpClient {
   async updateActivity(payload: ActivityRequest) {
@@ -7,7 +13,6 @@ class HttpClient {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sessionId: payload.sessionId,
         userId: payload.userId,
       }),
     });

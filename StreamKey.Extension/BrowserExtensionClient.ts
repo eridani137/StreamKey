@@ -204,7 +204,6 @@ class BrowserExtensionClient {
 
   async updateActivity(payload: WithUserId): Promise<void> {
     await this.connection.invoke('UpdateActivity', {
-      sessionId: this.sessionId,
       userId: payload.userId,
     } as ActivityRequest);
   }
