@@ -26,7 +26,7 @@ public class UsherService(
         return $"{VodTokenKey}:{vodId}:{deviceId}";
     }
 
-    private static readonly TimeSpan AbsoluteExpiration = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan AbsoluteExpiration = TimeSpan.FromMinutes(1);
 
     public async Task<HttpResponseMessage?> GetStreamPlaylist(string username, string deviceId,
         HttpContext context)
