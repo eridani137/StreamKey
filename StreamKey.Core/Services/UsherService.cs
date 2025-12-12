@@ -32,7 +32,7 @@ public class UsherService(
         HttpContext context)
     {
         var cacheKey = GetStreamKey(username, deviceId);
-        
+
         if (!cache.TryGetValue(cacheKey, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         {
             tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
@@ -56,7 +56,9 @@ public class UsherService(
         var query = HttpUtility.ParseQueryString(string.Empty);
         foreach (var (key, value) in context.Request.Query)
         {
-            if (key.Equals("auth")) continue;
+            if (key.Equals("auth", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("token", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("sig", StringComparison.OrdinalIgnoreCase)) continue;
             query[key] = value;
         }
 
@@ -72,7 +74,7 @@ public class UsherService(
     public async Task<HttpResponseMessage?> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
     {
         var cacheKey = GetVodKey(vodId, deviceId);
-        
+
         if (!cache.TryGetValue(cacheKey, out VideoPlaybackAccessTokenResponse? tokenResponse) ||
             tokenResponse is null)
         {
@@ -97,7 +99,11 @@ public class UsherService(
         var query = HttpUtility.ParseQueryString(string.Empty);
         foreach (var (key, value) in context.Request.Query)
         {
-            if (key.Equals("vod_id") || key.Equals("auth")) continue;
+            if (key.Equals("vod_id", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("auth", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("client_id", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("token", StringComparison.OrdinalIgnoreCase) ||
+                key.Equals("sig", StringComparison.OrdinalIgnoreCase)) continue;
             query[key] = value;
         }
 
