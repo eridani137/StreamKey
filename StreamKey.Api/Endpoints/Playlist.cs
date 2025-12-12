@@ -37,7 +37,8 @@ public class Playlist : ICarterModule
                 var response = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
                 if (response is null) return Results.BadRequest();
 
-                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
+                if (!response.IsSuccessStatusCode &&
+                    response.StatusCode != HttpStatusCode.NotFound)
                 {
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
@@ -87,12 +88,15 @@ public class Playlist : ICarterModule
                 var response = await usherService.GetVodPlaylist(vodId, deviceId, context);
                 if (response is null) return Results.NotFound();
 
-                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.Forbidden)
+                if (!response.IsSuccessStatusCode &&
+                    response.StatusCode != HttpStatusCode.Forbidden &&
+                    response.StatusCode != HttpStatusCode.NotFound)
                 {
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
 
-                    logger.LogWarning("GetVod {VodId} {StatusCode}: {Body}", vodId, (int)response.StatusCode, bodyString);
+                    logger.LogWarning("GetVod {VodId} {StatusCode}: {Body}", vodId, (int)response.StatusCode,
+                        bodyString);
 
                     await WriteHttpResponse(context, response, body);
                     return Results.Empty;
