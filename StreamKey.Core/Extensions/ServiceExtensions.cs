@@ -162,8 +162,8 @@ public static class ServiceExtensions
                 }
             );
 
-            builder.Services.AddScoped(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
-            builder.Services.AddScoped(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
+            builder.Services.AddSingleton(typeof(INatsSubscriptionProcessor<>), typeof(NatsSubscriptionProcessor<>));
+            builder.Services.AddSingleton(typeof(INatsRequestReplyProcessor<,>), typeof(NatsRequestReplyProcessor<,>));
             
             builder.Services.AddSingleton(typeof(JsonNatsSerializer<>));
         }
