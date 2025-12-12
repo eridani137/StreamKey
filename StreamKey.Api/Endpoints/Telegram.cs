@@ -1,11 +1,8 @@
 using Carter;
-using Microsoft.AspNetCore.SignalR;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.Common;
 using StreamKey.Core.Mappers;
 using StreamKey.Infrastructure.Abstractions;
-using StreamKey.Shared.DTOs;
 using StreamKey.Shared.DTOs.Telegram;
 
 namespace StreamKey.Api.Endpoints;
