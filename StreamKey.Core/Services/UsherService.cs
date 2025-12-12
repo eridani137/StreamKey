@@ -1,19 +1,46 @@
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
 using StreamKey.Shared;
+using StreamKey.Shared.DTOs.Twitch;
 
 namespace StreamKey.Core.Services;
 
 public class UsherService(
     IHttpClientFactory clientFactory,
-    ITwitchService twitchService
+    ITwitchService twitchService,
+    IMemoryCache cache
 ) : IUsherService
 {
-    public async Task<Result<HttpResponseMessage>> GetStreamPlaylist(string username, string deviceId, HttpContext context)
+    private const string StreamTokenKey = "UsherStreamKey";
+    private const string VodTokenKey = "UsherVodKey";
+
+    private static string GetStreamKey(string username, string deviceId)
     {
-        var tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
+        return $"{StreamTokenKey}:{username}:{deviceId}";
+    }
+
+    private static string GetVodKey(string vodId, string deviceId)
+    {
+        return $"{VodTokenKey}:{vodId}:{deviceId}";
+    }
+
+    private static readonly TimeSpan AbsoluteExpiration = TimeSpan.FromMinutes(2);
+
+    public async Task<Result<HttpResponseMessage>> GetStreamPlaylist(string username, string deviceId,
+        HttpContext context)
+    {
+        if (!cache.TryGetValue(GetStreamKey(username, deviceId),
+                out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        {
+            tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
+            if (tokenResponse is not null)
+            {
+                cache.Set(username, tokenResponse, AbsoluteExpiration);
+            }
+        }
 
         if (tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             tokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
@@ -58,7 +85,15 @@ public class UsherService(
 
     public async Task<Result<HttpResponseMessage>> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
     {
-        var tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
+        if (!cache.TryGetValue(GetVodKey(vodId, deviceId), out VideoPlaybackAccessTokenResponse? tokenResponse) ||
+            tokenResponse is null)
+        {
+            tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
+            if (tokenResponse is not null)
+            {
+                cache.Set(vodId, tokenResponse, AbsoluteExpiration);
+            }
+        }
 
         if (tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             tokenResponse.Data.VideoPlaybackAccessToken.Value is null)
@@ -77,7 +112,7 @@ public class UsherService(
             if (key.Equals("vod_id") || key.Equals("auth")) continue;
             query[key] = value;
         }
-        
+
         query["client_id"] = ApplicationConstants.ClientId;
         query["token"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Value;
         query["sig"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Signature;
