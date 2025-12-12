@@ -1,7 +1,7 @@
+import activeChannels from '@/handlers/ActiveChannels';
+import activityHandler from '@/handlers/ActivityHandler';
+import qualityMenu from '@/handlers/QualityMenu';
 import './style.css';
-import qualityMenu from '@/QualityMenu';
-import activeChannels from '@/ActiveChannels';
-import activityHandler from '@/ActivityHandler';
 
 export default defineContentScript({
   matches: ['https://*.twitch.tv/*'],

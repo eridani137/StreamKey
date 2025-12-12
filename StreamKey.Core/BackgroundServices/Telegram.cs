@@ -112,8 +112,6 @@ public class Telegram(
                         await extensionHub.Clients.Client(connectionId)
                             .ReloadUserData(dto.MapUserDto(user.IsChatMember));
                     }
-
-                    await Task.Delay(300, cancellationToken);
                 }
                 catch (Exception e)
                 {

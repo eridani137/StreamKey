@@ -1,6 +1,6 @@
 import { getTwitchUserId, sleep } from '@/utils';
 import { sendMessage } from '@/messaging';
-import { ChannelData, ClickChannel } from './types/messaging';
+import { ChannelData, ClickChannel } from '@/types/messaging';
 
 export class ActiveChannels {
   private ctx: any = null;
