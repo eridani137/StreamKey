@@ -1,9 +1,8 @@
-using StreamKey.Shared.DTOs;
-using StreamKey.Shared.DTOs.Telegram;
+using Telegram.Bot.Types;
 
 namespace StreamKey.Core.Abstractions;
 
 public interface ITelegramService
 {
-    Task<GetChatMemberResponse?> GetChatMember(long userId, CancellationToken cancellationToken);
+    Task<ChatMember?> GetChatMember(long userId, CancellationToken cancellationToken);
 }

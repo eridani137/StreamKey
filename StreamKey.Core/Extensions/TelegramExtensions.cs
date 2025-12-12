@@ -1,17 +1,15 @@
-using StreamKey.Shared.DTOs;
-using StreamKey.Shared.DTOs.Telegram;
+using Telegram.Bot.Types;
 
 namespace StreamKey.Core.Extensions;
 
 public static class TelegramExtensions
 {
-    extension(GetChatMemberResponse response)
+    extension(ChatMember? chatMember)
     {
         public bool IsChatMember()
         {
-            return response.Result?.Status is ChatMemberStatus.Creator
-                or ChatMemberStatus.Owner or ChatMemberStatus.Administrator or ChatMemberStatus.Member
-                or ChatMemberStatus.Restricted;
+            if (chatMember == null) return false;
+            return chatMember.IsAdmin || chatMember.IsInChat;
         }
     }
 }

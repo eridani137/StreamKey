@@ -51,12 +51,11 @@ public class Telegram : ICarterModule
         userGroup.MapGet("/check/{id:long}",
                 async (long id, ITelegramService service, CancellationToken cancellationToken) =>
                 {
-                    var getChatMemberResponse = await service.GetChatMember(id, cancellationToken);
-                    if (getChatMemberResponse is null) return Results.BadRequest("Chat member check failed");
+                    var chatMember = await service.GetChatMember(id, cancellationToken);
+                    if (chatMember is null) return Results.BadRequest("Chat member check failed");
 
-                    return Results.Ok(getChatMemberResponse);
+                    return Results.Ok(chatMember);
                 })
-            .Produces<GetChatMemberResponse?>()
             .WithSummary("Проверка подписки на канал");
     }
 
