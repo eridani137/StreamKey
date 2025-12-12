@@ -37,12 +37,7 @@ public class Playlist : ICarterModule
 
                 if (result.IsFailure)
                 {
-                    return result.Error.Code switch
-                    {
-                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
-                        ErrorCode.PlaylistNotReceived => Results.Content(result.Error.Message, statusCode: result.Error.StatusCode),
-                        _ => Results.InternalServerError(result.Error.Message)
-                    };
+                    logger.LogWarning("{Channel}: {Error}", request.ChannelName, result.Error.Code.ToString());
                 }
 
                 await WriteHttpResponse(context, result.Value);
@@ -84,12 +79,7 @@ public class Playlist : ICarterModule
 
                 if (result.IsFailure)
                 {
-                    return result.Error.Code switch
-                    {
-                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
-                        ErrorCode.PlaylistNotReceived => Results.Content(result.Error.Message, statusCode: result.Error.StatusCode),
-                        _ => Results.InternalServerError(result.Error.Message)
-                    };
+                    logger.LogWarning("{VodId}: {Error}", vodId, result.Error.Code.ToString());
                 }
 
                 await WriteHttpResponse(context, result.Value);
