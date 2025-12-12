@@ -43,7 +43,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         if (result?.Data?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             result?.Data.Data.StreamPlaybackAccessToken?.Value is null)
         {
-            // logger.LogError("Twitch вернул неверный StreamAccessToken. Body: {@Body}", result?.RawJson);
+            // logger.LogWarning("GetStreamAccessToken: {Body}", result?.RawJson);
             return null;
         }
 
@@ -78,11 +78,11 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         var result =
             await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
                 RequestTwitchPlaylistType.VodAccessToken);
-        
+
         if (result?.Data?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             result?.Data.Data?.VideoPlaybackAccessToken?.Value is null)
         {
-            // logger.LogError("Twitch вернул неверный VodAccessToken. Body: {@Body}", result?.RawJson);
+            // logger.LogWarning("VodAccessToken: {Body}", result?.RawJson);
             return null;
         }
 
@@ -110,16 +110,15 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         // {
         //     context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
         // }
-        
+
         context.Request.Query.AddQueryDeviceId(request, deviceId);
 
         using var response = await client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
-        
+
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogWarning("{Prefix} Twitch GQL error {Status}. Body: {Body}",
-                type, response.StatusCode, body);
+            logger.LogWarning("{Prefix} [{StatusCode}]: {Body}", type, response.StatusCode, body);
             return null;
         }
 
@@ -130,8 +129,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "{Prefix} Ошибка десериализации Twitch JSON. Body: {Body}",
-                type, body);
+            logger.LogError(ex, "{Prefix} [ошибка десериализации]: {Body}", type, body);
             return null;
         }
     }

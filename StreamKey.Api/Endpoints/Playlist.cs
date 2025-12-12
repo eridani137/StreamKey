@@ -1,3 +1,4 @@
+using System.Text;
 using Carter;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
@@ -33,15 +34,22 @@ public class Playlist : ICarterModule
                     UserId = request.UserId
                 });
 
-                var result = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
+                var response = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
+                if (response is null) return Results.BadRequest();
 
-                if (result.IsFailure)
+                if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogWarning("{Channel}: {Error}", request.ChannelName, result.Error.Code.ToString());
+                    var body = await response.Content.ReadAsByteArrayAsync();
+                    var bodyString = Encoding.UTF8.GetString(body);
+
+                    logger.LogWarning("GetStream {ChannelName} {StatusCode}: {Body}", request.ChannelName,
+                        response.StatusCode, bodyString);
+
+                    await WriteHttpResponse(context, response, body);
+                    return Results.Empty;
                 }
 
-                await WriteHttpResponse(context, result.Value);
-
+                await WriteHttpResponse(context, response);
                 return Results.Empty;
             })
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
@@ -55,7 +63,8 @@ public class Playlist : ICarterModule
                 IUsherService usherService,
                 ILogger<Playlist> logger) =>
             {
-                if (!context.Request.Query.TryGetValue("vod_id", out var vodId))
+                if (!context.Request.Query.TryGetValue("vod_id", out var vodIdValue) ||
+                    vodIdValue.ToString() is not { } vodId)
                 {
                     return Results.BadRequest("vod_id is not found");
                 }
@@ -75,15 +84,21 @@ public class Playlist : ICarterModule
                     deviceId = TwitchExtensions.GenerateDeviceId();
                 }
 
-                var result = await usherService.GetVodPlaylist(vodId.ToString(), deviceId, context);
+                var response = await usherService.GetVodPlaylist(vodId, deviceId, context);
+                if (response is null) return Results.NotFound();
 
-                if (result.IsFailure)
+                if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogWarning("{VodId}: {Error}", vodId, result.Error.Code.ToString());
+                    var body = await response.Content.ReadAsByteArrayAsync();
+                    var bodyString = Encoding.UTF8.GetString(body);
+
+                    logger.LogWarning("GetVod {VodId} {StatusCode}: {Body}", vodId, response.StatusCode, bodyString);
+
+                    await WriteHttpResponse(context, response, body);
+                    return Results.Empty;
                 }
 
-                await WriteHttpResponse(context, result.Value);
-
+                await WriteHttpResponse(context, response);
                 return Results.Empty;
             })
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
@@ -93,7 +108,10 @@ public class Playlist : ICarterModule
             .WithSummary("Получить плейлист записи");
     }
 
-    private static async Task WriteHttpResponse(HttpContext context, HttpResponseMessage response)
+    private static async Task WriteHttpResponse(
+        HttpContext context,
+        HttpResponseMessage response,
+        byte[]? bodyOverride = null)
     {
         context.Response.StatusCode = (int)response.StatusCode;
 
@@ -110,7 +128,14 @@ public class Playlist : ICarterModule
         context.Response.Headers.Remove("transfer-encoding");
         context.Response.Headers.Remove("Content-Length");
 
-        await response.Content.CopyToAsync(context.Response.Body);
+        if (bodyOverride != null)
+        {
+            await context.Response.Body.WriteAsync(bodyOverride);
+        }
+        else
+        {
+            await response.Content.CopyToAsync(context.Response.Body);
+        }
     }
 
     private static UserTokenData? ProcessRequest(HttpContext context, ILogger<Playlist> logger)

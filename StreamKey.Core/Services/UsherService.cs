@@ -2,7 +2,6 @@ using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using StreamKey.Core.Abstractions;
-using StreamKey.Core.Results;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs.Twitch;
 
@@ -29,7 +28,7 @@ public class UsherService(
 
     private static readonly TimeSpan AbsoluteExpiration = TimeSpan.FromMinutes(2);
 
-    public async Task<Result<HttpResponseMessage>> GetStreamPlaylist(string username, string deviceId,
+    public async Task<HttpResponseMessage?> GetStreamPlaylist(string username, string deviceId,
         HttpContext context)
     {
         if (!cache.TryGetValue(GetStreamKey(username, deviceId),
@@ -45,7 +44,7 @@ public class UsherService(
         if (tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             tokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
         {
-            return Result.Failure<HttpResponseMessage>(Error.ServerTokenNotFound);
+            return null;
         }
 
         var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
@@ -66,24 +65,11 @@ public class UsherService(
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
 
-        try
-        {
-            var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-
-            return Result.Success(response);
-        }
-        catch (TaskCanceledException)
-        {
-            return Result.Failure<HttpResponseMessage>(Error.Timeout);
-        }
-        catch (Exception)
-        {
-            return Result.Failure<HttpResponseMessage>(Error.UnexpectedError);
-        }
+        var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+        return await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
     }
 
-    public async Task<Result<HttpResponseMessage>> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
+    public async Task<HttpResponseMessage?> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
     {
         if (!cache.TryGetValue(GetVodKey(vodId, deviceId), out VideoPlaybackAccessTokenResponse? tokenResponse) ||
             tokenResponse is null)
@@ -98,7 +84,7 @@ public class UsherService(
         if (tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             tokenResponse.Data.VideoPlaybackAccessToken.Value is null)
         {
-            return Result.Failure<HttpResponseMessage>(Error.ServerTokenNotFound);
+            return null;
         }
 
         var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
@@ -120,20 +106,7 @@ public class UsherService(
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
 
-        try
-        {
-            var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-
-            return Result.Success(response);
-        }
-        catch (TaskCanceledException)
-        {
-            return Result.Failure<HttpResponseMessage>(Error.Timeout);
-        }
-        catch (Exception)
-        {
-            return Result.Failure<HttpResponseMessage>(Error.UnexpectedError);
-        }
+        var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+        return await client.GetAsync(uriBuilder.ToString(), HttpCompletionOption.ResponseHeadersRead);
     }
 }
