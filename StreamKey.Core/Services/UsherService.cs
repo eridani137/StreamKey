@@ -31,13 +31,14 @@ public class UsherService(
     public async Task<HttpResponseMessage?> GetStreamPlaylist(string username, string deviceId,
         HttpContext context)
     {
-        if (!cache.TryGetValue(GetStreamKey(username, deviceId),
-                out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        var cacheKey = GetStreamKey(username, deviceId);
+        
+        if (!cache.TryGetValue(cacheKey, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
         {
             tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
             if (tokenResponse is not null)
             {
-                cache.Set(username, tokenResponse, AbsoluteExpiration);
+                cache.Set(cacheKey, tokenResponse, AbsoluteExpiration);
             }
         }
 
@@ -63,21 +64,22 @@ public class UsherService(
         query["token"] = tokenResponse.Data.StreamPlaybackAccessToken.Value;
 
         uriBuilder.Query = query.ToString();
-        var url = uriBuilder.ToString();
 
         var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-        return await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+        return await client.GetAsync(uriBuilder.ToString(), HttpCompletionOption.ResponseHeadersRead);
     }
 
     public async Task<HttpResponseMessage?> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
     {
-        if (!cache.TryGetValue(GetVodKey(vodId, deviceId), out VideoPlaybackAccessTokenResponse? tokenResponse) ||
+        var cacheKey = GetVodKey(vodId, deviceId);
+        
+        if (!cache.TryGetValue(cacheKey, out VideoPlaybackAccessTokenResponse? tokenResponse) ||
             tokenResponse is null)
         {
             tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
             if (tokenResponse is not null)
             {
-                cache.Set(vodId, tokenResponse, AbsoluteExpiration);
+                cache.Set(cacheKey, tokenResponse, AbsoluteExpiration);
             }
         }
 
@@ -104,7 +106,6 @@ public class UsherService(
         query["sig"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Signature;
 
         uriBuilder.Query = query.ToString();
-        var url = uriBuilder.ToString();
 
         var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
         return await client.GetAsync(uriBuilder.ToString(), HttpCompletionOption.ResponseHeadersRead);

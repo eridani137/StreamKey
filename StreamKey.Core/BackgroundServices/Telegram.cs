@@ -12,12 +12,12 @@ using StreamKey.Shared.Hubs;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class TelegramHandler(
+public class Telegram(
     IServiceScopeFactory scopeFactory,
-    ILogger<TelegramHandler> logger)
+    ILogger<Telegram> logger)
     : BackgroundService
 {
-    private readonly PeriodicTaskRunner<TelegramHandler> _taskRunner = new(logger);
+    private readonly PeriodicTaskRunner<Telegram> _taskRunner = new(logger);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -25,7 +25,7 @@ public class TelegramHandler(
 
         await Task.WhenAll(
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), CheckOldUsers, stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromSeconds(5), SaveNewTelegramUsers, stoppingToken)
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(1), SaveNewTelegramUsers, stoppingToken)
         );
     }
 
@@ -112,6 +112,8 @@ public class TelegramHandler(
                         await extensionHub.Clients.Client(connectionId)
                             .ReloadUserData(dto.MapUserDto(user.IsChatMember));
                     }
+
+                    await Task.Delay(300, cancellationToken);
                 }
                 catch (Exception e)
                 {

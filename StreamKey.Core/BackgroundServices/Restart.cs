@@ -7,15 +7,15 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class RestartHandler(
+public class Restart(
     IServiceScopeFactory scopeFactory,
     IHostApplicationLifetime appLifetime,
-    ILogger<RestartHandler> logger)
+    ILogger<Restart> logger)
     : BackgroundService
 {
     private readonly TimeSpan _restartTime = new(1, 0, 0); // 01:00
     
-    private readonly PeriodicTaskRunner<RestartHandler> _taskRunner = new(logger);
+    private readonly PeriodicTaskRunner<Restart> _taskRunner = new(logger);
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {

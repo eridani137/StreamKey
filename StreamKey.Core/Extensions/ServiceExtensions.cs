@@ -41,10 +41,10 @@ public static class ServiceExtensions
 
             services.AddSingleton<StatisticService>();
 
-            services.AddHostedService<ChannelsHandler>();
-            services.AddHostedService<StatisticHandler>();
-            services.AddHostedService<RestartHandler>();
-            services.AddHostedService<TelegramHandler>();
+            services.AddHostedService<ChannelsBackground>();
+            services.AddHostedService<Statistic>();
+            services.AddHostedService<Restart>();
+            services.AddHostedService<Telegram>();
 
             services.AddHostedService<ConnectionListener>();
             services.AddHostedService<ClickChannelListener>();

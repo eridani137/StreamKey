@@ -10,16 +10,16 @@ using StreamKey.Shared.Hubs;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class StatisticHandler(
+public class Statistic(
     StatisticService statisticService,
     IServiceScopeFactory scopeFactory,
-    ILogger<StatisticHandler> logger)
+    ILogger<Statistic> logger)
     : BackgroundService
 {
     private static readonly TimeSpan UserOfflineTimeout = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan MinimumSessionDuration = TimeSpan.FromSeconds(30);
 
-    private readonly PeriodicTaskRunner<StatisticHandler> _taskRunner = new(logger);
+    private readonly PeriodicTaskRunner<Statistic> _taskRunner = new(logger);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

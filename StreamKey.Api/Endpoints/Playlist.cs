@@ -4,7 +4,6 @@ using Carter;
 using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
-using StreamKey.Core.Results;
 using StreamKey.Core.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs.Twitch;
@@ -88,7 +87,7 @@ public class Playlist : ICarterModule
                 var response = await usherService.GetVodPlaylist(vodId, deviceId, context);
                 if (response is null) return Results.NotFound();
 
-                if (!response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.Forbidden)
                 {
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);

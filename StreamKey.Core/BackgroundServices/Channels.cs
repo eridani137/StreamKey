@@ -7,10 +7,10 @@ using StreamKey.Infrastructure.Abstractions;
 
 namespace StreamKey.Core.BackgroundServices;
 
-public class ChannelsHandler(ILogger<ChannelsHandler> logger, IServiceScopeFactory scopeFactory)
+public class ChannelsBackground(ILogger<ChannelsBackground> logger, IServiceScopeFactory scopeFactory)
     : BackgroundService
 {
-    private readonly PeriodicTaskRunner<ChannelsHandler> _taskRunner = new(logger);
+    private readonly PeriodicTaskRunner<ChannelsBackground> _taskRunner = new(logger);
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
