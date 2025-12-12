@@ -43,7 +43,7 @@ public class Playlist : ICarterModule
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
 
-                    logger.LogWarning("GetStream {ChannelName} {StatusCode}: {Body}", request.ChannelName,
+                    logger.LogWarning("GetStream {ChannelName} [{StatusCode}]: {Body}", request.ChannelName,
                         (int)response.StatusCode, bodyString);
 
                     await WriteHttpResponse(context, response, body);
@@ -95,7 +95,7 @@ public class Playlist : ICarterModule
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
 
-                    logger.LogWarning("GetVod {VodId} {StatusCode}: {Body}", vodId, (int)response.StatusCode,
+                    logger.LogWarning("GetVod {VodId} [{StatusCode}]: {Body}", vodId, (int)response.StatusCode,
                         bodyString);
 
                     await WriteHttpResponse(context, response, body);
