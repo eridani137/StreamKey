@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using Carter;
 using Newtonsoft.Json.Linq;
@@ -37,13 +38,13 @@ public class Playlist : ICarterModule
                 var response = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
                 if (response is null) return Results.BadRequest();
 
-                if (!response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
                 {
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
 
                     logger.LogWarning("GetStream {ChannelName} {StatusCode}: {Body}", request.ChannelName,
-                        response.StatusCode, bodyString);
+                        (int)response.StatusCode, bodyString);
 
                     await WriteHttpResponse(context, response, body);
                     return Results.Empty;
@@ -92,7 +93,7 @@ public class Playlist : ICarterModule
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
 
-                    logger.LogWarning("GetVod {VodId} {StatusCode}: {Body}", vodId, response.StatusCode, bodyString);
+                    logger.LogWarning("GetVod {VodId} {StatusCode}: {Body}", vodId, (int)response.StatusCode, bodyString);
 
                     await WriteHttpResponse(context, response, body);
                     return Results.Empty;
