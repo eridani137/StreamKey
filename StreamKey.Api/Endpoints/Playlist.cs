@@ -18,110 +18,109 @@ public class Playlist : ICarterModule
             .WithTags("Работа с плейлистами");
 
         group.MapGet("", async (
-                    HttpContext context,
-                    IUsherService usherService,
-                    StatisticService statisticService,
-                    ILogger<Playlist> logger) =>
-                await GetStreamPlaylist(context, usherService, statisticService, logger))
+                HttpContext context,
+                IUsherService usherService,
+                StatisticService statisticService,
+                ILogger<Playlist> logger) =>
+            {
+                var request = ProcessRequest(context, logger);
+                if (request is null) return Results.BadRequest();
+
+                statisticService.ViewStatisticQueue.Enqueue(new ViewStatisticEntity()
+                {
+                    ChannelName = request.ChannelName,
+                    UserIp = request.UserIp,
+                    UserId = request.UserId
+                });
+
+                var result = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
+
+                if (result.IsFailure)
+                {
+                    return result.Error.Code switch
+                    {
+                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
+                        ErrorCode.PlaylistNotReceived => Results.Content(result.Error.Message, statusCode: result.Error.StatusCode),
+                        _ => Results.InternalServerError(result.Error.Message)
+                    };
+                }
+
+                await WriteHttpResponse(context, result.Value);
+
+                return Results.Empty;
+            })
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
             .WithSummary("Получить плейлист стрима");
 
         group.MapGet("/vod", async (
-                    HttpContext context,
-                    IUsherService usherService,
-                    ILogger<Playlist> logger) =>
-                await GetVodPlaylist(context, usherService, logger))
+                HttpContext context,
+                IUsherService usherService,
+                ILogger<Playlist> logger) =>
+            {
+                if (!context.Request.Query.TryGetValue("vod_id", out var vodId))
+                {
+                    return Results.BadRequest("vod_id is not found");
+                }
+
+                if (!context.Request.Query.TryGetValue("token", out var tokenValue))
+                {
+                    logger.LogError("Token отсутствует в запросе");
+                    return Results.BadRequest("token is not found");
+                }
+
+                var obj = JObject.Parse(tokenValue.ToString());
+
+                var deviceId = obj.SelectToken(".device_id")?.ToString();
+
+                if (string.IsNullOrEmpty(deviceId))
+                {
+                    deviceId = TwitchExtensions.GenerateDeviceId();
+                }
+
+                var result = await usherService.GetVodPlaylist(vodId.ToString(), deviceId, context);
+
+                if (result.IsFailure)
+                {
+                    return result.Error.Code switch
+                    {
+                        ErrorCode.StreamNotFound => Results.NotFound(result.Error.Message),
+                        ErrorCode.PlaylistNotReceived => Results.Content(result.Error.Message, statusCode: result.Error.StatusCode),
+                        _ => Results.InternalServerError(result.Error.Message)
+                    };
+                }
+
+                await WriteHttpResponse(context, result.Value);
+
+                return Results.Empty;
+            })
             .Produces<string>(contentType: ApplicationConstants.PlaylistContentType)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status429TooManyRequests)
             .Produces(StatusCodes.Status500InternalServerError)
             .WithSummary("Получить плейлист записи");
     }
 
-    private static async Task<IResult> GetStreamPlaylist(
-        HttpContext context,
-        IUsherService usherService,
-        StatisticService statisticService,
-        ILogger<Playlist> logger)
+    private static async Task WriteHttpResponse(HttpContext context, HttpResponseMessage response)
     {
-        var request = ProcessRequest(context, logger);
-        if (request is null) return Results.BadRequest();
+        context.Response.StatusCode = (int)response.StatusCode;
 
-        statisticService.ViewStatisticQueue.Enqueue(new ViewStatisticEntity()
+        foreach (var header in response.Headers)
         {
-            ChannelName = request.ChannelName,
-            UserIp = request.UserIp,
-            UserId = request.UserId
-        });
-
-        var result = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
-
-        if (result.IsFailure)
-        {
-            switch (result.Error.Code)
-            {
-                case ErrorCode.StreamNotFound:
-                    return Results.NotFound(result.Error.Message);
-                case ErrorCode.PlaylistNotReceived:
-                    logger.LogWarning("{Channel}: {Error}", request.ChannelName, result.Error.Message);
-                    return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
-                default:
-                    // logger.LogWarning("{Error}: {Channel}", result.Error.Message, request.ChannelName);
-                    return Results.InternalServerError(result.Error.Message);
-            }
+            context.Response.Headers[header.Key] = header.Value.ToArray();
         }
 
-        return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);
-    }
-
-    private static async Task<IResult> GetVodPlaylist(
-        HttpContext context,
-        IUsherService usherService,
-        ILogger<Playlist> logger)
-    {
-        if (!context.Request.Query.TryGetValue("vod_id", out var vodId))
+        foreach (var header in response.Content.Headers)
         {
-            return Results.BadRequest("vod_id is not found");
+            context.Response.Headers[header.Key] = header.Value.ToArray();
         }
 
-        if (!context.Request.Query.TryGetValue("token", out var tokenValue))
-        {
-            logger.LogError("Token отсутствует в запросе");
-            return Results.BadRequest("token is not found");
-        }
+        context.Response.Headers.Remove("transfer-encoding");
+        context.Response.Headers.Remove("Content-Length");
 
-        var obj = JObject.Parse(tokenValue.ToString());
-
-        var deviceId = obj.SelectToken(".device_id")?.ToString();
-
-        if (string.IsNullOrEmpty(deviceId))
-        {
-            deviceId = TwitchExtensions.GenerateDeviceId();
-        }
-
-        var result = await usherService.GetVodPlaylist(vodId.ToString(), deviceId, context);
-
-        if (result.IsFailure)
-        {
-            switch (result.Error.Code)
-            {
-                case ErrorCode.StreamNotFound:
-                    return Results.NotFound(result.Error.Message);
-                case ErrorCode.PlaylistNotReceived:
-                    logger.LogWarning("{VodId}: {Error}", vodId.ToString(), result.Error.Message);
-                    return Results.Content(result.Error.Message, statusCode: result.Error.StatusCode);
-                default:
-                    // logger.LogWarning("{Error}: {VodId}", result.Error.Message, vodId.ToString());
-                    return Results.InternalServerError(result.Error.Message);
-            }
-        }
-
-        return Results.Content(result.Value, ApplicationConstants.PlaylistContentType);
+        await response.Content.CopyToAsync(context.Response.Body);
     }
 
     private static UserTokenData? ProcessRequest(HttpContext context, ILogger<Playlist> logger)

@@ -5,6 +5,6 @@ namespace StreamKey.Core.Abstractions;
 
 public interface IUsherService
 {
-    Task<Result<string>> GetStreamPlaylist(string username, string deviceId, HttpContext context);
-    Task<Result<string>> GetVodPlaylist(string vodId, string deviceId, HttpContext context);
+    Task<Result<HttpResponseMessage>> GetStreamPlaylist(string username, string deviceId, HttpContext context);
+    Task<Result<HttpResponseMessage>> GetVodPlaylist(string vodId, string deviceId, HttpContext context);
 }

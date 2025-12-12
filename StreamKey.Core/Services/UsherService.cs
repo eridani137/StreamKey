@@ -1,8 +1,5 @@
-using System.Net;
 using System.Web;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Results;
 using StreamKey.Shared;
@@ -14,81 +11,59 @@ public class UsherService(
     ITwitchService twitchService
 ) : IUsherService
 {
-    public async Task<Result<string>> GetStreamPlaylist(string username, string deviceId, HttpContext context)
+    public async Task<Result<HttpResponseMessage>> GetStreamPlaylist(string username, string deviceId, HttpContext context)
     {
         var tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
 
-        if (tokenResponse?.Data is null)
+        if (tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
+            tokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
         {
-            return Result.Failure<string>(Error.ServerTokenNotFound);
+            return Result.Failure<HttpResponseMessage>(Error.ServerTokenNotFound);
         }
 
         var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
         {
             Path = $"api/v2/channel/hls/{username}.m3u8"
         };
-        
-        var query = HttpUtility.ParseQueryString(string.Empty);
 
+        var query = HttpUtility.ParseQueryString(string.Empty);
         foreach (var (key, value) in context.Request.Query)
         {
             if (key.Equals("auth")) continue;
             query[key] = value;
         }
 
-        query["sig"] = tokenResponse.Data?.StreamPlaybackAccessToken?.Signature;
-        query["token"] = tokenResponse.Data?.StreamPlaybackAccessToken?.Value;
+        query["sig"] = tokenResponse.Data.StreamPlaybackAccessToken.Signature;
+        query["token"] = tokenResponse.Data.StreamPlaybackAccessToken.Value;
 
         uriBuilder.Query = query.ToString();
         var url = uriBuilder.ToString();
 
         try
         {
-            using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            var response = await client.GetAsync(url);
+            var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Result.Failure<string>(Error.StreamNotFound);
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var array = JArray.Parse(errorContent);
-                foreach (var jToken in array)
-                {
-                    if (jToken is JObject obj)
-                    {
-                        obj.Remove("url");
-                    }
-                }
-
-                return Result.Failure<string>(Error.PlaylistNotReceived(array.ToString(Formatting.None),
-                    (int)response.StatusCode));
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            return Result.Success(content);
+            return Result.Success(response);
         }
         catch (TaskCanceledException)
         {
-            return Result.Failure<string>(Error.Timeout);
+            return Result.Failure<HttpResponseMessage>(Error.Timeout);
         }
         catch (Exception)
         {
-            return Result.Failure<string>(Error.UnexpectedError);
+            return Result.Failure<HttpResponseMessage>(Error.UnexpectedError);
         }
     }
 
-    public async Task<Result<string>> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
+    public async Task<Result<HttpResponseMessage>> GetVodPlaylist(string vodId, string deviceId, HttpContext context)
     {
         var tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
 
-        if (tokenResponse?.Data is null)
+        if (tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
+            tokenResponse.Data.VideoPlaybackAccessToken.Value is null)
         {
-            return Result.Failure<string>(Error.ServerTokenNotFound);
+            return Result.Failure<HttpResponseMessage>(Error.ServerTokenNotFound);
         }
 
         var uriBuilder = new UriBuilder(ApplicationConstants.UsherUrl)
@@ -97,7 +72,6 @@ public class UsherService(
         };
 
         var query = HttpUtility.ParseQueryString(string.Empty);
-        
         foreach (var (key, value) in context.Request.Query)
         {
             if (key.Equals("vod_id") || key.Equals("auth")) continue;
@@ -113,41 +87,18 @@ public class UsherService(
 
         try
         {
-            using var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
-            var response = await client.GetAsync(url);
+            var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Result.Failure<string>(Error.StreamNotFound);
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var array = JArray.Parse(errorContent);
-                foreach (var jToken in array)
-                {
-                    if (jToken is JObject obj)
-                    {
-                        obj.Remove("url");
-                    }
-                }
-
-                return Result.Failure<string>(Error.PlaylistNotReceived(array.ToString(Formatting.None),
-                    (int)response.StatusCode));
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            return Result.Success(content);
+            return Result.Success(response);
         }
         catch (TaskCanceledException)
         {
-            return Result.Failure<string>(Error.Timeout);
+            return Result.Failure<HttpResponseMessage>(Error.Timeout);
         }
         catch (Exception)
         {
-            return Result.Failure<string>(Error.UnexpectedError);
+            return Result.Failure<HttpResponseMessage>(Error.UnexpectedError);
         }
     }
 }
