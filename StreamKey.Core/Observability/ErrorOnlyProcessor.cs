@@ -29,10 +29,14 @@ public class ErrorOnlyProcessor : BaseProcessor<Activity>
         var route = activity.GetTagItem("http.route")?.ToString();
         var status = activity.GetTagItem("http.response.status_code")?.ToString();
 
-        if (route == "/playlist/vod" && status is "403" or "404" or "499") return true;
-        if (route == "/playlist" && status is "403" or "404" or "499") return true;
-
-        return false;
+        switch (route)
+        {
+            case "/playlist/vod" when status is "403" or "404" or "499":
+            case "/playlist" when status is "403" or "404" or "499":
+                return true;
+            default:
+                return false;
+        }
     }
     
     private static bool IsError(Activity activity)
