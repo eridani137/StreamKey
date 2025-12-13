@@ -3,7 +3,7 @@ using OpenTelemetry;
 
 namespace StreamKey.Core.Observability;
 
-public class ErrorOnlyProcessor : BaseProcessor<Activity>
+public sealed class ErrorOnlyProcessor : BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
@@ -21,36 +21,43 @@ public class ErrorOnlyProcessor : BaseProcessor<Activity>
 
         base.OnEnd(activity);
     }
-    
+
     private static bool IsExpected(Activity activity)
     {
-        if (activity.GetTagItem("expected_error")?.ToString() == "true") return true;
-
-        var route = activity.GetTagItem("http.route")?.ToString();
         var status = activity.GetTagItem("http.response.status_code")?.ToString();
 
-        switch (route)
+        // ---------- AspNetCore ----------
+        var route = activity.GetTagItem("http.route")?.ToString()?.TrimEnd('/');
+
+        if (route is "/playlist" or "/playlist/vod" &&
+            status is "403" or "404" or "499")
         {
-            case "/playlist/vod" when status is "403" or "404" or "499":
-            case "/playlist" when status is "403" or "404" or "499":
-                return true;
-            default:
-                return false;
+            return true;
         }
-    }
-    
-    private static bool IsError(Activity activity)
-    {
-        if (activity.Status == ActivityStatusCode.Error) return true;
 
-        if (activity.Events.Any(e => e.Name == "exception")) return true;
+        // ---------- HttpClient (usher) ----------
+        var host = activity.GetTagItem("server.address")?.ToString();
 
-        var statusCode = activity.GetTagItem("http.response.status_code")?.ToString();
-        if (int.TryParse(statusCode, out var code)) return code >= 400;
+        if (host == "usher.ttvnw.net" && status is "403" or "404" or "499")
+        {
+            return true;
+        }
 
         return false;
     }
-    
+
+    private static bool IsError(Activity activity)
+    {
+        if (activity.Status == ActivityStatusCode.Error)
+            return true;
+
+        if (activity.Events.Any(e => e.Name == "exception"))
+            return true;
+
+        var statusCode = activity.GetTagItem("http.response.status_code")?.ToString();
+        return int.TryParse(statusCode, out var code) && code >= 400;
+    }
+
     private static void Drop(Activity activity)
     {
         activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
