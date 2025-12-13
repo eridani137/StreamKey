@@ -146,17 +146,6 @@ public static class ServiceExtensions
             if (natsConfig is null) return;
 
             if (isInternal) natsConfig.Url = $"nats://nats:{natsConfig.Port}";
-
-            var options = new NatsOpts()
-            {
-                Url = natsConfig.Url,
-                Name = "StreamKey",
-                AuthOpts = NatsAuthOpts.Default with
-                {
-                    Username = natsConfig.User,
-                    Password = natsConfig.Password
-                }
-            };
             
             builder.Services.AddNats(configureOpts: opts => opts with
                 {
