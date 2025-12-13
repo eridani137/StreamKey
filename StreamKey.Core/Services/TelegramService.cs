@@ -21,7 +21,7 @@ public class TelegramService(ITelegramBotClient botClient, ILogger<TelegramServi
         }
         catch (Exception e)
         {
-            logger.LogError(e, "GetChatMember");
+            logger.LogError(e, "GetChatMember [{UserId}]", userId);
             return null;
         }
     }
