@@ -17,6 +17,7 @@ using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.Configs;
+using Telegram.Bot;
 
 namespace StreamKey.Core.Extensions;
 
@@ -33,6 +34,13 @@ public static class ServiceExtensions
 
             services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
 
+            services.AddSingleton<ITelegramBotClient>(sp => 
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                var botToken = configuration.GetSection("TelegramAuthorizationBotToken").Get<string>();
+                return new TelegramBotClient(botToken!);
+            });
+            
             services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
             services.AddSingleton<ICamoufoxService, CamoufoxService>();
             services.AddSingleton<ITelegramService, TelegramService>();

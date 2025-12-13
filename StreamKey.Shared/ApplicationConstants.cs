@@ -13,7 +13,6 @@ public static class ApplicationConstants
     
     public const string ClientId = "kimne78kx3ncx6brgo4mv6wki5h1ko";
     
-    public static string TelegramBotToken { get; set; } = string.Empty;
     public static readonly Uri TelegramUrl = new ("https://api.telegram.org");
     public const string TelegramClientName = "TelegramClient";
     public const long TelegramChatId = -1001578482756;
