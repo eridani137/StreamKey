@@ -56,12 +56,17 @@ public class Telegram(
             try
             {
                 var response = await service.GetChatMember(user.TelegramId, cancellationToken);
-                if (response is null) continue;
-
-                var isChatMember = response.IsChatMember();
-                if (user.IsChatMember != isChatMember)
+                if (response is null)
                 {
-                    user.IsChatMember = isChatMember;
+                    user.IsChatMember = false;
+                }
+                else
+                {
+                    var isChatMember = response.IsChatMember();
+                    if (user.IsChatMember != isChatMember)
+                    {
+                        user.IsChatMember = isChatMember;
+                    }
                 }
 
                 user.UpdatedAt = now;
@@ -93,17 +98,17 @@ public class Telegram(
                     var user = await repository.GetByTelegramId(dto.Id, cancellationToken);
 
                     var chatMember = await service.GetChatMember(dto.Id, cancellationToken);
-                    if (chatMember is null) continue;
+                    var isChatMember = chatMember?.IsChatMember() ?? false;
                     
                     if (user is null)
                     {
                         user = dto.Map();
-                        user.UpdateUserProperties(dto, chatMember.IsChatMember());
+                        user.UpdateUserProperties(dto, isChatMember);
                         await repository.Add(user, cancellationToken);
                     }
                     else
                     {
-                        user.UpdateUserProperties(dto, chatMember.IsChatMember());
+                        user.UpdateUserProperties(dto, isChatMember);
                         repository.Update(user);
                     }
                     

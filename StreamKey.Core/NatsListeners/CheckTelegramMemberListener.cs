@@ -50,13 +50,9 @@ public class CheckTelegramMemberListener(
             return null;
         }
 
-        var getChatMemberResponse = await telegramService.GetChatMember(request.UserId, cancellationToken);
-        if (getChatMemberResponse is null)
-        {
-            return user.MapUserDto();
-        }
+        var chatMember = await telegramService.GetChatMember(request.UserId, cancellationToken);
+        var isChatMember = chatMember?.IsChatMember() ?? false;
 
-        var isChatMember = getChatMemberResponse.IsChatMember();
         if (user.IsChatMember != isChatMember)
         {
             user.IsChatMember = isChatMember;
