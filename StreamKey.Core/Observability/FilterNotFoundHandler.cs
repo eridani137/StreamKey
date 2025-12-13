@@ -10,7 +10,7 @@ public class FilterNotFoundHandler : DelegatingHandler
     {
         var response = await base.SendAsync(request, cancellationToken);
         
-        if (response.StatusCode == HttpStatusCode.NotFound)
+        if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden)
         {
             using var activity = System.Diagnostics.Activity.Current;
             activity?.SetTag("expected_not_found", "true");
