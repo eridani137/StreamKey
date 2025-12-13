@@ -8,11 +8,13 @@ namespace StreamKey.Core.Services;
 
 public class TelegramService(ITelegramBotClient botClient, ILogger<TelegramService> logger) : ITelegramService
 {
+    private static readonly ChatId ChatId = new(ApplicationConstants.TelegramChatId);
+    
     public async Task<ChatMember?> GetChatMember(long userId, CancellationToken cancellationToken)
     {
         try
         {
-            var chatMember = await botClient.GetChatMember(new ChatId(ApplicationConstants.TelegramChatId), userId, cancellationToken: cancellationToken);
+            var chatMember = await botClient.GetChatMember(ChatId, userId, cancellationToken: cancellationToken);
             return chatMember;
         }
         catch (OperationCanceledException)
