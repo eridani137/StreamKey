@@ -30,7 +30,3 @@ export enum StatusType {
   WORKING = 'working',
   MAINTENANCE = 'maintenance',
 }
-
-export type Rule = Awaited<
-  ReturnType<typeof browser.declarativeNetRequest.getDynamicRules>
->[number];
