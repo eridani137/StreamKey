@@ -116,6 +116,8 @@ class BrowserExtensionClient {
 
     while (this.shouldReconnect) {
       try {
+        if (this.connection.state === HubConnectionState.Connected) break;
+
         const delay = retryCount === 0 ? initialDelay : subsequentDelay;
         console.log(
           `Повтор подключения через ${delay}ms (попытка ${retryCount + 1})...`
