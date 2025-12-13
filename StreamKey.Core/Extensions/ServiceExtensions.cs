@@ -77,7 +77,7 @@ public static class ServiceExtensions
 
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 })
-                .AddHttpMessageHandler<FilterNotFoundHandler>();
+                .AddHttpMessageHandler<FilterExpectedErrorStatusCodeHandler>();
 
             services.AddHttpClient(ApplicationConstants.TwitchClientName, (_, client) =>
                 {
@@ -91,7 +91,7 @@ public static class ServiceExtensions
 
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 })
-                .AddHttpMessageHandler<FilterNotFoundHandler>();
+                .AddHttpMessageHandler<FilterExpectedErrorStatusCodeHandler>();
 
             services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
             {

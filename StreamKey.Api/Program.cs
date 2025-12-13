@@ -37,7 +37,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddIdentity();
 
-builder.Services.AddTransient<FilterNotFoundHandler>();
+builder.Services.AddTransient<FilterExpectedErrorStatusCodeHandler>();
 
 builder.AddDefaultAuthorizationData();
 

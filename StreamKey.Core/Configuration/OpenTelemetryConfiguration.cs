@@ -7,7 +7,6 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using StreamKey.Core.Extensions;
 using StreamKey.Core.Observability;
 
 namespace StreamKey.Core.Configuration;
@@ -60,17 +59,17 @@ public static class OpenTelemetryConfiguration
                         {
                             if (httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true)
                             {
-                                activity.SetTag("service.context", "stream_check");
+                                activity.SetTag("service.context", "usher");
                             }
                         };
 
                         options.EnrichWithHttpResponseMessage = (activity, httpResponseMessage) =>
                         {
-                            if (httpResponseMessage.StatusCode == HttpStatusCode.NotFound &&
-                                activity.GetTagItem("service.context")?.ToString() == "stream_check")
+                            if (httpResponseMessage.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden &&
+                                activity.GetTagItem("service.context")?.ToString() == "usher")
                             {
                                 activity.SetTag("expected_error", "true");
-                                activity.SetStatus(ActivityStatusCode.Ok, "Expected stream not found");
+                                activity.SetStatus(ActivityStatusCode.Ok, "Expected");
                             }
                         };
                     })
