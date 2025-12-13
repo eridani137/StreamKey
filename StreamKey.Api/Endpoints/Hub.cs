@@ -16,7 +16,7 @@ public class Hub : ICarterModule
         group.MapGet("/connections", () => Results.Json(ConnectionRegistry.GetAllActive()))
             .WithSummary("Получить соединения");
         
-        group.MapGet("/online", () => Results.Json(new OnlineResponse(ConnectionRegistry.GetAllActive().Count())))
+        group.MapGet("/online", () => Results.Ok(ConnectionRegistry.GetAllActive().Count()))
             .WithSummary("Получить онлайн");
         
         group.MapGet("/disconnected", () => Results.Json(ConnectionRegistry.GetAllDisconnected()))

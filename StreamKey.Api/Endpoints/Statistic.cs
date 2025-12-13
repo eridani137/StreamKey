@@ -36,9 +36,22 @@ public class Statistic : ICarterModule
 
         group.MapGet("/online",
                 (StatisticService statisticService) =>
-                    Results.Ok(new OnlineResponse(statisticService.OnlineUsers.Count +
-                                                  ConnectionRegistry.ActiveConnections.Count)))
-            .WithSummary("Получить число онлайн пользователей")
+                {
+                    var active = ConnectionRegistry
+                        .GetAllActive()
+                        .Count(s => s.UserId is not null);
+                    var sleeping = ConnectionRegistry.ActiveConnections.Count - active;
+                    
+                    return Results.Ok(new OnlineResponse()
+                    {
+                        TotalOnline = statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count,
+                        SocketConnections = ConnectionRegistry.ActiveConnections.Count,
+                        OldVersionsOnline = statisticService.OnlineUsers.Count,
+                        ActiveOnline = active,
+                        SleepingOnline =  sleeping
+                    });
+                })
+            .WithSummary("Получить онлайн")
             .RequireAuthorization()
             .Produces<OnlineResponse>();
 
