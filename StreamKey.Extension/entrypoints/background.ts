@@ -2,9 +2,10 @@ import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
-import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from '@/rules';
+// import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from '@/rules';
 import { HubConnectionState } from '@microsoft/signalr';
 import { TelegramUser } from '@/types/messaging';
+import { enableRuleset } from '@/rules';
 // import client from '@/client';
 
 export default defineBackground(() => {
@@ -48,7 +49,8 @@ export async function onStartup() {
   await extensionClient.startWithPersistentRetry(sessionId);
   await utils.initUserProfile();
 
-  await loadTwitchRedirectDynamicRules();
+  // await loadTwitchRedirectDynamicRules();
+  await enableRuleset()
 
   browser.alarms.create(Config.alarms.checkConnectionState, {
     delayInMinutes: 0.5,

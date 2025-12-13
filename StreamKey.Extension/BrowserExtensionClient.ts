@@ -9,7 +9,7 @@ import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 import Config from '@/config';
 import * as utils from '@/utils';
 import { sendMessage } from './messaging';
-import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from './rules';
+// import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from './rules';
 import {
   ActivityRequest,
   ChannelData,
@@ -76,7 +76,7 @@ class BrowserExtensionClient {
         // Ignore messaging errors
       }
 
-      await removeAllDynamicRules();
+      // await removeAllDynamicRules();
     });
 
     connection.onreconnected(async () => {
@@ -88,13 +88,13 @@ class BrowserExtensionClient {
         // Ignore messaging errors
       }
 
-      await loadTwitchRedirectDynamicRules();
+      // await loadTwitchRedirectDynamicRules();
     });
 
     connection.onclose(async (error) => {
       console.warn('Соединение закрыто', error);
 
-      await removeAllDynamicRules();
+      // await removeAllDynamicRules();
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
@@ -140,7 +140,7 @@ class BrowserExtensionClient {
 
         console.log('SignalR соединение восстановлено');
 
-        await loadTwitchRedirectDynamicRules();
+        // await loadTwitchRedirectDynamicRules();
 
         await utils.initUserProfile();
 
