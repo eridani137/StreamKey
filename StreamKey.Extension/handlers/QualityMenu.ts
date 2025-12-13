@@ -11,7 +11,6 @@ export class QualityMenu {
   async init(ctx: any): Promise<void> {
     this.ctx = ctx;
     this.startObserver();
-    await this.setDefault();
   }
 
   getResolutionElements(): HTMLElement[] {
