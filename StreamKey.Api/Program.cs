@@ -37,8 +37,6 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddIdentity();
 
-builder.Services.AddTransient<FilterExpectedErrorStatusCodeHandler>();
-
 builder.AddDefaultAuthorizationData();
 
 ConfigureCors.Configure(builder);

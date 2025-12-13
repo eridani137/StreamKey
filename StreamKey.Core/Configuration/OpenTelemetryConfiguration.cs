@@ -40,37 +40,12 @@ public static class OpenTelemetryConfiguration
                     })
                     .AddHttpClientInstrumentation(options =>
                     {
-                        options.FilterHttpRequestMessage = httpRequestMessage =>
+                        options.FilterHttpRequestMessage = msg =>
                         {
-                            var uri = httpRequestMessage.RequestUri;
-                            if (uri == null) return true;
-
-                            var path = uri.AbsolutePath;
-
-                            if (excludedPaths.Any(excluded => path.StartsWith(excluded, StringComparison.OrdinalIgnoreCase)))
-                            {
-                                return false;
-                            }
-
-                            return true;
-                        };
-                        
-                        options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
-                        {
-                            if (httpRequestMessage.RequestUri?.Host.Contains("usher.ttvnw.net") == true)
-                            {
-                                activity.SetTag("service.context", "usher");
-                            }
-                        };
-
-                        options.EnrichWithHttpResponseMessage = (activity, httpResponseMessage) =>
-                        {
-                            if (httpResponseMessage.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Forbidden &&
-                                activity.GetTagItem("service.context")?.ToString() == "usher")
-                            {
-                                activity.SetTag("expected_error", "true");
-                                activity.SetStatus(ActivityStatusCode.Ok, "Expected");
-                            }
+                            var path = msg.RequestUri?.AbsolutePath;
+                            return path == null ||
+                                   !excludedPaths.Any(p =>
+                                       path.StartsWith(p, StringComparison.OrdinalIgnoreCase));
                         };
                     })
                     .AddOtlpExporter(options =>
