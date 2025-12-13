@@ -19,6 +19,11 @@ public class TelegramService(ITelegramBotClient botClient, ILogger<TelegramServi
         {
             return null;
         }
+        catch (Telegram.Bot.Exceptions.ApiRequestException e) when (e.Message.Contains("PARTICIPANT_ID_INVALID"))
+        {
+            logger.LogError(e, "PARTICIPANT_ID_INVALID [{UserId}]", userId);
+            return null;
+        }
         catch (Exception e)
         {
             logger.LogError(e, "GetChatMember [{UserId}]", userId);
