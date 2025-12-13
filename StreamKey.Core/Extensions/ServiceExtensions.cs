@@ -66,32 +66,30 @@ public static class ServiceExtensions
         public IServiceCollection AddHttpClients()
         {
             services.AddHttpClient(ApplicationConstants.UsherClientName, (_, client) =>
+            {
+                client.BaseAddress = ApplicationConstants.UsherUrl;
+                client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
+
+                foreach (var header in ApplicationConstants.Headers)
                 {
-                    client.BaseAddress = ApplicationConstants.UsherUrl;
-                    client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
 
-                    foreach (var header in ApplicationConstants.Headers)
-                    {
-                        client.DefaultRequestHeaders.Add(header.Key, header.Value);
-                    }
-
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                })
-                .AddHttpMessageHandler<FilterExpectedErrorStatusCodeHandler>();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            });
 
             services.AddHttpClient(ApplicationConstants.TwitchClientName, (_, client) =>
+            {
+                client.BaseAddress = ApplicationConstants.QqlUrl;
+                client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
+
+                foreach (var header in ApplicationConstants.Headers)
                 {
-                    client.BaseAddress = ApplicationConstants.QqlUrl;
-                    client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
 
-                    foreach (var header in ApplicationConstants.Headers)
-                    {
-                        client.DefaultRequestHeaders.Add(header.Key, header.Value);
-                    }
-
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                })
-                .AddHttpMessageHandler<FilterExpectedErrorStatusCodeHandler>();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            });
 
             services.AddHttpClient<ICamoufoxService, CamoufoxService>((_, client) =>
             {
