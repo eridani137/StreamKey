@@ -102,16 +102,17 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             Content = JsonContent.Create(tokenRequest)
         };
 
-        // if (type == RequestTwitchPlaylistType.StreamAccessToken)
-        // {
-        //     context.Request.Query.AddQueryDeviceId(request, deviceId);
-        // }
-        // else
-        // {
-        //     context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
-        // }
-
-        context.Request.Query.AddQueryDeviceId(request, deviceId);
+        switch (type)
+        {
+            case RequestTwitchPlaylistType.StreamAccessToken:
+                context.Request.Query.AddQueryDeviceId(request, deviceId);
+                break;
+            case RequestTwitchPlaylistType.VodAccessToken:
+                context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
 
         using var response = await client.SendAsync(request);
         var body = await response.Content.ReadAsStringAsync();
