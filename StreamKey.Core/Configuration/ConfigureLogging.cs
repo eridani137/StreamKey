@@ -4,6 +4,7 @@ using Serilog.Core;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Serilog.Extensions;
 using StreamKey.Core.Extensions;
 
 namespace StreamKey.Core.Configuration;
@@ -28,10 +29,23 @@ public static class ConfigureLogging
             .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Warning)
             .MinimumLevel.Override("NATS.Client.Core.Internal", LogEventLevel.Warning)
             .Enrich.FromLogContext()
+            
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName()
+            
+            .Enrich.WithProcessId()
+            .Enrich.WithProcessName()
+            
+            .Enrich.WithThreadId()
+            
             .Enrich.WithExceptionDetails()
+            
             .Enrich.WithSpan()
+            
+            .Enrich.WithClientIp()
+            .Enrich.WithRequestBody()
+            .Enrich.WithRequestQuery()
+            
             .Enrich.WithProperty("ServiceName", builder.Environment.ApplicationName)
             .WriteTo.Console(outputTemplate: outputTemplate, levelSwitch: levelSwitch);
 

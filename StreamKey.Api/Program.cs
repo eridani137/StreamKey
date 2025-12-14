@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
+ConfigureForwardedHeaders.Configure(builder);
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
@@ -50,6 +51,8 @@ builder.Services.AddProblemDetails();
 TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.MapOpenApi();
 app.MapScalarApiReference();

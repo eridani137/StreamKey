@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
+ConfigureForwardedHeaders.Configure(builder);
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
 
@@ -25,6 +26,8 @@ builder.AddNats(false);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.MapHub<BrowserExtensionHub>("/hubs/extension");
 
