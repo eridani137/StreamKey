@@ -16,7 +16,7 @@ public record OnlineResponse
 {
     public int TotalOnline { get; init; }
     public int OldVersionsOnline { get; init; }
-    public int SocketConnections { get; init; }
+    public int Online { get; init; }
     public int ActiveOnline { get; init; }
     public int SleepingOnline { get; init; } 
 }

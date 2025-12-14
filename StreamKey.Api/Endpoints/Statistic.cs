@@ -45,7 +45,7 @@ public class Statistic : ICarterModule
                     return Results.Ok(new OnlineResponse()
                     {
                         TotalOnline = statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count,
-                        SocketConnections = ConnectionRegistry.ActiveConnections.Count,
+                        Online = ConnectionRegistry.ActiveConnections.Count,
                         OldVersionsOnline = statisticService.OnlineUsers.Count,
                         ActiveOnline = active,
                         SleepingOnline =  sleeping
