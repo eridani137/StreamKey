@@ -10,7 +10,6 @@ using StreamKey.Core.Abstractions;
 using StreamKey.Core.BackgroundServices;
 using StreamKey.Core.Messaging;
 using StreamKey.Core.NatsListeners;
-using StreamKey.Core.Observability;
 using StreamKey.Core.Services;
 using StreamKey.Core.Validation;
 using StreamKey.Infrastructure.Abstractions;

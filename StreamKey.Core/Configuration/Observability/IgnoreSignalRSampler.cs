@@ -1,6 +1,6 @@
 using OpenTelemetry.Trace;
 
-namespace StreamKey.Core.Observability;
+namespace StreamKey.Core.Configuration.Observability;
 
 public class IgnoreSignalRSampler : Sampler
 {

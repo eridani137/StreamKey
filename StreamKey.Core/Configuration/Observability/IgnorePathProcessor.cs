@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using OpenTelemetry;
 
-namespace StreamKey.Core.Observability;
+namespace StreamKey.Core.Configuration.Observability;
 
 public class IgnorePathProcessor(params string[]? ignoredPaths) : BaseProcessor<Activity>
 {

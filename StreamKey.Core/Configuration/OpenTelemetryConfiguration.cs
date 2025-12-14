@@ -7,7 +7,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using StreamKey.Core.Observability;
+using StreamKey.Core.Configuration.Observability;
 
 namespace StreamKey.Core.Configuration;
 

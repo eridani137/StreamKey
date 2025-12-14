@@ -1,7 +1,8 @@
 using System.Diagnostics;
 using OpenTelemetry;
+using StreamKey.Shared;
 
-namespace StreamKey.Core.Observability;
+namespace StreamKey.Core.Configuration.Observability;
 
 public sealed class ErrorOnlyProcessor : BaseProcessor<Activity>
 {
@@ -35,10 +36,15 @@ public sealed class ErrorOnlyProcessor : BaseProcessor<Activity>
             return true;
         }
 
-        // ---------- HttpClient (usher) ----------
-        var host = activity.GetTagItem("server.address")?.ToString();
+        // ---------- HttpClient ----------
+        var host = activity.GetTagItem("server.address")?.ToString() ?? "null";
 
-        if (host == "usher.ttvnw.net" && status is "403" or "404" or "499")
+        if (ApplicationConstants.UsherUrl.AbsolutePath.Contains(host) && status is "403" or "404" or "499")
+        {
+            return true;
+        }
+
+        if (ApplicationConstants.TelegramUrl.AbsolutePath.Contains(host) && status is "400")
         {
             return true;
         }
