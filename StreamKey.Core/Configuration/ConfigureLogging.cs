@@ -56,9 +56,6 @@ public static class ConfigureLogging
 
         Log.Logger = configuration.CreateLogger();
 
-        // Log.Information("Seq endpoint: {SeqEndpoint}", seqEndpoint);
-        // Log.Information("Seq API key: {SeqApiKey}", seqApiKey ?? "null");
-
         builder.Host.UseSerilog(Log.Logger);
     }
 }
