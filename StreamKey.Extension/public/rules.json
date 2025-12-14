@@ -22,7 +22,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "regexSubstitution": "https://service.streamkey.ru/playlist/?auth=&\\1"
+        "regexSubstitution": "https://service.streamkey.ru:1111/playlist/?auth=&\\1"
       }
     },
     "condition": {
