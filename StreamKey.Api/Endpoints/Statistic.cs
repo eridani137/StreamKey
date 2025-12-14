@@ -44,11 +44,11 @@ public class Statistic : ICarterModule
                     
                     return Results.Ok(new OnlineResponse()
                     {
-                        TotalOnline = statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count,
+                        Total = statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count,
                         ConnectionsCount = ConnectionRegistry.ActiveConnections.Count,
-                        OldVersionsOnline = statisticService.OnlineUsers.Count,
-                        ActiveOnline = active,
-                        SleepingOnline =  sleeping
+                        OldVersions = statisticService.OnlineUsers.Count,
+                        Active = active,
+                        Sleeping =  sleeping
                     });
                 })
             .WithSummary("Получить онлайн")
