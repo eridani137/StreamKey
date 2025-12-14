@@ -38,7 +38,11 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         var result =
             await SendTwitchGqlRequest<StreamPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
-                RequestTwitchPlaylistType.StreamAccessToken);
+                new RequestTwitchPlaylist()
+                {
+                    Type = RequestTwitchPlaylistType.StreamAccessToken,
+                    Username = username,
+                });
 
         if (result?.Data?.Data?.StreamPlaybackAccessToken?.Signature is null ||
             result?.Data.Data.StreamPlaybackAccessToken?.Value is null)
@@ -77,7 +81,11 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         var result =
             await SendTwitchGqlRequest<VideoPlaybackAccessTokenResponse>(tokenRequest, deviceId, context,
-                RequestTwitchPlaylistType.VodAccessToken);
+                new RequestTwitchPlaylist()
+                {
+                    Type = RequestTwitchPlaylistType.VodAccessToken,
+                    VodId = vodId
+                });
 
         if (result?.Data?.Data?.VideoPlaybackAccessToken?.Signature is null ||
             result?.Data.Data?.VideoPlaybackAccessToken?.Value is null)
@@ -93,7 +101,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         object tokenRequest,
         string deviceId,
         HttpContext context,
-        RequestTwitchPlaylistType type)
+        RequestTwitchPlaylist type)
         where T : class
     {
         using var client = clientFactory.CreateClient(ApplicationConstants.TwitchClientName);
@@ -102,7 +110,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             Content = JsonContent.Create(tokenRequest)
         };
 
-        switch (type)
+        switch (type.Type)
         {
             case RequestTwitchPlaylistType.StreamAccessToken:
                 context.Request.Query.AddQueryDeviceId(request, deviceId);
@@ -110,8 +118,6 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             case RequestTwitchPlaylistType.VodAccessToken:
                 context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
                 break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
 
         using var response = await client.SendAsync(request);
@@ -119,7 +125,16 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogWarning("{Prefix} [{StatusCode}]: {Body}", type, response.StatusCode, body);
+            switch (type.Type)
+            {
+                case RequestTwitchPlaylistType.StreamAccessToken:
+                    logger.LogWarning("{Prefix}: {Username} [{StatusCode}]: {Body}", type, type.Username, response.StatusCode, body);
+                    break;
+                case RequestTwitchPlaylistType.VodAccessToken:
+                    logger.LogWarning("{Prefix}: {VodId} [{StatusCode}]: {Body}", type, type.VodId, response.StatusCode, body);
+                    break;
+            }
+            
             return null;
         }
 
