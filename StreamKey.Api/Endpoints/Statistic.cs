@@ -34,23 +34,7 @@ public class Statistic : ICarterModule
             .WithSummary("Time Spent")
             .RequireAuthorization();
 
-        group.MapGet("/online",
-                (StatisticService statisticService) =>
-                {
-                    var active = ConnectionRegistry
-                        .GetAllActive()
-                        .Count(s => s.UserId is not null);
-                    var sleeping = ConnectionRegistry.ActiveConnections.Count - active;
-                    
-                    return Results.Ok(new OnlineResponse()
-                    {
-                        Total = statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count,
-                        ConnectionsCount = ConnectionRegistry.ActiveConnections.Count,
-                        OldVersions = statisticService.OnlineUsers.Count,
-                        Active = active,
-                        Sleeping =  sleeping
-                    });
-                })
+        group.MapGet("/online", (StatisticService statisticService) => Results.Ok(statisticService.GetOnline()))
             .WithSummary("Получить онлайн")
             .RequireAuthorization()
             .Produces<OnlineResponse>();

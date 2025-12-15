@@ -6,7 +6,6 @@ using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Infrastructure.Abstractions;
 using StreamKey.Infrastructure.Repositories;
-using StreamKey.Shared.Hubs;
 
 namespace StreamKey.Core.BackgroundServices;
 
@@ -176,10 +175,11 @@ public class Statistic(
         }
     }
 
-    private Task LogOnlineUsers(CancellationToken cancellationToken)
+    private async Task LogOnlineUsers(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Текущий онлайн: {OnlineUsers}",
-            statisticService.OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count);
-        return Task.CompletedTask;
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<StatisticService>();
+        
+        logger.LogInformation("Текущий онлайн: {@OnlineResponse}", service.GetOnline());
     }
 }

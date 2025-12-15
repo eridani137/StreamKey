@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using StreamKey.Core.Common;
 using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
@@ -11,6 +12,23 @@ public class StatisticService
     public readonly ConcurrentDictionary<string, UserSessionEntity> OnlineUsers = new();
     
     public ConcurrentQueue<ClickChannelEntity> ChannelActivityQueue { get; } = new();
+    
+    public OnlineResponse GetOnline()
+    {
+        var active = ConnectionRegistry
+            .GetAllActive()
+            .Count(s => s.UserId is not null);
+        var sleeping = ConnectionRegistry.ActiveConnections.Count - active;
+
+        return new OnlineResponse()
+        {
+            Total = OnlineUsers.Count + ConnectionRegistry.ActiveConnections.Count,
+            ConnectionsCount = ConnectionRegistry.ActiveConnections.Count,
+            OldVersions = OnlineUsers.Count,
+            Active = active,
+            Sleeping = sleeping
+        };
+    }
 
     public void UpdateUserActivity(UpdateUserActivityRequest updateUserActivityRequest)
     {
