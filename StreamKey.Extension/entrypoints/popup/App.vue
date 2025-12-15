@@ -287,7 +287,7 @@ onMounted(async () => {
 }
 
 .status-active {
-  color: rgb(14, 148, 114);
+  color: #4bd970;
 }
 
 .status-inactive {
