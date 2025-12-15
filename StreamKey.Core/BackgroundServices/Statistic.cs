@@ -180,6 +180,6 @@ public class Statistic(
         await using var scope = scopeFactory.CreateAsyncScope();
         var service = scope.ServiceProvider.GetRequiredService<StatisticService>();
         
-        logger.LogInformation("Текущий онлайн: {@OnlineResponse}", service.GetOnline());
+        logger.LogInformation("Текущий онлайн: {OnlineResponse}", service.GetOnline());
     }
 }

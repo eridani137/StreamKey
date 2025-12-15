@@ -128,10 +128,10 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             switch (type.Type)
             {
                 case RequestTwitchPlaylistType.StreamAccessToken:
-                    logger.LogWarning("{Prefix}: {Username} [{StatusCode}]: {Body}", type, type.Username, response.StatusCode, body);
+                    logger.LogWarning("{Type}: [{StatusCode}]: {Body}", type, response.StatusCode, body);
                     break;
                 case RequestTwitchPlaylistType.VodAccessToken:
-                    logger.LogWarning("{Prefix}: {VodId} [{StatusCode}]: {Body}", type, type.VodId, response.StatusCode, body);
+                    logger.LogWarning("{Type}: [{StatusCode}]: {Body}", type, response.StatusCode, body);
                     break;
             }
             
