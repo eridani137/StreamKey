@@ -37,14 +37,14 @@ public sealed class ErrorOnlyProcessor : BaseProcessor<Activity>
         }
 
         // ---------- HttpClient ----------
-        var host = activity.GetTagItem("server.address")?.ToString() ?? "null";
+        var host = activity.GetTagItem("server.address")?.ToString();
 
-        if (ApplicationConstants.UsherUrl.AbsolutePath.Contains(host) && status is "403" or "404" or "499")
+        if (host == ApplicationConstants.UsherUrl.Host && status is "403" or "404" or "499")
         {
             return true;
         }
 
-        if (ApplicationConstants.TelegramUrl.AbsolutePath.Contains(host) && status is "400")
+        if (host == ApplicationConstants.TelegramUrl.Host && status is "400")
         {
             return true;
         }
