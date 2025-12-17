@@ -28,6 +28,7 @@ public static class ConfigureLogging
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Warning)
             .MinimumLevel.Override("NATS.Client.Core.Internal", LogEventLevel.Warning)
+            
             .Enrich.FromLogContext()
             
             .Enrich.WithMachineName()
@@ -56,6 +57,6 @@ public static class ConfigureLogging
 
         Log.Logger = configuration.CreateLogger();
 
-        builder.Host.UseSerilog(Log.Logger);
+        builder.Host.UseSerilog();
     }
 }

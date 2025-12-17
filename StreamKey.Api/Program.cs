@@ -56,7 +56,7 @@ app.UseForwardedHeaders();
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-app.UseCors(ConfigureCors.ProductionCorsPolicyName);
+app.UseCors(ConfigureCors.CorsPolicyName);
 
 app.UseExceptionHandler();
 

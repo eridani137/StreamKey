@@ -5,13 +5,13 @@ namespace StreamKey.Core.Configuration;
 
 public static class ConfigureCors
 {
-    public const string ProductionCorsPolicyName = "CorsPolicy";
+    public const string CorsPolicyName = "CorsPolicy";
     
     public static void Configure(WebApplicationBuilder builder)
     {
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy(ProductionCorsPolicyName, policy =>
+            options.AddPolicy(CorsPolicyName, policy =>
             {
                 policy
                     .AllowAnyOrigin()
