@@ -16,7 +16,9 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
     {
         var tokenRequest = new
         {
-            operationName = "PlaybackAccessToken",
+            operationName = "PlaybackAccessToken_Template",
+            query =
+                "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
             variables = new
             {
                 isLive = true,
@@ -25,14 +27,6 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
                 vodID = "",
                 playerType = "site",
                 platform = "web"
-            },
-            extensions = new
-            {
-                persistedQuery = new
-                {
-                    version = 1,
-                    sha256Hash = "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712"
-                }
             }
         };
 
@@ -59,7 +53,8 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
     {
         var tokenRequest = new
         {
-            OperationName = "PlaybackAccessToken",
+            OperationName = "PlaybackAccessToken_Template",
+            query = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
             variables = new
             {
                 isLive = false,
@@ -67,15 +62,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
                 isVod = true,
                 vodID = vodId,
                 playerType = "site",
-                зlatform = "web"
-            },
-            extensions = new
-            {
-                persistedQuery = new
-                {
-                    version = 1,
-                    sha256Hash = "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712"
-                }
+                platform = "web"
             }
         };
 
