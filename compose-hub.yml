@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: StreamKey.Hub/Dockerfile
+      network: host
     restart: unless-stopped
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:${HUB_PORT}
