@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -38,7 +39,7 @@ public class UsherService(
             tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
             if (tokenResponse is not null)
             {
-                cache.Set(cacheKey, tokenResponse, AbsoluteExpiration);
+                cache.Set(cacheKey, tokenResponse, GetCacheDuration(tokenResponse.Value));
             }
         }
 
@@ -80,7 +81,7 @@ public class UsherService(
             tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
             if (tokenResponse is not null)
             {
-                cache.Set(cacheKey, tokenResponse, AbsoluteExpiration);
+                cache.Set(cacheKey, tokenResponse, GetCacheDuration(tokenResponse.Value));
             }
         }
 
@@ -113,5 +114,27 @@ public class UsherService(
 
         var client = clientFactory.CreateClient(ApplicationConstants.UsherClientName);
         return await client.GetAsync(uriBuilder.ToString(), HttpCompletionOption.ResponseHeadersRead);
+    }
+
+    private TimeSpan GetCacheDuration(string? json)
+    {
+        var cacheDuration = AbsoluteExpiration;
+        if (json is null) return cacheDuration;
+
+        using var doc = JsonDocument.Parse(json);
+
+        if (!doc.RootElement.TryGetProperty("expires", out var expiresProperty) ||
+            expiresProperty.ValueKind != JsonValueKind.Number) return cacheDuration;
+
+        var expires = expiresProperty.GetInt64();
+        var expiresAt = DateTimeOffset.FromUnixTimeSeconds(expires);
+        var remaining = expiresAt - DateTimeOffset.UtcNow;
+
+        if (remaining.TotalSeconds > 30)
+        {
+            cacheDuration = TimeSpan.FromSeconds(remaining.TotalSeconds * 0.9);
+        }
+
+        return cacheDuration;
     }
 }
