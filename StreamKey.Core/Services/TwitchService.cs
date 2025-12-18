@@ -11,7 +11,7 @@ namespace StreamKey.Core.Services;
 
 public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchService> logger) : ITwitchService
 {
-    public async Task<StreamPlaybackAccessTokenResponse?> GetStreamAccessToken(string username, string deviceId,
+    public async Task<PlaybackAccessToken?> GetStreamAccessToken(string username, string deviceId,
         HttpContext context)
     {
         var tokenRequest = new
@@ -45,10 +45,10 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             return null;
         }
 
-        return result.Data;
+        return result.Data.Data.StreamPlaybackAccessToken;
     }
 
-    public async Task<VideoPlaybackAccessTokenResponse?> GetVodAccessToken(string vodId, string deviceId,
+    public async Task<PlaybackAccessToken?> GetVodAccessToken(string vodId, string deviceId,
         HttpContext context)
     {
         var tokenRequest = new
@@ -81,7 +81,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
             return null;
         }
 
-        return result.Data;
+        return result.Data.Data.VideoPlaybackAccessToken;
     }
 
     private async Task<TwitchResponseWrapper<T>?> SendTwitchGqlRequest<T>(

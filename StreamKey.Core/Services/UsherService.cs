@@ -33,7 +33,7 @@ public class UsherService(
     {
         var cacheKey = GetStreamKey(username, deviceId);
 
-        if (!cache.TryGetValue(cacheKey, out StreamPlaybackAccessTokenResponse? tokenResponse) || tokenResponse is null)
+        if (!cache.TryGetValue(cacheKey, out PlaybackAccessToken? tokenResponse) || tokenResponse is null)
         {
             tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
             if (tokenResponse is not null)
@@ -42,8 +42,7 @@ public class UsherService(
             }
         }
 
-        if (tokenResponse?.Data?.StreamPlaybackAccessToken?.Signature is null ||
-            tokenResponse?.Data?.StreamPlaybackAccessToken?.Value is null)
+        if (tokenResponse is null)
         {
             return null;
         }
@@ -62,8 +61,8 @@ public class UsherService(
             query[key] = value;
         }
 
-        query["sig"] = tokenResponse.Data.StreamPlaybackAccessToken.Signature;
-        query["token"] = tokenResponse.Data.StreamPlaybackAccessToken.Value;
+        query["sig"] = tokenResponse.Signature;
+        query["token"] = tokenResponse.Value;
 
         uriBuilder.Query = query.ToString();
 
@@ -75,7 +74,7 @@ public class UsherService(
     {
         var cacheKey = GetVodKey(vodId, deviceId);
 
-        if (!cache.TryGetValue(cacheKey, out VideoPlaybackAccessTokenResponse? tokenResponse) ||
+        if (!cache.TryGetValue(cacheKey, out PlaybackAccessToken? tokenResponse) ||
             tokenResponse is null)
         {
             tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
@@ -85,8 +84,7 @@ public class UsherService(
             }
         }
 
-        if (tokenResponse?.Data?.VideoPlaybackAccessToken?.Signature is null ||
-            tokenResponse.Data.VideoPlaybackAccessToken.Value is null)
+        if (tokenResponse is null)
         {
             return null;
         }
@@ -108,8 +106,8 @@ public class UsherService(
         }
 
         query["client_id"] = ApplicationConstants.ClientId;
-        query["token"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Value;
-        query["sig"] = tokenResponse.Data?.VideoPlaybackAccessToken?.Signature;
+        query["token"] = tokenResponse.Value;
+        query["sig"] = tokenResponse.Signature;
 
         uriBuilder.Query = query.ToString();
 
