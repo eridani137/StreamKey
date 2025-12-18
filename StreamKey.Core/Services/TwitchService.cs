@@ -53,7 +53,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
     {
         var tokenRequest = new
         {
-            OperationName = "PlaybackAccessToken_Template",
+            operationName = "PlaybackAccessToken_Template",
             query = "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!, $platform: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: $platform, playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
             variables = new
             {
