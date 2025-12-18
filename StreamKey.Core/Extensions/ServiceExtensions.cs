@@ -79,7 +79,7 @@ public static class ServiceExtensions
 
             services.AddHttpClient(ApplicationConstants.TwitchClientName, (_, client) =>
             {
-                client.BaseAddress = ApplicationConstants.QqlUrl;
+                client.BaseAddress = ApplicationConstants.GqlUrl;
                 client.DefaultRequestHeaders.Referrer = ApplicationConstants.TwitchUrl;
 
                 foreach (var header in ApplicationConstants.Headers)

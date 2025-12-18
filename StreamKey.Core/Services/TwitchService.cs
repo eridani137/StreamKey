@@ -92,7 +92,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         where T : class
     {
         using var client = clientFactory.CreateClient(ApplicationConstants.TwitchClientName);
-        var request = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.QqlUrl)
+        var request = new HttpRequestMessage(HttpMethod.Post, ApplicationConstants.GqlUrl)
         {
             Content = JsonContent.Create(tokenRequest)
         };
