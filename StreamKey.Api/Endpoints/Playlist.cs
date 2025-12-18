@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Carter;
-using Newtonsoft.Json.Linq;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Extensions;
 using StreamKey.Core.Services;
@@ -24,17 +24,17 @@ public class Playlist : ICarterModule
                 StatisticService statisticService,
                 ILogger<Playlist> logger) =>
             {
-                var request = ProcessRequest(context, logger);
-                if (request is null) return Results.BadRequest();
+                var userToken = ProcessUserToken(context, logger);
+                if (userToken is null) return Results.BadRequest();
 
                 statisticService.ViewStatisticQueue.Enqueue(new ViewStatisticEntity()
                 {
-                    ChannelName = request.ChannelName,
-                    UserIp = request.UserIp,
-                    UserId = request.UserId
+                    ChannelName = userToken.ChannelName,
+                    UserIp = userToken.UserIp,
+                    UserId = userToken.UserId
                 });
 
-                var response = await usherService.GetStreamPlaylist(request.ChannelName, request.DeviceId, context);
+                var response = await usherService.GetStreamPlaylist(userToken.ChannelName, userToken.DeviceId, context);
                 if (response is null) return Results.BadRequest();
 
                 if (!response.IsSuccessStatusCode &&
@@ -43,7 +43,7 @@ public class Playlist : ICarterModule
                     var body = await response.Content.ReadAsByteArrayAsync();
                     var bodyString = Encoding.UTF8.GetString(body);
 
-                    logger.LogWarning("GetStream {ChannelName} [{StatusCode}]: {Body}", request.ChannelName,
+                    logger.LogWarning("GetStream {ChannelName} [{StatusCode}]: {Body}", userToken.ChannelName,
                         (int)response.StatusCode, bodyString);
 
                     await WriteHttpResponse(context, response, body);
@@ -70,22 +70,10 @@ public class Playlist : ICarterModule
                     return Results.BadRequest("vod_id is not found");
                 }
 
-                if (!context.Request.Query.TryGetValue("token", out var tokenValue))
-                {
-                    logger.LogError("Token отсутствует в запросе");
-                    return Results.BadRequest("token is not found");
-                }
+                var userToken = ProcessUserToken(context, logger);
+                if (userToken is null) return Results.BadRequest();
 
-                var obj = JObject.Parse(tokenValue.ToString());
-
-                var deviceId = obj.SelectToken(".device_id")?.ToString();
-
-                if (string.IsNullOrEmpty(deviceId))
-                {
-                    deviceId = TwitchExtensions.GenerateDeviceId();
-                }
-
-                var response = await usherService.GetVodPlaylist(vodId, deviceId, context);
+                var response = await usherService.GetVodPlaylist(vodId, userToken.DeviceId, context);
                 if (response is null) return Results.NotFound();
 
                 if (!response.IsSuccessStatusCode &&
@@ -142,51 +130,46 @@ public class Playlist : ICarterModule
         }
     }
 
-    private static UserTokenData? ProcessRequest(HttpContext context, ILogger<Playlist> logger)
+    private static UserTokenData? ProcessUserToken(HttpContext context, ILogger<Playlist> logger)
     {
-        if (!context.Request.Query.TryGetValue("token", out var tokenValue))
+        if (!context.Request.Query.TryGetValue("token", out var tokenValue) || tokenValue.ToString() is not { } token)
         {
             logger.LogError("Token отсутствует в запросе");
             return null;
         }
 
-        var obj = JObject.Parse(tokenValue.ToString());
+        using var doc = JsonDocument.Parse(token);
+        var root = doc.RootElement;
 
-        var deviceId = obj.SelectToken(".device_id")?.ToString();
+        var deviceId = root.TryGetProperty("device_id", out var deviceIdProp) &&
+                       deviceIdProp.ValueKind == JsonValueKind.String
+            ? deviceIdProp.GetString() ?? ""
+            : TwitchExtensions.GenerateDeviceId();
 
-        if (string.IsNullOrEmpty(deviceId))
-        {
-            deviceId = TwitchExtensions.GenerateDeviceId();
-        }
+        var channel = root.TryGetProperty("channel", out var channelProp) &&
+                      channelProp.ValueKind == JsonValueKind.String
+            ? channelProp.GetString() ?? ""
+            : "null";
 
-        var channel = obj.SelectToken(".channel")?.ToString();
-        var channelId = obj.SelectToken(".channel_id")?.ToObject<int>();
+        var channelId = root.TryGetProperty("channel_id", out var channelIdProp) &&
+                        channelIdProp.ValueKind == JsonValueKind.Number
+            ? channelIdProp.GetInt32()
+            : -1;
 
-        if (string.IsNullOrEmpty(channel))
-        {
-            logger.LogError("Не удалось получить channel: {Json}", obj.ToString());
-            return null;
-        }
+        var userIp = root.TryGetProperty("user_ip", out var userIpProp) &&
+                     userIpProp.ValueKind == JsonValueKind.String
+            ? userIpProp.GetString() ?? ""
+            : "null";
 
-        if (channelId is null or 0)
-        {
-            logger.LogError("Не удалось получить channel_id: {Json}", obj.ToString());
-            return null;
-        }
-
-        var userIp = obj.SelectToken(".user_ip")?.ToString();
-        var userId = obj.SelectToken(".user_id")?.ToString() ?? "anonymous";
-
-        if (string.IsNullOrEmpty(userIp))
-        {
-            logger.LogError("Не удалось получить IP: {Json}", obj.ToString());
-            return null;
-        }
+        var userId = root.TryGetProperty("user_id", out var userIdProp) &&
+                     userIdProp.ValueKind == JsonValueKind.String
+            ? userIdProp.GetString() ?? "anonymous"
+            : "anonymous";
 
         return new UserTokenData()
         {
             ChannelName = channel,
-            ChannelId = channelId.Value,
+            ChannelId = channelId,
             UserIp = userIp,
             UserId = userId,
             DeviceId = deviceId
