@@ -27,8 +27,6 @@ public class UsherService(
         return $"{VodTokenKey}:{vodId}:{deviceId}";
     }
 
-    private static readonly TimeSpan AbsoluteExpiration = TimeSpan.FromMinutes(1);
-
     public async Task<HttpResponseMessage?> GetStreamPlaylist(string username, string deviceId,
         HttpContext context)
     {
@@ -37,9 +35,11 @@ public class UsherService(
         if (!cache.TryGetValue(cacheKey, out PlaybackAccessToken? tokenResponse) || tokenResponse is null)
         {
             tokenResponse = await twitchService.GetStreamAccessToken(username, deviceId, context);
-            if (tokenResponse is not null)
+            if (tokenResponse is not null &&
+                GetCacheDuration(tokenResponse.Value) is var cacheDuration &&
+                cacheDuration > TimeSpan.Zero)
             {
-                cache.Set(cacheKey, tokenResponse, GetCacheDuration(tokenResponse.Value));
+                cache.Set(cacheKey, tokenResponse, cacheDuration);
             }
         }
 
@@ -79,9 +79,11 @@ public class UsherService(
             tokenResponse is null)
         {
             tokenResponse = await twitchService.GetVodAccessToken(vodId, deviceId, context);
-            if (tokenResponse is not null)
+            if (tokenResponse is not null &&
+                GetCacheDuration(tokenResponse.Value) is var cacheDuration &&
+                cacheDuration > TimeSpan.Zero)
             {
-                cache.Set(cacheKey, tokenResponse, GetCacheDuration(tokenResponse.Value));
+                cache.Set(cacheKey, tokenResponse, cacheDuration);
             }
         }
 
@@ -116,9 +118,9 @@ public class UsherService(
         return await client.GetAsync(uriBuilder.ToString(), HttpCompletionOption.ResponseHeadersRead);
     }
 
-    private TimeSpan GetCacheDuration(string? json)
+    private static TimeSpan GetCacheDuration(string? json)
     {
-        var cacheDuration = AbsoluteExpiration;
+        var cacheDuration = TimeSpan.Zero;
         if (json is null) return cacheDuration;
 
         using var doc = JsonDocument.Parse(json);
