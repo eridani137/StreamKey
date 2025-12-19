@@ -1,7 +1,5 @@
-import rules from '@/public/rules.json';
-import { type Browser } from 'wxt/browser';
-
-type Rule = Browser.declarativeNetRequest.Rule;
+// import { type Browser } from 'wxt/browser';
+// type Rule = Browser.declarativeNetRequest.Rule;
 
 export async function enableRuleset(): Promise<void> {
   try {
@@ -41,29 +39,31 @@ export async function disableRuleset(): Promise<void> {
   }
 }
 
-export async function enableAllRules(): Promise<void> {
-  const existing = await browser.declarativeNetRequest.getDynamicRules();
+// export async function enableAllRules(): Promise<void> {
+//   const existing = await browser.declarativeNetRequest.getDynamicRules();
 
-  if (existing.length > 0) {
-    await browser.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: existing.map((r) => r.id),
-    });
-  }
+//   if (existing.length > 0) {
+//     await browser.declarativeNetRequest.updateDynamicRules({
+//       removeRuleIds: existing.map((r) => r.id),
+//     });
+//   }
 
-  await browser.declarativeNetRequest.updateDynamicRules({
-    addRules: rules as Rule[],
-  });
-}
+//   await browser.declarativeNetRequest.updateDynamicRules({
+//     addRules: rules as Rule[],
+//   });
+// }
 
-export async function disableAllRules(): Promise<void> {
-  const existing = await browser.declarativeNetRequest.getDynamicRules();
+// export async function disableAllRules(): Promise<void> {
+//   const existing = await browser.declarativeNetRequest.getDynamicRules();
 
-  if (existing.length === 0) return;
+//   if (existing.length === 0) return;
 
-  await browser.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: existing.map((r) => r.id),
-  });
-}
+//   await browser.declarativeNetRequest.updateDynamicRules({
+//     removeRuleIds: existing.map((r) => r.id),
+//   });
+// }
+
+
 
 // export async function getDynamicRules(): Promise<Rule[]> {
 //   try {

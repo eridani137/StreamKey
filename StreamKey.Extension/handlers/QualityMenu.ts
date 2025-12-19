@@ -113,7 +113,9 @@ export class QualityMenu {
 
     if (!input) return;
 
+    console.log('input.checked', input.checked);
     if (input.checked) {
+      console.log('call autoSwitch');
       await this.autoSwitch();
     }
 
