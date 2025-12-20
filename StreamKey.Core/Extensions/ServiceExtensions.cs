@@ -50,7 +50,7 @@ public static class ServiceExtensions
 
             services.AddHostedService<ChannelsBackground>();
             services.AddHostedService<Statistic>();
-            services.AddHostedService<Restart>();
+            // services.AddHostedService<Restart>();
             services.AddHostedService<BackgroundServices.Telegram>();
 
             services.AddHostedService<ConnectionListener>();
