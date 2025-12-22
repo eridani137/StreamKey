@@ -27,26 +27,26 @@
 
     <template v-if="telegramStatus !== TelegramStatus.None">
       <ActivateButton
-      v-if="telegramStatus === TelegramStatus.NotAuthorized"
-      label="Подключить 1440p"
-      @click="openTelegramAuthentication"
-    />
-    <ActivateButton
-      v-else-if="telegramStatus === TelegramStatus.NotMember"
-      label="Подписаться на канал"
-      @click="openTelegramChannel"
-    />
-    <QAButton v-else label="Не работает!" @click="openQA" />
+        v-if="telegramStatus === TelegramStatus.NotAuthorized"
+        label="Подключить 1440p"
+        @click="openTelegramAuthentication"
+      />
+      <ActivateButton
+        v-else-if="telegramStatus === TelegramStatus.NotMember"
+        label="Подписаться на канал"
+        @click="openTelegramChannel"
+      />
+      <QAButton v-else label="Не работает!" @click="openQA" />
 
-    <ActivateButton
-      v-if="telegramStatus === TelegramStatus.NotMember"
-      style="margin-top: 8px; width: 166.36px"
-      color="#059669"
-      color_hover="#07a674"
-      color_active="#05825b"
-      label="Проверить подписку"
-      @click="checkMember"
-    />
+      <ActivateButton
+        v-if="telegramStatus === TelegramStatus.NotMember"
+        style="margin-top: 8px; width: 166.36px"
+        color="#059669"
+        color_hover="#07a674"
+        color_active="#05825b"
+        label="Проверить подписку"
+        @click="checkMember"
+      />
     </template>
 
     <h1 class="stream-key-title">STREAM KEY</h1>
@@ -112,7 +112,7 @@ const isVideoLooped = computed(() => currentVideo.value === EnabledVideo);
 const STATUS_MAP = {
   [TelegramStatus.None]: {
     text: '',
-    class: ''
+    class: '',
   },
   [TelegramStatus.NotAuthorized]: {
     text: 'Не активирован*',
@@ -305,16 +305,16 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   transition: background 0.2s, transform 0.2s;
-}
 
-.telegram-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.05);
-}
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+  }
 
-.telegram-button:active {
-  transform: scale(0.95);
-  background: rgba(255, 255, 255, 0.2);
+  &:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
 
 .subscribe-status {

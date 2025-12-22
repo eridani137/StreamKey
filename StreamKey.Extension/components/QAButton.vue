@@ -46,14 +46,14 @@ const props = defineProps<{
 <style>
 .qa-button {
   transition: all 0.2s ease-in-out;
-}
 
-.qa-button:hover {
-  background: #4a4a4a !important;
-  cursor: pointer;
-}
+  &:hover {
+    background: #4a4a4a !important;
+    cursor: pointer;
+  }
 
-.qa-button:active {
-  background: #2a2a2a !important;
+  &:active {
+    background: #2a2a2a !important;
+  }
 }
 </style>
