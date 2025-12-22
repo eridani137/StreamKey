@@ -39,7 +39,12 @@ public sealed class ErrorOnlyProcessor : BaseProcessor<Activity>
         // ---------- HttpClient ----------
         var host = activity.GetTagItem("server.address")?.ToString();
 
-        if (host == ApplicationConstants.UsherUrl.Host && status is "401" or "403" or "404" or "499")
+        if (host == ApplicationConstants.UsherUrl.Host && status is "401" or "403" or "404" or "443" or "499")
+        {
+            return true;
+        }
+        
+        if (host == ApplicationConstants.GqlUrl.Host && status is "401" or "403" or "404" or "443" or "499")
         {
             return true;
         }
