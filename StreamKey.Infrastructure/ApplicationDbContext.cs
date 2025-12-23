@@ -26,6 +26,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             });
         });
 
+        modelBuilder.Entity<ChannelButtonEntity>(entity =>
+        {
+            entity.ToTable("ChannelButtons");
+
+            entity.HasIndex(e => e.Link).IsUnique();
+        });
+
         modelBuilder.Entity<ViewStatisticEntity>(entity =>
         {
             entity.ToTable("ViewStatistics");
