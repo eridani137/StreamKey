@@ -1,38 +1,87 @@
-import { Nullable } from '@/types/common';
+import { LiveChannelButton, Nullable } from '@/types/common';
 
 export class LiveChannel {
   private ctx: any = null;
   private observer: Nullable<MutationObserver> = null;
   private isProcessing = false;
+  private buttonCounter = 0;
 
   init(ctx: any): void {
     this.ctx = ctx;
     this.startObserver();
   }
 
-  addButton() {
+  addButtons() {
+    const buttons: LiveChannelButton[] = [
+      {
+        html: `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          StreamKey
+        `,
+        style: `
+          margin-left: 8px;
+          padding: 6px 12px;
+          border: none;
+          border-radius: 16px;
+          background: #9146ff;
+          color: white;
+          font-size: 14px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: background 0.2s;
+        `,
+        hoverStyle: `
+          background: #7a3ed0;
+        `,
+        activeStyle: `
+          background: #6a34b8;
+        `,
+        link: 'https://google.com',
+      },
+    ];
+    buttons.forEach((b) => this.addButton(b));
+  }
+
+  addButton(data: LiveChannelButton) {
     const spacer = document.querySelector(
       '.metadata-layout__secondary-button-spacing'
     );
+    if (!spacer) return;
+    
+    const existingButton = spacer.parentNode?.querySelector(
+      `button[link="${data.link}"]`
+    );
+    if (existingButton) return;
 
-    if (
-      !spacer ||
-      spacer.nextElementSibling?.classList.contains('streamkey-channel-info-button')
-    ) {
-      return;
-    }
+    this.buttonCounter++;
+    const uniqueClass = `streamkey-livechannel-button-${this.buttonCounter}`;
+
+    const styleEl = document.createElement('style');
+    styleEl.id = `style-${uniqueClass}`;
+    styleEl.textContent = `
+      .${uniqueClass} {
+        ${data.style}
+      }
+      .${uniqueClass}:hover {
+        ${data.hoverStyle || ''}
+      }
+      .${uniqueClass}:active {
+        ${data.activeStyle || ''}
+      }
+    `;
+    document.head.appendChild(styleEl);
 
     const button = document.createElement('button');
-    button.className = 'streamkey-channel-info-button';
+    button.className = uniqueClass;
+    button.innerHTML = data.html;
+    button.setAttribute('link', data.link);
     button.addEventListener('click', () => {
-        alert('Кнопка нажата!');
+      window.open(data.link, '_blank');
     });
-    button.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-    </svg>
-    StreamKey
-  `;
 
     spacer.parentNode?.insertBefore(button, spacer.nextSibling);
   }
@@ -49,7 +98,7 @@ export class LiveChannel {
         this.observer!.disconnect();
 
         try {
-          this.addButton();
+          this.addButtons();
         } finally {
           this.observer!.observe(document.body, {
             childList: true,
