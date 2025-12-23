@@ -13,5 +13,8 @@ public enum ErrorCode
     ChannelAlreadyExists = 7,
     ChannelPositionIsBusy = 8,
     
-    ServerTokenNotFound = 9
+    ServerTokenNotFound = 9,
+    
+    ChannelButtonAlreadyExists = 10,
+    ChannelButtonNotFound = 11,
 }

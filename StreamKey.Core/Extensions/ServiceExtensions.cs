@@ -30,6 +30,7 @@ public static class ServiceExtensions
             services.AddScoped<ITwitchService, TwitchService>();
 
             services.AddScoped<IChannelService, ChannelService>();
+            services.AddScoped<IChannelButtonService, ChannelButtonService>();
 
             services.AddValidatorsFromAssembly(typeof(IValidatorMarker).Assembly);
 

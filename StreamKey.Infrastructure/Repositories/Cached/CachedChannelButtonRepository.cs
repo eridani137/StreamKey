@@ -14,7 +14,17 @@ public class CachedChannelButtonRepository(ChannelButtonRepository repository, I
     {
         return GetCachedData(GetCacheKey(), () => Repository.GetAll(cancellationToken));
     }
-    
+
+    public Task<bool> HasEntity(string link, CancellationToken cancellationToken)
+    {
+        return Repository.HasEntity(link, cancellationToken);
+    }
+
+    public Task<ChannelButtonEntity?> GetByLink(string link, CancellationToken cancellationToken)
+    {
+        return Repository.GetByLink(link, cancellationToken);
+    }
+
     public DbSet<ChannelButtonEntity> GetSet()
     {
         return Repository.GetSet();

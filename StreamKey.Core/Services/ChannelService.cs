@@ -11,31 +11,31 @@ using StreamKey.Shared.Entities;
 namespace StreamKey.Core.Services;
 
 public class ChannelService(
-    IChannelRepository channelRepository,
+    IChannelRepository repository,
     IUnitOfWork unitOfWork,
     ICamoufoxService camoufox,
     ILogger<ChannelService> logger) : IChannelService
 {
     public async Task<List<ChannelEntity>> GetChannels(CancellationToken cancellationToken)
     {
-        return await channelRepository.GetAll(cancellationToken);
+        return await repository.GetAll(cancellationToken);
     }
 
     public async Task<Result<ChannelEntity>> AddChannel(ChannelDto dto, CancellationToken cancellationToken)
     {
-        if (await channelRepository.HasEntity(dto.ChannelName, cancellationToken))
+        if (await repository.HasEntity(dto.ChannelName, cancellationToken))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelAlreadyExist);
         }
 
-        if (await channelRepository.HasInPosition(dto.Position, cancellationToken))
+        if (await repository.HasInPosition(dto.Position, cancellationToken))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
         }
 
         var channel = dto.Map();
 
-        await channelRepository.Add(channel, cancellationToken);
+        await repository.Add(channel, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(channel);
@@ -43,13 +43,13 @@ public class ChannelService(
 
     public async Task<Result<ChannelEntity>> RemoveChannel(int position, CancellationToken cancellationToken)
     {
-        var channel = await channelRepository.GetByPosition(position, cancellationToken);
+        var channel = await repository.GetByPosition(position, cancellationToken);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
 
-        channelRepository.Delete(channel);
+        repository.Delete(channel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(channel);
@@ -57,20 +57,20 @@ public class ChannelService(
 
     public async Task<Result<ChannelEntity>> UpdateChannel(ChannelDto dto, CancellationToken cancellationToken)
     {
-        var channel = await channelRepository.GetByName(dto.ChannelName, cancellationToken);
+        var channel = await repository.GetByName(dto.ChannelName, cancellationToken);
         if (channel is null)
         {
             return Result.Failure<ChannelEntity>(Error.ChannelNotFound);
         }
 
-        if (await channelRepository.HasInPosition(dto.Position, cancellationToken))
+        if (await repository.HasInPosition(dto.Position, cancellationToken))
         {
             return Result.Failure<ChannelEntity>(Error.ChannelPositionIsBusy);
         }
 
         channel.Position = dto.Position;
 
-        channelRepository.Update(channel);
+        repository.Update(channel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(channel);
@@ -80,13 +80,13 @@ public class ChannelService(
     {
         logger.LogDebug("Обновление канала: {ChannelName}", channel.Name);
 
-        var fresh = await channelRepository.GetByName(channel.Name, cancellationToken);
+        var fresh = await repository.GetByName(channel.Name, cancellationToken);
         if (fresh is null) return;
 
         var info = await ParseChannelInfo(channel.Name);
         fresh.Info = info;
 
-        channelRepository.Update(fresh);
+        repository.Update(fresh);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
