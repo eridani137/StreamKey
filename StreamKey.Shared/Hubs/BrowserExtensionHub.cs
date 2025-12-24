@@ -16,7 +16,8 @@ public class BrowserExtensionHub(
     JsonNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
     JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
     JsonNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
-    JsonNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer
+    JsonNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer,
+    JsonNatsSerializer<List<ButtonDto>?> buttonsResponseSerializer
     // ILogger<BrowserExtensionHub> logger
 )
     : Hub<IBrowserExtensionHub>
@@ -26,6 +27,7 @@ public class BrowserExtensionHub(
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
 
     private const string ChannelsCacheKey = "channels_list";
+    private const string ButtonsCacheKey = "channel_buttons_list";
 
     public override async Task OnConnectedAsync()
     {
@@ -144,7 +146,7 @@ public class BrowserExtensionHub(
 
         var response = await nats.RequestAsync<string?, List<ChannelDto>?>(
             subject: NatsKeys.GetChannels,
-            data: "channels",
+            data: "c",
             replySerializer: channelsResponseSerializer,
             requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
@@ -159,8 +161,7 @@ public class BrowserExtensionHub(
 
         return channels;
     }
-
-
+    
     public async Task CheckMember(CheckMemberRequest request)
     {
         var response = await nats.RequestAsync(
@@ -176,5 +177,30 @@ public class BrowserExtensionHub(
         {
             await Clients.Caller.ReloadUserData(response.Data);
         }
+    }
+
+    public async Task<List<ButtonDto>> GetButtons()
+    {
+        if (cache.TryGetValue<List<ButtonDto>>(ButtonsCacheKey, out var cachedButtons))
+        {
+            return cachedButtons!;
+        }
+
+        var response = await nats.RequestAsync<string?, List<ButtonDto>?>(
+            subject: NatsKeys.GetButtons,
+            data: "b",
+            replySerializer: buttonsResponseSerializer,
+            requestOpts: new NatsPubOpts(),
+            replyOpts: new NatsSubOpts() { Timeout = TimeSpan.FromSeconds(15) }
+        );
+
+        var buttons = response.Data ?? [];
+
+        cache.Set(ButtonsCacheKey, buttons, new MemoryCacheEntryOptions()
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+        });
+        
+        return buttons;
     }
 }

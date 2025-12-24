@@ -15,6 +15,6 @@ public enum ErrorCode
     
     ServerTokenNotFound = 9,
     
-    ChannelButtonAlreadyExists = 10,
-    ChannelButtonNotFound = 11,
+    ButtonAlreadyExists = 10,
+    ButtonNotFound = 11,
 }

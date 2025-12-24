@@ -1,6 +1,6 @@
 namespace StreamKey.Shared.Entities;
 
-public class ChannelButtonEntity : BaseGuidEntity
+public class ButtonEntity : BaseGuidEntity
 {
     public required string Html { get; set; }
     public required string Style { get; set; }

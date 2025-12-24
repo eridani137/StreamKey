@@ -5,29 +5,29 @@ using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Api.Endpoints;
 
-public class ChannelButton : ICarterModule
+public class Button : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/channel-buttons")
+        var group = app.MapGroup("/buttons")
             .WithTags("Работа с кнопками")
             .RequireAuthorization();
 
         group.MapGet("",
-                async (IChannelButtonService service, CancellationToken cancellationToken) =>
+                async (IButtonService service, CancellationToken cancellationToken) =>
                 {
-                    var buttons = await service.GetChannelButtons(cancellationToken);
+                    var buttons = await service.GetButtons(cancellationToken);
                     var mapped = buttons.Select(b => b.Map());
 
                     return Results.Ok(mapped);
                 })
-            .Produces<List<ChannelButtonDto>>()
+            .Produces<List<ButtonDto>>()
             .WithSummary("Получить все добавленные кнопки");
 
         group.MapPost("",
-                async (ChannelButtonDto dto, IChannelButtonService service, CancellationToken cancellationToken) =>
+                async (ButtonDto dto, IButtonService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.AddChannelButton(dto, cancellationToken);
+                    var result = await service.AddButton(dto, cancellationToken);
 
                     if (!result.IsSuccess)
                     {
@@ -36,13 +36,13 @@ public class ChannelButton : ICarterModule
 
                     return Results.Ok(result.Value);
                 })
-            .Produces<ChannelButtonDto>()
+            .Produces<ButtonDto>()
             .WithSummary("Добавить кнопку");
 
         group.MapDelete("/{link}",
-                async (string link, IChannelButtonService service, CancellationToken cancellationToken) =>
+                async (string link, IButtonService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.RemoveChannelButton(link, cancellationToken);
+                    var result = await service.RemoveButton(link, cancellationToken);
 
                     if (!result.IsSuccess)
                     {
@@ -51,13 +51,13 @@ public class ChannelButton : ICarterModule
 
                     return Results.Ok(result.Value);
                 })
-            .Produces<ChannelButtonDto>()
+            .Produces<ButtonDto>()
             .WithSummary("Удалить кнопку");
 
         group.MapPut("",
-                async (ChannelButtonDto dto, IChannelButtonService service, CancellationToken cancellationToken) =>
+                async (ButtonDto dto, IButtonService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.UpdateChannelButton(dto, cancellationToken);
+                    var result = await service.UpdateButton(dto, cancellationToken);
 
                     if (!result.IsSuccess)
                     {
@@ -66,7 +66,7 @@ public class ChannelButton : ICarterModule
 
                     return Results.Ok(result.Value.Map());
                 })
-            .Produces<ChannelButtonDto>()
+            .Produces<ButtonDto>()
             .WithSummary("Обновить кнопку");
     }
 }

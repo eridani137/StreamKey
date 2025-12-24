@@ -3,13 +3,13 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Mappers;
 
-public static class ChannelButtonMapper
+public static class ButtonMapper
 {
-    extension(ChannelButtonEntity entity)
+    extension(ButtonEntity entity)
     {
-        public ChannelButtonDto Map()
+        public ButtonDto Map()
         {
-            return new ChannelButtonDto()
+            return new ButtonDto()
             {
                 Html = entity.Html,
                 Style = entity.Style,
@@ -20,11 +20,11 @@ public static class ChannelButtonMapper
         }
     }
 
-    extension(ChannelButtonDto dto)
+    extension(ButtonDto dto)
     {
-        public ChannelButtonEntity Map()
+        public ButtonEntity Map()
         {
-            return new ChannelButtonEntity()
+            return new ButtonEntity()
             {
                 Html = dto.Html,
                 Style = dto.Style,

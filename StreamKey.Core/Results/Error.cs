@@ -19,10 +19,10 @@ public record Error(ErrorCode Code, string Message, int StatusCode)
     public static Error ServerTokenNotFound =>
         new(ErrorCode.ServerTokenNotFound, "Токен не был получен", 404);
 
-    public static Error ChannelButtonAlreadyExist =>
-        new Error(ErrorCode.ChannelButtonAlreadyExists, "Кнопка с такой ссылкой уже существует", 409);
-    public static Error ChannelButtonNotFound =>
-        new(ErrorCode.ChannelButtonNotFound, "Кнопка не найдена", 404);
+    public static Error ButtonAlreadyExist =>
+        new Error(ErrorCode.ButtonAlreadyExists, "Кнопка с такой ссылкой уже существует", 409);
+    public static Error ButtonNotFound =>
+        new(ErrorCode.ButtonNotFound, "Кнопка не найдена", 404);
     
 
     public override string ToString()

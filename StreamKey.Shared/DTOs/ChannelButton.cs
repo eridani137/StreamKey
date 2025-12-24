@@ -1,6 +1,6 @@
 namespace StreamKey.Shared.DTOs;
 
-public record ChannelButtonDto
+public record ButtonDto
 {
     public required string Html { get; set; }
     public required string Style { get; set; }

@@ -5,12 +5,12 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories.Cached;
 
-public class CachedChannelButtonRepository(ChannelButtonRepository repository, IMemoryCache cache)
-    : BaseCachedRepository<ChannelButtonEntity, ChannelButtonRepository>(repository, cache), IChannelButtonRepository
+public class CachedButtonRepository(ButtonRepository repository, IMemoryCache cache)
+    : BaseCachedRepository<ButtonEntity, ButtonRepository>(repository, cache), IButtonRepository
 {
-    protected override string CacheKeyPrefix => "ChannelButton";
+    protected override string CacheKeyPrefix => "Button";
  
-    public Task<List<ChannelButtonEntity>> GetAll(CancellationToken cancellationToken)
+    public Task<List<ButtonEntity>> GetAll(CancellationToken cancellationToken)
     {
         return GetCachedData(GetCacheKey(), () => Repository.GetAll(cancellationToken));
     }
@@ -20,35 +20,35 @@ public class CachedChannelButtonRepository(ChannelButtonRepository repository, I
         return Repository.HasEntity(link, cancellationToken);
     }
 
-    public Task<ChannelButtonEntity?> GetByLink(string link, CancellationToken cancellationToken)
+    public Task<ButtonEntity?> GetByLink(string link, CancellationToken cancellationToken)
     {
         return Repository.GetByLink(link, cancellationToken);
     }
 
-    public DbSet<ChannelButtonEntity> GetSet()
+    public DbSet<ButtonEntity> GetSet()
     {
         return Repository.GetSet();
     }
 
-    public Task Add(ChannelButtonEntity entity, CancellationToken cancellationToken)
+    public Task Add(ButtonEntity entity, CancellationToken cancellationToken)
     {
         InvalidateCache(entity.Id.ToString());
         return Repository.Add(entity, cancellationToken);
     }
 
-    public Task AddRange(IEnumerable<ChannelButtonEntity> entities, CancellationToken cancellationToken)
+    public Task AddRange(IEnumerable<ButtonEntity> entities, CancellationToken cancellationToken)
     {
         InvalidateCache();
         return Repository.AddRange(entities, cancellationToken);
     }
 
-    public void Update(ChannelButtonEntity entity)
+    public void Update(ButtonEntity entity)
     {
         InvalidateCache(entity.Id.ToString());
         Repository.Update(entity);
     }
 
-    public void Delete(ChannelButtonEntity entity)
+    public void Delete(ButtonEntity entity)
     {
         InvalidateCache(entity.Id.ToString());
         Repository.Delete(entity);

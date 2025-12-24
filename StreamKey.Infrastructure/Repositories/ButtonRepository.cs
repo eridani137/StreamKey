@@ -4,10 +4,10 @@ using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories;
 
-public class ChannelButtonRepository(ApplicationDbContext context)
-    : BaseRepository<ChannelButtonEntity>(context), IChannelButtonRepository
+public class ButtonRepository(ApplicationDbContext context)
+    : BaseRepository<ButtonEntity>(context), IButtonRepository
 {
-    public async Task<List<ChannelButtonEntity>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<ButtonEntity>> GetAll(CancellationToken cancellationToken)
     {
         return await GetSet().ToListAsync(cancellationToken: cancellationToken);
     }
@@ -17,7 +17,7 @@ public class ChannelButtonRepository(ApplicationDbContext context)
         return await GetSet().AnyAsync(c => c.Link == link, cancellationToken: cancellationToken);
     }
 
-    public Task<ChannelButtonEntity?> GetByLink(string link, CancellationToken cancellationToken)
+    public Task<ButtonEntity?> GetByLink(string link, CancellationToken cancellationToken)
     {
         return GetSet().FirstOrDefaultAsync(c => c.Link == link, cancellationToken);
     }
