@@ -12,7 +12,7 @@ public class ClickChannelListener(
     INatsConnection nats,
     INatsSubscriptionProcessor<ClickChannelRequest> processor,
     JsonNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
-    StatisticService statisticService) : BackgroundService
+    StatisticService service) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -24,7 +24,7 @@ public class ClickChannelListener(
 
     private Task HandleClickChannel(ClickChannelRequest dto)
     {
-        statisticService.ChannelActivityQueue.Enqueue(dto.Map());
+        service.ChannelActivityQueue.Enqueue(dto.Map());
 
         return Task.CompletedTask;
     }

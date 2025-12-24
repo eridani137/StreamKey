@@ -41,7 +41,7 @@ public class CheckTelegramMemberListener(
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
-        var telegramService = scope.ServiceProvider.GetRequiredService<ITelegramService>();
+        var service = scope.ServiceProvider.GetRequiredService<ITelegramService>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         var user = await repository.GetByTelegramId(request.UserId, cancellationToken);
@@ -50,7 +50,7 @@ public class CheckTelegramMemberListener(
             return null;
         }
 
-        var chatMember = await telegramService.GetChatMember(request.UserId, cancellationToken);
+        var chatMember = await service.GetChatMember(request.UserId, cancellationToken);
         var isChatMember = chatMember?.IsChatMember() ?? false;
 
         if (user.IsChatMember != isChatMember)

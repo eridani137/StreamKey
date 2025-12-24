@@ -41,8 +41,7 @@ public class TelegramGetUserListener(
         var repository = scope.ServiceProvider.GetRequiredService<ITelegramUserRepository>();
 
         var user = await repository.GetByTelegramIdNotTracked(request.UserId, cancellationToken);
-        if (user is null) return null;
 
-        return user.MapUserDto();
+        return user?.MapUserDto();
     }
 }

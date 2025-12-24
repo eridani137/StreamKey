@@ -3,40 +3,39 @@ using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Mappers;
+using StreamKey.Core.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
 
 namespace StreamKey.Core.NatsListeners;
 
-public class ChannelsListener(
+public class ButtonsListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
-    JsonNatsSerializer<List<ChannelDto>?> responseSerializer,
-    INatsRequestReplyProcessor<string?, List<ChannelDto>?> processor
+    JsonNatsSerializer<List<ButtonDto>?> responseSerializer,
+    INatsRequestReplyProcessor<string?, List<ButtonDto>?> processor
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var subscription = nats.SubscribeAsync<string?>(
-            NatsKeys.GetChannels,
-            cancellationToken: stoppingToken
-        );
+            NatsKeys.GetButtons,
+            cancellationToken: stoppingToken);
 
         await processor.ProcessAsync(
             subscription,
-            _ => GetChannelsAsync(stoppingToken),
+            _ => GetButtonsAsync(stoppingToken),
             nats,
             responseSerializer,
-            stoppingToken
-        );
+            stoppingToken);
     }
 
-    private async Task<List<ChannelDto>?> GetChannelsAsync(CancellationToken cancellationToken)
+    private async Task<List<ButtonDto>?> GetButtonsAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
-        var service = scope.ServiceProvider.GetRequiredService<IChannelService>();
+        var service = scope.ServiceProvider.GetRequiredService<IButtonService>();
 
-        var entities = await service.GetChannels(cancellationToken);
-        return entities.Map();
+        var entities = await service.GetButtons(cancellationToken);
+        return entities.Select(b => b.Map()).ToList();
     }
 }
