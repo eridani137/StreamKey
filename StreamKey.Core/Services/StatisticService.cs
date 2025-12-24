@@ -12,6 +12,7 @@ public class StatisticService
     public readonly ConcurrentDictionary<string, UserSessionEntity> OnlineUsers = new();
     
     public ConcurrentQueue<ClickChannelEntity> ChannelActivityQueue { get; } = new();
+    public ConcurrentQueue<ClickButtonEntity> ButtonActivityQueue { get; } = new();
     
     public OnlineResponse GetOnline()
     {

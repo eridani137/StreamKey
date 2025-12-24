@@ -29,6 +29,7 @@ public class Statistic(
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => SaveSessions(false, ct), stoppingToken),
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => SaveHubSessions(false, ct), stoppingToken),
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveChannelClickStatistic, stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveButtonClickStatistic, stoppingToken),
             _taskRunner.RunAsync(TimeSpan.FromMinutes(10), LogOnlineUsers, stoppingToken)
         );
     }
@@ -39,7 +40,8 @@ public class Statistic(
             SaveViewStatistic(CancellationToken.None),
             SaveSessions(true, CancellationToken.None),
             SaveHubSessions(true, CancellationToken.None),
-            SaveChannelClickStatistic(CancellationToken.None)
+            SaveChannelClickStatistic(CancellationToken.None),
+            SaveButtonClickStatistic(CancellationToken.None)
         );
 
         await base.StopAsync(stoppingToken);
@@ -172,6 +174,34 @@ public class Statistic(
         catch (Exception e)
         {
             logger.LogError(e, "Ошибка при сохранении статистики кликов на каналы");
+        }
+    }
+    
+    private async Task SaveButtonClickStatistic(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var repository = scope.ServiceProvider.GetRequiredService<ButtonClickRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            while (statisticService.ButtonActivityQueue.TryDequeue(out var entity))
+            {
+                try
+                {
+                    await repository.Add(entity, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Ошибка при добавлении записи клика на кнопку");
+                }
+            }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Ошибка при сохранении статистики кликов на кнопки");
         }
     }
 

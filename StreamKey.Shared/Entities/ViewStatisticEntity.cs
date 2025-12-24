@@ -2,11 +2,11 @@ namespace StreamKey.Shared.Entities;
 
 public class ViewStatisticEntity : BaseIntEntity
 {
-    public string UserId { get; set; } = string.Empty;
+    public string UserId { get; init; } = string.Empty;
     
-    public string UserIp { get; set; } = string.Empty;
+    public string UserIp { get; init; } = string.Empty;
     
-    public string ChannelName { get; set; } = string.Empty;
+    public string ChannelName { get; init; } = string.Empty;
     
-    public DateTime DateTime { get; set; } = DateTime.UtcNow;
+    public DateTime DateTime { get; init; } = DateTime.UtcNow;
 }

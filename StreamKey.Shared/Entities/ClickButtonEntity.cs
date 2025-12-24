@@ -1,8 +1,8 @@
 namespace StreamKey.Shared.Entities;
 
-public class ClickChannelEntity : BaseIntEntity
+public class ClickButtonEntity : BaseIntEntity
 {
-    public required string ChannelName { get; init; }
+    public required string Link { get; init; }
     public required string UserId { get; init; }
     public DateTime DateTime { get; init; }
 }

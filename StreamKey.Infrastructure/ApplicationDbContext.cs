@@ -62,6 +62,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(e => e.DateTime);
         });
 
+        modelBuilder.Entity<ClickButtonEntity>(entity =>
+        {
+            entity.ToTable("ClickButtons");
+
+            entity.HasIndex(e => e.Link);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.DateTime);
+        });
+
         modelBuilder.Entity<TelegramUserEntity>(entity =>
         {
             entity.ToTable("TelegramUsers");

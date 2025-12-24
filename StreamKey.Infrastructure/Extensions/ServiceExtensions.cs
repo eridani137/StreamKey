@@ -29,6 +29,7 @@ public static class ServiceExtensions
             services.AddScoped<ViewStatisticRepository>();
             services.AddScoped<UserSessionRepository>();
             services.AddScoped<ChannelClickRepository>();
+            services.AddScoped<ButtonClickRepository>();
 
             services.AddMemoryCache();
 

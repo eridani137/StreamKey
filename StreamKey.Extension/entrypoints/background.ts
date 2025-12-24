@@ -71,6 +71,10 @@ export function registerMessageHandlers() {
     // await client.clickChannel(message.data);
   });
 
+  onMessage('clickButton', async (message) => {
+    await extensionClient.clickButton(message.data);
+  });
+
   onMessage('getChannels', async () => {
     return await extensionClient.getChannels();
 

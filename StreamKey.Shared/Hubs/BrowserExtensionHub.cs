@@ -13,6 +13,7 @@ public class BrowserExtensionHub(
     IMemoryCache cache,
     JsonNatsSerializer<UserSessionMessage> userSessionMessageSerializer,
     JsonNatsSerializer<ClickChannelRequest> clickChannelRequestSerializer,
+    JsonNatsSerializer<ClickButtonRequest> clickButtonRequestSerializer,
     JsonNatsSerializer<TelegramUserRequest> telegramUserRequestSerializer,
     JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
     JsonNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
@@ -120,6 +121,11 @@ public class BrowserExtensionHub(
     public async Task ClickChannel(ClickChannelRequest dto)
     {
         await nats.PublishAsync(NatsKeys.ClickChannel, dto, serializer: clickChannelRequestSerializer);
+    }
+
+    public async Task ClickButton(ClickButtonRequest dto)
+    {
+        await nats.PublishAsync(NatsKeys.ClickButton, dto, serializer: clickButtonRequestSerializer);
     }
 
     public async Task<TelegramUserDto?> GetTelegramUser(TelegramUserRequest request)

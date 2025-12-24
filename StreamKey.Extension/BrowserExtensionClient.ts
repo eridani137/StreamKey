@@ -15,6 +15,7 @@ import {
   Button,
   ChannelData,
   CheckMemberResponse,
+  ClickButton,
   ClickChannel,
   TelegramUser,
   TelegramUserResponse,
@@ -227,6 +228,10 @@ class BrowserExtensionClient {
 
   async clickChannel(payload: ClickChannel): Promise<void> {
     await this.connection.invoke('ClickChannel', payload);
+  }
+
+  async clickButton(payload: ClickButton): Promise<void> {
+    await this.connection.invoke('ClickButton', payload);
   }
 
   async checkMember(payload: CheckMemberResponse): Promise<void> {

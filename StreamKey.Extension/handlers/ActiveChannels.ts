@@ -1,4 +1,4 @@
-import { getTwitchUserId, sleep } from '@/utils';
+import { getTwitchUserId, handleClickAndNavigate, sleep } from '@/utils';
 import { sendMessage } from '@/messaging';
 import { ChannelData, ClickChannel } from '@/types/messaging';
 
@@ -159,26 +159,17 @@ export class ActiveChannels {
     div.ariaLabel = 'false';
     div.style.cssText = style;
 
-    div.addEventListener(
-      'click',
-      async function (event: MouseEvent): Promise<void> {
-        if (event && typeof event.preventDefault === 'function') {
-          event.preventDefault();
-        }
-        event.stopPropagation && event.stopPropagation();
-
-        try {
-          const userId = getTwitchUserId();
-          if (userId) {
-            await sendMessage('clickChannel', {
-              channelName: item.channelName,
-              userId: userId,
-            } as ClickChannel);
-          }
-        } finally {
-          window.location.href = `/${nickname}`;
-        }
-      }
+    div.addEventListener('click', (event) =>
+      handleClickAndNavigate(
+        event,
+        `/${nickname}`,
+        (url) => (window.location.href = url),
+        async (userId) =>
+          sendMessage('clickChannel', {
+            channelName: item.channelName,
+            userId,
+          } as ClickChannel)
+      )
     );
 
     div.innerHTML = `

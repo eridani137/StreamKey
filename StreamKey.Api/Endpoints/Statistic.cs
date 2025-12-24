@@ -63,5 +63,16 @@ public class Statistic : ICarterModule
                 })
             .Produces<ChannelClicksStatistic>()
             .WithSummary("Получение числа кликов на канал");
+        
+        group.MapGet("/buttons/clicks",
+                async (string link, int hours, ButtonClickRepository repository,
+                    CancellationToken cancellationToken) =>
+                {
+                    if (hours <= 0) return Results.BadRequest("Часов должно быть больше 0");
+
+                    return Results.Ok(await repository.GetButtonClicksCount(link, hours, cancellationToken));
+                })
+            .Produces<ChannelClicksStatistic>()
+            .WithSummary("Получение числа кликов на кнопку");
     }
 }

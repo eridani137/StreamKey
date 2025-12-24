@@ -1,6 +1,7 @@
 import { sendMessage } from '@/messaging';
 import { Nullable } from '@/types/common';
-import { Button } from '@/types/messaging';
+import { Button, ClickButton } from '@/types/messaging';
+import { getTwitchUserId, handleClickAndNavigate } from '@/utils';
 
 export class Buttons {
   private ctx: any = null;
@@ -60,8 +61,19 @@ export class Buttons {
     button.className = uniqueClass;
     button.innerHTML = data.html;
     button.setAttribute('link', data.link);
-    button.addEventListener('click', () => {
-      window.open(data.link, '_blank');
+
+    button.addEventListener('click', (event: MouseEvent) => {
+      handleClickAndNavigate(
+        event,
+        data.link,
+        (url) => window.open(url, '_blank'),
+        async (userId) => {
+          await sendMessage('clickButton', {
+            link: data.link,
+            userId
+          } as ClickButton);
+        }
+      );
     });
 
     spacer.parentNode?.insertBefore(button, spacer.nextSibling);

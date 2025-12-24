@@ -27,3 +27,10 @@ public record ClickChannelRequest
     [Key("channelName")] public string ChannelName { get; init; } = string.Empty;
     [Key("userId")] public string UserId { get; init; } = string.Empty;
 }
+
+[MessagePackObject]
+public record ClickButtonRequest
+{
+    [Key("link")] public string Link { get; init; } = string.Empty;
+    [Key("userId")] public string UserId { get; init; } = string.Empty;
+}

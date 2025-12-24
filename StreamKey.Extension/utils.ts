@@ -158,7 +158,7 @@ export async function initUserProfile(): Promise<void> {
 }
 
 export async function saveUserProfile(telegramUser: TelegramUser) {
-  await storage.setItem(Config.keys.userProfile, telegramUser);  // TODO
+  await storage.setItem(Config.keys.userProfile, telegramUser); // TODO
 }
 
 export const sleep = (ms: number): Promise<void> =>
@@ -212,4 +212,27 @@ export function getStateClass(state: HubConnectionState) {
 export function getTwitchUserId(): string | null {
   const userIdRaw = localStorage.getItem(Config.keys.twId);
   return userIdRaw ? userIdRaw.replace(/^"|"$/g, '') : null;
+}
+
+export async function handleClickAndNavigate(
+  event: MouseEvent,
+  redirectUrl: string,
+  navigateAction: (url: string) => void,
+  action?: (userId: string) => Promise<void>
+): Promise<void> {
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
+  event.stopPropagation?.();
+
+  try {
+    if (action) {
+      const userId = getTwitchUserId();
+      if (userId) {
+        await action(userId);
+      }
+    }
+  } finally {
+    navigateAction(redirectUrl);
+  }
 }

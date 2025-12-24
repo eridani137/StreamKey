@@ -56,6 +56,7 @@ public static class ServiceExtensions
 
             services.AddHostedService<ConnectionListener>();
             services.AddHostedService<ClickChannelListener>();
+            services.AddHostedService<ClickButtonListener>();
             services.AddHostedService<ChannelsListener>();
             services.AddHostedService<ButtonsListener>();
             services.AddHostedService<TelegramGetUserListener>();

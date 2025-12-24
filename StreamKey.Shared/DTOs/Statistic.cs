@@ -1,10 +1,20 @@
 namespace StreamKey.Shared.DTOs;
 
-public record ChannelClicksStatistic
+public record BaseClicksStatistic
 {
-    public required string ChannelName { get; set; }
     public int ClickCount { get; set; }
     public int UniqueUsers { get; set; }
+}
+
+public record ChannelClicksStatistic : BaseClicksStatistic
+{
+    public required string ChannelName { get; set; }
+    
+}
+
+public record ButtonClicksStatistic : BaseClicksStatistic
+{
+    public required string Link { get; set; }
 }
 
 public record ChannelViewStatistic
