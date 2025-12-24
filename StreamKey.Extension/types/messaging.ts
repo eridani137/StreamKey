@@ -46,3 +46,11 @@ export interface TelegramUserResponse extends WithNumberUserId {}
 export interface ClickChannel extends WithUserId, WithChannelName {}
 
 export interface CheckMemberResponse extends WithNumberUserId {}
+
+export interface Button {
+  html: string;
+  style: string;
+  hoverStyle?: string;
+  activeStyle?: string;
+  link: string;
+}

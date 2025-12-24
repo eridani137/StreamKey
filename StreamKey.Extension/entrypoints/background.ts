@@ -77,6 +77,10 @@ export function registerMessageHandlers() {
     // return await client.getChannels();
   });
 
+  onMessage('getButtons', async () => {
+    return await extensionClient.getButtons();
+  });
+
   onMessage('getConnectionState', async () => {
     return extensionClient.connectionState;
   });
@@ -99,7 +103,6 @@ export function registerMessageHandlers() {
   });
 
   onMessage('getProfileFromStorage', async () => {
-    const userData = await storage.getItem<TelegramUser>(Config.keys.userProfile);
-    return userData;
+    return await storage.getItem<TelegramUser>(Config.keys.userProfile);
   });
 }

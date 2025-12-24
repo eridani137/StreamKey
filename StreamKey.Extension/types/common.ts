@@ -30,11 +30,3 @@ export enum StatusType {
   WORKING = 'working',
   MAINTENANCE = 'maintenance',
 }
-
-export interface LiveChannelButton {
-  html: string;
-  style: string;
-  hoverStyle?: string;
-  activeStyle?: string;
-  link: string;
-}

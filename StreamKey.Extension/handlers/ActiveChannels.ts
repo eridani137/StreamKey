@@ -4,21 +4,15 @@ import { ChannelData, ClickChannel } from '@/types/messaging';
 
 export class ActiveChannels {
   private ctx: any = null;
-  private updateInterval: NodeJS.Timeout | null = null;
   private channelData: ChannelData[] = [];
   private isDataReady: boolean = false;
   private tooltipObserver: MutationObserver | null = null;
-  private readonly minUpdateInterval: number = 180000;
-  private pendingUpdate: NodeJS.Timeout | null = null;
 
   public init(ctx: any): void {
     this.ctx = ctx;
     this.setupTooltipHandler();
     this.fetchAndUpdateChannels();
-    this.updateInterval = ctx.setInterval(
-      () => this.fetchAndUpdateChannels(),
-      this.minUpdateInterval
-    );
+    ctx.setInterval(() => this.fetchAndUpdateChannels(), 180000);
   }
 
   private setupTooltipHandler(): void {
@@ -242,23 +236,6 @@ export class ActiveChannels {
 
     if (updated) {
       console.log('Channels successfully updated');
-    }
-  }
-
-  public destroy(): void {
-    if (this.updateInterval) {
-      this.ctx.clearInterval(this.updateInterval);
-      this.updateInterval = null;
-    }
-
-    if (this.pendingUpdate) {
-      this.ctx.clearTimeout(this.pendingUpdate);
-      this.pendingUpdate = null;
-    }
-
-    if (this.tooltipObserver) {
-      this.tooltipObserver.disconnect();
-      this.tooltipObserver = null;
     }
   }
 }

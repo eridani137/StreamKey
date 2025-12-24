@@ -12,6 +12,7 @@ import { sendMessage } from './messaging';
 // import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from './rules';
 import {
   ActivityRequest,
+  Button,
   ChannelData,
   CheckMemberResponse,
   ClickChannel,
@@ -213,12 +214,15 @@ class BrowserExtensionClient {
   async getTelegramUser(
     payload: TelegramUserResponse
   ): Promise<TelegramUser | null> {
-    const user = await this.connection.invoke('GetTelegramUser', payload);
-    return user;
+    return await this.connection.invoke('GetTelegramUser', payload);
   }
 
   async getChannels(): Promise<ChannelData[] | null> {
     return (await this.connection.invoke('GetChannels')) || null;
+  }
+
+  async getButtons(): Promise<Button[] | null> {
+    return (await this.connection.invoke('GetButtons')) || null;
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {
