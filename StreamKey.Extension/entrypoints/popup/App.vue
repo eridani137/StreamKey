@@ -331,7 +331,6 @@ onMounted(async () => {
   gap: 34px;
   padding: 8px;
   margin-top: 8px;
-  margin-left: 14px;
   font-family: 'Manrope', sans-serif;
   font-size: 10px;
 }
@@ -379,11 +378,17 @@ onMounted(async () => {
 
 .status-container {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
-  padding: 0px 0px 8px 0px;
-  margin-left: 8px;
-  margin-bottom: 8px;
+  padding: 0px 8px 8px 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
 }
 </style>
