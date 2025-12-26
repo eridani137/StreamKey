@@ -33,15 +33,6 @@ export default defineConfig({
           resources: ['fonts/*.ttf', 'fonts/*.otf'],
         },
       ],
-      declarative_net_request: {
-        rule_resources: [
-          {
-            id: 'ruleset_1',
-            enabled: true,
-            path: 'rules.json',
-          },
-        ],
-      },
       icons: {
         '16': 'icons/16.png',
         '32': 'icons/32.png',

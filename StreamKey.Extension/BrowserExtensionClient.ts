@@ -9,7 +9,7 @@ import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 import Config from '@/config';
 import * as utils from '@/utils';
 import { sendMessage } from './messaging';
-// import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from './rules';
+
 import {
   ActivityRequest,
   Button,
@@ -75,10 +75,7 @@ class BrowserExtensionClient {
       try {
         await sendMessage('setConnectionState', this.connectionState);
       } catch (e) {
-        // Ignore messaging errors
       }
-
-      // await removeAllDynamicRules();
     });
 
     connection.onreconnected(async () => {
@@ -87,21 +84,15 @@ class BrowserExtensionClient {
       try {
         await sendMessage('setConnectionState', this.connectionState);
       } catch (e) {
-        // Ignore messaging errors
       }
-
-      // await loadTwitchRedirectDynamicRules();
     });
 
     connection.onclose(async (error) => {
       console.warn('Соединение закрыто', error);
 
-      // await removeAllDynamicRules();
-
       try {
         await sendMessage('setConnectionState', this.connectionState);
       } catch (e) {
-        // Ignore messaging errors
       }
 
       if (this.shouldReconnect) {
@@ -137,12 +128,9 @@ class BrowserExtensionClient {
         try {
           await sendMessage('setConnectionState', this.connectionState);
         } catch (e) {
-          // Ignore messaging errors
         }
 
         console.log('SignalR соединение восстановлено');
-
-        // await loadTwitchRedirectDynamicRules();
 
         await utils.initUserProfile();
 
@@ -172,7 +160,6 @@ class BrowserExtensionClient {
         try {
           await sendMessage('setConnectionState', this.connectionState);
         } catch (e) {
-          // Ignore messaging errors
         }
 
         console.log('SignalR соединение установлено');

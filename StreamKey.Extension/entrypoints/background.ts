@@ -2,11 +2,9 @@ import * as utils from '@/utils';
 import Config from '@/config';
 import extensionClient from '@/BrowserExtensionClient';
 import { onMessage } from '@/messaging';
-// import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from '@/rules';
 import { HubConnectionState } from '@microsoft/signalr';
 import { TelegramUser } from '@/types/messaging';
-import { enableRuleset } from '@/rules';
-// import client from '@/client';
+import { enableDynamicRules } from '@/rules';
 
 export default defineBackground(() => {
   registerMessageHandlers();
@@ -49,8 +47,7 @@ export async function onStartup() {
   await extensionClient.startWithPersistentRetry(sessionId);
   await utils.initUserProfile();
 
-  // await loadTwitchRedirectDynamicRules();
-  await enableRuleset()
+  await enableDynamicRules()
 
   browser.alarms.create(Config.alarms.checkConnectionState, {
     delayInMinutes: 0.5,
@@ -61,14 +58,10 @@ export async function onStartup() {
 export function registerMessageHandlers() {
   onMessage('updateActivity', async (message) => {
     await extensionClient.updateActivity(message.data);
-
-    // await client.updateActivity(message.data);
   });
 
   onMessage('clickChannel', async (message) => {
     await extensionClient.clickChannel(message.data);
-
-    // await client.clickChannel(message.data);
   });
 
   onMessage('clickButton', async (message) => {
@@ -77,8 +70,6 @@ export function registerMessageHandlers() {
 
   onMessage('getChannels', async () => {
     return await extensionClient.getChannels();
-
-    // return await client.getChannels();
   });
 
   onMessage('getButtons', async () => {
@@ -108,5 +99,12 @@ export function registerMessageHandlers() {
 
   onMessage('getProfileFromStorage', async () => {
     return await storage.getItem<TelegramUser>(Config.keys.userProfile);
+  });
+
+  onMessage('enableRulesIfEnabled', async () => {
+    const state = await storage.getItem<boolean>(Config.keys.extensionState);
+    if (state) {
+      await enableDynamicRules();
+    }
   });
 }

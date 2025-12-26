@@ -93,11 +93,10 @@ import StatusLabel from '@/components/StatusLabel.vue';
 import EnableVideo from '~/assets/enable.webm';
 import EnabledVideo from '~/assets/enabled.webm';
 import DisableVideo from '~/assets/disable.webm';
-// import { loadTwitchRedirectDynamicRules, removeAllDynamicRules } from '@/rules';
 import { sendMessage } from '@/messaging';
 import { StatusType, TelegramStatus } from '@/types/common';
 import { TelegramUser, CheckMemberResponse } from '@/types/messaging';
-import { disableRuleset, enableRuleset } from '@/rules';
+import { disableDynamicRules, enableDynamicRules } from '@/rules';
 
 const currentVideo = ref<string | undefined>(undefined);
 const isEnabled = ref(false);
@@ -150,12 +149,10 @@ async function handleLogoClick() {
     const newState = !isEnabled.value;
 
     if (newState) {
-      // await loadTwitchRedirectDynamicRules();
-      await enableRuleset();
+      await enableDynamicRules();
       currentVideo.value = EnableVideo;
     } else {
-      // await removeAllDynamicRules();
-      await disableRuleset();
+      await disableDynamicRules();
       currentVideo.value = DisableVideo;
     }
 

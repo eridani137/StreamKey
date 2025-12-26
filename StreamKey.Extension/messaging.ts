@@ -18,6 +18,7 @@ interface ProtocolMap {
 
   getSessionId(): Promise<string | null>;
   getProfileFromStorage(): Promise<TelegramUser | null>;
+  enableRulesIfEnabled(): Promise<void>;
 }
 
 export const { sendMessage, onMessage } =

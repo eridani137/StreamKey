@@ -4,7 +4,6 @@ import Config from './config';
 import { DeviceInfo, StatusType } from './types/common';
 import { TelegramUser, TelegramUserResponse } from './types/messaging';
 import { ThrottledFetcher } from './throttler';
-// import client from './client';
 
 export function getDeviceInfo(): DeviceInfo {
   return {
