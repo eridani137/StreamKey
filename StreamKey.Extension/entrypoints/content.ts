@@ -1,7 +1,7 @@
 import activeChannels from '@/handlers/ActiveChannels';
 import activityHandler from '@/handlers/ActivityHandler';
 import qualityMenu from '@/handlers/QualityMenu';
-import buttons from '@/handlers/Buttons';
+import buttons from '@/handlers/ButtonsMenu';
 import './style.css';
 
 export default defineContentScript({

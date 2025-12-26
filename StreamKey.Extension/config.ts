@@ -29,6 +29,11 @@ const Config: AppConfig = {
   },
   alarms: {
     checkConnectionState: 'CHECK_CONNECTION_STATE'
+  },
+  buttonsMenu: {
+    spacingSelector: '.metadata-layout__secondary-button-spacing',
+    buttonsContainerName: 'streamkey-buttons-container',
+    uniqueButtonClassMask: 'streamkey-livechannel-button-'
   }
 };
 

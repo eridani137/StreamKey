@@ -31,9 +31,16 @@ export interface AlarmKeys {
   checkConnectionState: string;
 }
 
+export interface ButtonsMenu {
+  spacingSelector: string;
+  buttonsContainerName: string;
+  uniqueButtonClassMask: string;
+}
+
 export interface AppConfig {
   urls: AppUrls;
   keys: StorageKeys;
   qualityMenu: QualityMenu;
   alarms: AlarmKeys;
+  buttonsMenu: ButtonsMenu;
 }

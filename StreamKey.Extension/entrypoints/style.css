@@ -64,3 +64,12 @@
     background: #6a34b8;
   }
 }
+
+.streamkey-buttons-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  width: 100%;
+}

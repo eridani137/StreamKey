@@ -1,9 +1,10 @@
+import Config from '@/config';
 import { sendMessage } from '@/messaging';
 import { Nullable } from '@/types/common';
 import { Button, ClickButton } from '@/types/messaging';
-import { getTwitchUserId, handleClickAndNavigate } from '@/utils';
+import { handleClickAndNavigate } from '@/utils';
 
-export class Buttons {
+export class ButtonsMenu {
   private ctx: any = null;
   private observer: Nullable<MutationObserver> = null;
   private isProcessing = false;
@@ -22,25 +23,33 @@ export class Buttons {
     console.log('[Buttons] Fetch', this.buttons.length, 'items');
   }
 
-  async addButtons() {
-    if (this.buttons.length == 0) return;
+  addButtons() {
+    if (this.buttons.length === 0) return;
 
-    this.buttons.forEach((b) => this.addButton(b));
-  }
-
-  addButton(data: Button) {
-    const spacer = document.querySelector(
-      '.metadata-layout__secondary-button-spacing'
-    );
+    const spacer = document.querySelector(Config.buttonsMenu.spacingSelector);
     if (!spacer) return;
 
-    const existingButton = spacer.parentNode?.querySelector(
+    const parent = spacer.parentElement;
+    if (!parent) return;
+
+    let customContainer = parent.querySelector<HTMLDivElement>(`.${Config.buttonsMenu.buttonsContainerName}`);
+    if (!customContainer) {
+      customContainer = document.createElement('div');
+      customContainer.className = Config.buttonsMenu.buttonsContainerName;
+      parent.insertBefore(customContainer, spacer);
+    }
+
+    this.buttons.forEach((b) => this.addButtonToContainer(b, customContainer));
+  }
+
+  addButtonToContainer(data: Button, container: HTMLElement) {
+    const existingButton = container.querySelector(
       `button[link="${data.link}"]`
     );
     if (existingButton) return;
 
     this.buttonCounter++;
-    const uniqueClass = `streamkey-livechannel-button-${this.buttonCounter}`;
+    const uniqueClass = `${Config.buttonsMenu.uniqueButtonClassMask}${this.buttonCounter}`;
 
     const styleEl = document.createElement('style');
     styleEl.id = `style-${uniqueClass}`;
@@ -70,13 +79,13 @@ export class Buttons {
         async (userId) => {
           await sendMessage('clickButton', {
             link: data.link,
-            userId
+            userId,
           } as ClickButton);
         }
       );
     });
 
-    spacer.parentNode?.insertBefore(button, spacer.nextSibling);
+    container.appendChild(button);
   }
 
   startObserver(): void {
@@ -109,6 +118,6 @@ export class Buttons {
   }
 }
 
-const buttons = new Buttons();
+const buttonsMenu = new ButtonsMenu();
 
-export default buttons;
+export default buttonsMenu;
