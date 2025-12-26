@@ -38,6 +38,7 @@ public class Playlist : ICarterModule
                 if (response is null) return Results.BadRequest();
 
                 if (!response.IsSuccessStatusCode &&
+                    response.StatusCode != HttpStatusCode.Forbidden &&
                     response.StatusCode != HttpStatusCode.NotFound)
                 {
                     var body = await response.Content.ReadAsByteArrayAsync();
