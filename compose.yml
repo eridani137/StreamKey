@@ -145,6 +145,7 @@
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./files:/app/files:ro
+      - /var/www/certbot:/var/www/certbot:ro
     ulimits:
       nofile:
         soft: 1000000
