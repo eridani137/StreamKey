@@ -25,6 +25,11 @@ public class CachedButtonRepository(ButtonRepository repository, IMemoryCache ca
         return Repository.GetByLink(link, cancellationToken);
     }
 
+    public Task<ButtonEntity?> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        return Repository.GetById(id, cancellationToken);
+    }
+
     public DbSet<ButtonEntity> GetSet()
     {
         return Repository.GetSet();

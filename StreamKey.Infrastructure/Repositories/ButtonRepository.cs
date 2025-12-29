@@ -21,4 +21,9 @@ public class ButtonRepository(ApplicationDbContext context)
     {
         return GetSet().FirstOrDefaultAsync(c => c.Link == link, cancellationToken);
     }
+
+    public Task<ButtonEntity?> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        return GetSet().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+    }
 }

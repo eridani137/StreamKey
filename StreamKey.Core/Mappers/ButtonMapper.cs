@@ -11,6 +11,7 @@ public static class ButtonMapper
         {
             return new ButtonDto()
             {
+                Id = entity.Id,
                 Html = entity.Html,
                 Style = entity.Style,
                 HoverStyle = entity.HoverStyle,

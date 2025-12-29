@@ -1,4 +1,5 @@
 using Carter;
+using StreamKey.Core.Abstractions;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Services;
 using StreamKey.Shared.DTOs;
@@ -39,10 +40,10 @@ public class Button : ICarterModule
             .Produces<ButtonDto>()
             .WithSummary("Добавить кнопку");
 
-        group.MapDelete("/{link}",
-                async (string link, IButtonService service, CancellationToken cancellationToken) =>
+        group.MapDelete("/{id:guid}",
+                async (Guid id, IButtonService service, CancellationToken cancellationToken) =>
                 {
-                    var result = await service.RemoveButton(link, cancellationToken);
+                    var result = await service.RemoveButton(id, cancellationToken);
 
                     if (!result.IsSuccess)
                     {

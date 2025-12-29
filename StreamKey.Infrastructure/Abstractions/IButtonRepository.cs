@@ -9,4 +9,5 @@ public interface IButtonRepository : IBaseRepository<ButtonEntity>
     Task<bool> HasEntity(string link, CancellationToken cancellationToken);
     
     Task<ButtonEntity?> GetByLink(string link, CancellationToken cancellationToken);
+    Task<ButtonEntity?> GetById(Guid id, CancellationToken cancellationToken);
 }

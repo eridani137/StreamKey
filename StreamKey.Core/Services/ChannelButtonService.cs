@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using StreamKey.Core.Abstractions;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Results;
 using StreamKey.Infrastructure.Abstractions;
@@ -6,17 +7,6 @@ using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.Services;
-
-public interface IButtonService
-{
-    Task<List<ButtonEntity>> GetButtons(CancellationToken cancellationToken);
-
-    Task<Result<ButtonEntity>> AddButton(ButtonDto dto, CancellationToken cancellationToken);
-
-    Task<Result<ButtonEntity>> RemoveButton(string link, CancellationToken cancellationToken);
-
-    Task<Result<ButtonEntity>> UpdateButton(ButtonDto dto, CancellationToken cancellationToken);
-}
 
 public class ButtonService(
     IButtonRepository repository,
@@ -44,9 +34,9 @@ public class ButtonService(
         return Result.Success(button);
     }
 
-    public async Task<Result<ButtonEntity>> RemoveButton(string link, CancellationToken cancellationToken)
+    public async Task<Result<ButtonEntity>> RemoveButton(Guid id, CancellationToken cancellationToken)
     {
-        var button = await repository.GetByLink(link, cancellationToken);
+        var button = await repository.GetById(id, cancellationToken);
         if (button is null)
         {
             return Result.Failure<ButtonEntity>(Error.ButtonNotFound);
