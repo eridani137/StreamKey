@@ -25,7 +25,7 @@ public class Telegram(
 
         await Task.WhenAll(
             _taskRunner.RunAsync(TimeSpan.FromMinutes(1), CheckOldUsers, stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromSeconds(1), SaveNewTelegramUsers, stoppingToken)
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(15), SaveNewTelegramUsers, stoppingToken)
         );
     }
 

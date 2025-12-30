@@ -25,11 +25,11 @@ public class Statistic(
         logger.LogInformation("Сервис статистики запущен");
 
         await Task.WhenAll(
-            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveViewStatistic, stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => SaveSessions(false, ct), stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), ct => SaveHubSessions(false, ct), stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveChannelClickStatistic, stoppingToken),
-            _taskRunner.RunAsync(TimeSpan.FromMinutes(1), SaveButtonClickStatistic, stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(15), SaveViewStatistic, stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(15), ct => SaveSessions(false, ct), stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(15), ct => SaveHubSessions(false, ct), stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(15), SaveChannelClickStatistic, stoppingToken),
+            _taskRunner.RunAsync(TimeSpan.FromSeconds(15), SaveButtonClickStatistic, stoppingToken),
             _taskRunner.RunAsync(TimeSpan.FromMinutes(10), LogOnlineUsers, stoppingToken)
         );
     }
