@@ -25,19 +25,6 @@ public class Authorization : ICarterModule
 
                     var result = await userManager.CheckPasswordAsync(user, login.Password);
 
-                    // if (result.RequiresTwoFactor)
-                    // {
-                    //     if (!string.IsNullOrEmpty(login.TwoFactorCode))
-                    //     {
-                    //         result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, false,
-                    //             false);
-                    //     }
-                    //     else if (!string.IsNullOrEmpty(login.TwoFactorRecoveryCode))
-                    //     {
-                    //         result = await signInManager.TwoFactorRecoveryCodeSignInAsync(login.TwoFactorRecoveryCode);
-                    //     }
-                    // }
-
                     if (!result)
                     {
                         return TypedResults.Problem(statusCode: StatusCodes.Status401Unauthorized);
