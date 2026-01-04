@@ -15,7 +15,9 @@ export class ButtonsMenu {
     this.ctx = ctx;
     await this.fetchButtons();
     ctx.setInterval(async () => this.fetchButtons(), 180000);
-    this.startObserver();
+    this.ctx.setInterval(() => {
+      this.startObserver();
+    }, 2000);
   }
 
   private async fetchButtons() {
@@ -26,26 +28,28 @@ export class ButtonsMenu {
   addButtons() {
     if (this.buttons.length === 0) return;
 
-    const spacer = document.querySelector(Config.buttonsMenu.spacingSelector);
+    const spacer = document.querySelector<HTMLDivElement>(
+      Config.buttonsMenu.spacingSelector
+    );
     if (!spacer) return;
 
     const parent = spacer.parentElement;
     if (!parent) return;
 
-    let customContainer = parent.querySelector<HTMLDivElement>(`.${Config.buttonsMenu.buttonsContainerName}`);
-    if (!customContainer) {
-      customContainer = document.createElement('div');
-      customContainer.className = Config.buttonsMenu.buttonsContainerName;
-      parent.insertBefore(customContainer, spacer);
-    }
+    this.buttons.forEach((b) => this.addButtonToContainer(b, spacer));
 
-    this.buttons.forEach((b) => this.addButtonToContainer(b, customContainer));
+    // let customContainer = parent.querySelector<HTMLDivElement>(`.${Config.buttonsMenu.buttonsContainerName}`);
+    // if (!customContainer) {
+    //   customContainer = document.createElement('div');
+    //   customContainer.className = Config.buttonsMenu.buttonsContainerName;
+    //   parent.insertBefore(customContainer, spacer);
+    // }
+
+    // this.buttons.forEach((b) => this.addButtonToContainer(b, customContainer));
   }
 
   addButtonToContainer(data: Button, container: HTMLElement) {
-    const existingButton = container.querySelector(
-      `button[link="${data.link}"]`
-    );
+    const existingButton = container.querySelector(`button[id="${data.id}"]`);
     if (existingButton) return;
 
     this.buttonCounter++;
@@ -69,7 +73,7 @@ export class ButtonsMenu {
     const button = document.createElement('button');
     button.className = uniqueClass;
     button.innerHTML = data.html;
-    button.setAttribute('link', data.link);
+    button.setAttribute('id', data.id);
 
     button.addEventListener('click', (event: MouseEvent) => {
       handleClickAndNavigate(

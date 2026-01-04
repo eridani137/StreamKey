@@ -52,6 +52,7 @@ export interface ClickButton extends WithUserId {
 export interface CheckMemberResponse extends WithNumberUserId {}
 
 export interface Button {
+  id: string;
   html: string;
   style: string;
   hoverStyle?: string;
