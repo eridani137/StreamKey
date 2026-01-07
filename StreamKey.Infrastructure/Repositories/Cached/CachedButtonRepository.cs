@@ -15,16 +15,6 @@ public class CachedButtonRepository(ButtonRepository repository, IMemoryCache ca
         return GetCachedData(GetCacheKey(), () => Repository.GetAll(cancellationToken));
     }
 
-    public Task<bool> HasEntity(string link, CancellationToken cancellationToken)
-    {
-        return Repository.HasEntity(link, cancellationToken);
-    }
-
-    public Task<ButtonEntity?> GetByLink(string link, CancellationToken cancellationToken)
-    {
-        return Repository.GetByLink(link, cancellationToken);
-    }
-
     public Task<ButtonEntity?> GetById(Guid id, CancellationToken cancellationToken)
     {
         return Repository.GetById(id, cancellationToken);

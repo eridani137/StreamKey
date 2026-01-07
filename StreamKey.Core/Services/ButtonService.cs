@@ -21,11 +21,6 @@ public class ButtonService(
     public async Task<Result<ButtonEntity>> AddButton(ButtonDto dto,
         CancellationToken cancellationToken)
     {
-        if (await repository.HasEntity(dto.Link, cancellationToken))
-        {
-            return Result.Failure<ButtonEntity>(Error.ButtonAlreadyExist);
-        }
-
         var button = dto.Map();
 
         await repository.Add(button, cancellationToken);
@@ -51,7 +46,7 @@ public class ButtonService(
     public async Task<Result<ButtonEntity>> UpdateButton(ButtonDto dto,
         CancellationToken cancellationToken)
     {
-        var button = await repository.GetByLink(dto.Link, cancellationToken);
+        var button = await repository.GetById(dto.Id, cancellationToken);
         if (button is null)
         {
             return Result.Failure<ButtonEntity>(Error.ButtonNotFound);
@@ -61,6 +56,8 @@ public class ButtonService(
         button.Style = dto.Style;
         button.HoverStyle = dto.HoverStyle;
         button.ActiveStyle = dto.ActiveStyle;
+        button.Link = dto.Link;
+        button.IsEnabled = dto.IsEnabled;
         
         repository.Update(button);
         await unitOfWork.SaveChangesAsync(cancellationToken);

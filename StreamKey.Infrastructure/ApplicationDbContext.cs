@@ -29,8 +29,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ButtonEntity>(entity =>
         {
             entity.ToTable("Buttons");
-
-            entity.HasIndex(e => e.Link).IsUnique();
         });
 
         modelBuilder.Entity<ViewStatisticEntity>(entity =>

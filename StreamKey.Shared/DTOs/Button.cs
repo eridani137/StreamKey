@@ -11,4 +11,5 @@ public record ButtonDto
     [Key("hoverStyle")] public required string HoverStyle { get; init; }
     [Key("activeStyle")] public required string ActiveStyle { get; init; }
     [Key("link")] public required string Link { get; init; }
+    [Key("isEnabled")] public required bool IsEnabled { get; init; }
 }

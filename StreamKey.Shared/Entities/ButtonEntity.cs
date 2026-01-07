@@ -6,5 +6,6 @@ public class ButtonEntity : BaseGuidEntity
     public required string Style { get; set; }
     public required string HoverStyle { get; set; }
     public required string ActiveStyle { get; set; }
-    public required string Link { get; init; }
+    public required string Link { get; set; }
+    public required bool IsEnabled { get; set; }
 }

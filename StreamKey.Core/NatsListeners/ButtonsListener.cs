@@ -36,6 +36,9 @@ public class ButtonsListener(
         var service = scope.ServiceProvider.GetRequiredService<IButtonService>();
 
         var entities = await service.GetButtons(cancellationToken);
-        return entities.Select(b => b.Map()).ToList();
+        return entities
+            .Where(b => b.IsEnabled)
+            .Select(b => b.Map())
+            .ToList();
     }
 }
