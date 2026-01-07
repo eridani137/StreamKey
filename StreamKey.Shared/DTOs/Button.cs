@@ -5,7 +5,7 @@ namespace StreamKey.Shared.DTOs;
 [MessagePackObject]
 public record ButtonDto
 {
-    [Key("id")] public required Guid Id { get; init; }
+    [Key("id")] public Guid Id { get; init; }
     [Key("html")] public required string Html { get; init; }
     [Key("style")] public required string Style { get; init; }
     [Key("hoverStyle")] public required string HoverStyle { get; init; }
