@@ -172,16 +172,28 @@ public static class ServiceExtensions
 
         public void AddDefaultAuthorizationData()
         {
-            var authorization = builder.Configuration.GetSection("Authorization");
-            if (authorization.Exists() && !string.IsNullOrEmpty(authorization.Value))
+            var authorizationSection = builder.Configuration.GetSection("Authorization");
+            if (authorizationSection.Exists() && !string.IsNullOrEmpty(authorizationSection.Value))
             {
-                ApplicationConstants.DefaultAuthorization = authorization.Value;
+                ApplicationConstants.DefaultAuthorization = authorizationSection.Value;
             }
 
-            var deviceId = builder.Configuration.GetSection("DeviceId");
-            if (deviceId.Exists() && !string.IsNullOrEmpty(deviceId.Value))
+            var deviceIdSection = builder.Configuration.GetSection("DeviceId");
+            if (deviceIdSection.Exists() && !string.IsNullOrEmpty(deviceIdSection.Value))
             {
-                ApplicationConstants.DefaultDeviceId = deviceId.Value;
+                ApplicationConstants.DefaultDeviceId = deviceIdSection.Value;
+            }
+        }
+
+        public void AddDefaultHeaders()
+        {
+            var headersSection = builder.Configuration.GetSection("Headers");
+            if (headersSection.Exists())
+            {
+                foreach (var child in headersSection.GetChildren())
+                {
+                    ApplicationConstants.Headers.Add(child.Key, child.Value!);
+                }
             }
         }
     }

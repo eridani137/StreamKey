@@ -38,6 +38,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddIdentity();
 
 builder.AddDefaultAuthorizationData();
+builder.AddDefaultHeaders();
 
 ConfigureCors.Configure(builder);
 ConfigureJwt.Configure(builder);

@@ -17,14 +17,14 @@ public static class QueryExtensions
                 ? $"{scheme} {auth}"
                 : $"{scheme} {ApplicationConstants.DefaultAuthorization}";
 
-            request.Headers.Add("Authorization", authorization);
+            request.Headers.Add("authorization", authorization);
 
             request.Headers.Add("x-device-id", deviceId);
         }
         
-        public void AddQueryDeviceId(HttpRequestMessage request, string deviceId)
+        public static void AddQueryDeviceId(HttpRequestMessage request, string deviceId)
         {
-            request.Headers.Add("Authorization", $"{Scheme} {ApplicationConstants.DefaultAuthorization}");
+            request.Headers.Add("authorization", $"{Scheme} {ApplicationConstants.DefaultAuthorization}");
 
             request.Headers.Add("x-device-id", deviceId);
         }

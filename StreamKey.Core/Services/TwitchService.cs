@@ -100,11 +100,13 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
         switch (type.Type)
         {
             case RequestTwitchPlaylistType.StreamAccessToken:
-                context.Request.Query.AddQueryDeviceId(request, deviceId);
+                IQueryCollection.AddQueryDeviceId(request, deviceId);
                 break;
             case RequestTwitchPlaylistType.VodAccessToken:
                 context.Request.Query.AddQueryAuthAndDeviceId(request, deviceId);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
         using var response = await client.SendAsync(request);
@@ -112,15 +114,7 @@ public class TwitchService(IHttpClientFactory clientFactory, ILogger<TwitchServi
 
         if (!response.IsSuccessStatusCode)
         {
-            switch (type.Type)
-            {
-                case RequestTwitchPlaylistType.StreamAccessToken:
-                    logger.LogWarning("{Type}: [{StatusCode}]: {Body}", type, response.StatusCode, body);
-                    break;
-                case RequestTwitchPlaylistType.VodAccessToken:
-                    logger.LogWarning("{Type}: [{StatusCode}]: {Body}", type, response.StatusCode, body);
-                    break;
-            }
+            logger.LogWarning("{Type}: [{StatusCode}]: {Body}", type, response.StatusCode, body);
             
             return null;
         }
