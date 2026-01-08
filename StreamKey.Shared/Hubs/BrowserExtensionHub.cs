@@ -186,10 +186,10 @@ public class BrowserExtensionHub(
         }
     }
 
-    public async Task<List<ButtonDto>> GetButtons()
-    {
-        return await GetButtonsByPosition(ButtonPosition.StreamBottom);
-    }
+    // public async Task<List<ButtonDto>> GetButtons()
+    // {
+    //     return await GetButtonsByPosition(ButtonPosition.StreamBottom);
+    // }
     
     public async Task<List<ButtonDto>> GetButtonsByPosition(ButtonPosition position)
     {
