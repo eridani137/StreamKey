@@ -186,11 +186,6 @@ public class BrowserExtensionHub(
         }
     }
 
-    public async Task<List<ButtonDto>> GetButtons()
-    {
-        return await GetButtons(ButtonPosition.StreamBottom);
-    }
-
     public async Task<List<ButtonDto>> GetButtons(ButtonPosition position)
     {
         var cacheKey = GetButtonsCacheKey(position);
