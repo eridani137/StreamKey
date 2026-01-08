@@ -1,6 +1,7 @@
 using DotNetEnv;
 using StreamKey.Core.Configuration;
 using StreamKey.Core.Extensions;
+using StreamKey.Hub;
 using StreamKey.Shared.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ Env.Load();
 ConfigureForwardedHeaders.Configure(builder);
 ConfigureLogging.Configure(builder);
 OpenTelemetryConfiguration.Configure(builder, EnvironmentHelper.GetSeqEndpoint());
+
+builder.Services.AddHostedService<InvalidateButtonsCacheListener>();
 
 builder.Services.AddMemoryCache();
 

@@ -1,8 +1,9 @@
-using Microsoft.Extensions.Logging;
+using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Mappers;
 using StreamKey.Core.Results;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
 using StreamKey.Shared.Entities;
 
@@ -11,7 +12,9 @@ namespace StreamKey.Core.Services;
 public class ButtonService(
     IButtonRepository repository,
     IUnitOfWork unitOfWork,
-    ILogger<ButtonService> logger) : IButtonService
+    INatsConnection nats,
+    JsonNatsSerializer<int> serializer
+) : IButtonService
 {
     public async Task<List<ButtonEntity>> GetButtons(CancellationToken cancellationToken)
     {
@@ -25,6 +28,8 @@ public class ButtonService(
 
         await repository.Add(button, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        await nats.PublishAsync(NatsKeys.InvalidateButtonsCache, (int)button.Position, serializer: serializer, cancellationToken: cancellationToken);
 
         return Result.Success(button);
     }
@@ -39,6 +44,8 @@ public class ButtonService(
 
         repository.Delete(button);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        await nats.PublishAsync(NatsKeys.InvalidateButtonsCache, (int)button.Position, serializer: serializer, cancellationToken: cancellationToken);
 
         return Result.Success(button);
     }
@@ -51,17 +58,19 @@ public class ButtonService(
         {
             return Result.Failure<ButtonEntity>(Error.ButtonNotFound);
         }
-        
+
         button.Html = dto.Html;
         button.Style = dto.Style;
         button.HoverStyle = dto.HoverStyle;
         button.ActiveStyle = dto.ActiveStyle;
         button.Link = dto.Link;
         button.IsEnabled = dto.IsEnabled;
-        
+
         repository.Update(button);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         
+        await nats.PublishAsync(NatsKeys.InvalidateButtonsCache, (int)button.Position, serializer: serializer, cancellationToken: cancellationToken);
+
         return Result.Success(button);
     }
 }

@@ -1,15 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using NATS.Client.Core;
 using StreamKey.Infrastructure.Abstractions;
+using StreamKey.Shared;
 using StreamKey.Shared.Entities;
 
 namespace StreamKey.Infrastructure.Repositories.Cached;
 
-public class CachedButtonRepository(ButtonRepository repository, IMemoryCache cache)
+public class CachedButtonRepository(
+    ButtonRepository repository,
+    IMemoryCache cache)
     : BaseCachedRepository<ButtonEntity, ButtonRepository>(repository, cache), IButtonRepository
 {
     protected override string CacheKeyPrefix => "Button";
- 
+
     public Task<List<ButtonEntity>> GetAll(CancellationToken cancellationToken)
     {
         return GetCachedData(GetCacheKey(), () => Repository.GetAll(cancellationToken));

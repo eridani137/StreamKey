@@ -218,7 +218,7 @@ public class BrowserExtensionHub(
         return buttons;
     }
 
-    private static string GetButtonsCacheKey(ButtonPosition position)
+    public static string GetButtonsCacheKey(ButtonPosition position)
     {
         return position switch
         {

@@ -11,4 +11,5 @@ public static class NatsKeys
     public const string CheckTelegramMember = "telegram.user.check";
     public const string GetButtons = "buttons.get";
     public const string ClickButton = "button.click";
+    public const string InvalidateButtonsCache = "cache.buttons.invalidate";
 }

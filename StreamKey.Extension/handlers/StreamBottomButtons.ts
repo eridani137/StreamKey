@@ -20,7 +20,7 @@ export class StreamBottomButtons {
 
   private async fetchButtons() {
     this.buttons = (await sendMessage('getButtons', ButtonPosition.StreamBottom)) || [];
-    console.log('[Buttons] Fetch', this.buttons.length, 'items');
+    console.log('[StreamBottom] Fetch', this.buttons.length, 'items');
   }
 
   addButtons() {
