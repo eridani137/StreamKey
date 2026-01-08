@@ -14,10 +14,8 @@ export class StreamBottomButtons {
   async init(ctx: any): Promise<void> {
     this.ctx = ctx;
     await this.fetchButtons();
-    ctx.setInterval(async () => this.fetchButtons(), 180000);
-    this.ctx.setInterval(() => {
-      this.startObserver();
-    }, 2000);
+    ctx.setInterval(async () => this.fetchButtons(), Config.intervals.updateStreamBottomButtons);
+    this.startObserver();
   }
 
   private async fetchButtons() {
@@ -29,7 +27,7 @@ export class StreamBottomButtons {
     if (this.buttons.length === 0) return;
 
     const spacer = document.querySelector<HTMLDivElement>(
-      Config.buttonsMenu.spacingSelector
+      Config.streamBottomButtonsMenu.spacingSelector
     );
     if (!spacer) return;
 
@@ -40,67 +38,14 @@ export class StreamBottomButtons {
       const button = this.createButtonElement(b);
       parent.insertBefore(button, spacer);
     });
-
-    // let customContainer = parent.querySelector<HTMLDivElement>(`.${Config.buttonsMenu.buttonsContainerName}`);
-    // if (!customContainer) {
-    //   customContainer = document.createElement('div');
-    //   customContainer.className = Config.buttonsMenu.buttonsContainerName;
-    //   parent.insertBefore(customContainer, spacer);
-    // }
-
-    // this.buttons.forEach((b) => this.addButtonToContainer(b, customContainer));
   }
-
-  // addButtonToContainer(data: Button, container: HTMLElement) {
-  //   const existingButton = container.querySelector(`button[id="${data.id}"]`);
-  //   if (existingButton) return;
-
-  //   this.buttonCounter++;
-  //   const uniqueClass = `${Config.buttonsMenu.uniqueButtonClassMask}${this.buttonCounter}`;
-
-  //   const styleEl = document.createElement('style');
-  //   styleEl.id = `style-${uniqueClass}`;
-  //   styleEl.textContent = `
-  //     .${uniqueClass} {
-  //       ${data.style}
-  //     }
-  //     .${uniqueClass}:hover {
-  //       ${data.hoverStyle || ''}
-  //     }
-  //     .${uniqueClass}:active {
-  //       ${data.activeStyle || ''}
-  //     }
-  //   `;
-  //   document.head.appendChild(styleEl);
-
-  //   const button = document.createElement('button');
-  //   button.className = uniqueClass;
-  //   button.innerHTML = data.html;
-  //   button.setAttribute('id', data.id);
-
-  //   button.addEventListener('click', (event: MouseEvent) => {
-  //     handleClickAndNavigate(
-  //       event,
-  //       data.link,
-  //       (url) => window.open(url, '_blank'),
-  //       async (userId) => {
-  //         await sendMessage('clickButton', {
-  //           link: data.link,
-  //           userId,
-  //         } as ClickButton);
-  //       }
-  //     );
-  //   });
-
-  //   container.appendChild(button);
-  // }
 
   createButtonElement(data: Button): HTMLButtonElement {
     const existingButton = document.querySelector(`button[id="${data.id}"]`);
     if (existingButton) return existingButton as HTMLButtonElement;
 
     this.buttonCounter++;
-    const uniqueClass = `${Config.buttonsMenu.uniqueButtonClassMask}${this.buttonCounter}`;
+    const uniqueClass = `${Config.streamBottomButtonsMenu.uniqueButtonClassMask}${this.buttonCounter}`;
 
     const styleEl = document.createElement('style');
     styleEl.id = `style-${uniqueClass}`;
@@ -147,11 +92,11 @@ export class StreamBottomButtons {
 
       this.isProcessing = true;
 
-      this.ctx.setTimeout(async () => {
+      this.ctx.setTimeout(() => {
         this.observer!.disconnect();
 
         try {
-          await this.addButtons();
+          this.addButtons();
         } finally {
           this.observer!.observe(document.body, {
             childList: true,

@@ -30,10 +30,15 @@ const Config: AppConfig = {
   alarms: {
     checkConnectionState: 'CHECK_CONNECTION_STATE'
   },
-  buttonsMenu: {
+  streamBottomButtonsMenu: {
     spacingSelector: '.metadata-layout__secondary-button-spacing',
     buttonsContainerName: 'streamkey-buttons-container',
     uniqueButtonClassMask: 'streamkey-livechannel-button-'
+  },
+  intervals: {
+    updateChannels: 180000,
+    updateActivity: 60000,
+    updateStreamBottomButtons: 180000
   }
 };
 

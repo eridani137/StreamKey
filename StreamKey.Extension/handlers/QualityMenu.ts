@@ -335,29 +335,6 @@ export class QualityMenu {
       subtree: true,
     });
   }
-
-  destroy(): void {
-    this.observer?.disconnect();
-    this.observer = null;
-
-    this.styleElement?.remove();
-    this.styleElement = null;
-
-    document.querySelectorAll<HTMLElement>('.custom-radio').forEach((el) => {
-      el.classList.remove('custom-radio', 'selected');
-      delete el.dataset.listenerAttached;
-    });
-
-    document.querySelectorAll('.custom-radio-badge').forEach((b) => b.remove());
-
-    document.querySelectorAll('[data-streamkey-blocked]').forEach((el) => {
-      el.removeAttribute('data-streamkey-blocked');
-    });
-
-    document.querySelectorAll('.tw-in-feature-notification').forEach((el) => {
-      el.closest('.goosYB')?.remove();
-    });
-  }
 }
 
 const qualityMenu = new QualityMenu();

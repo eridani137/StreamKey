@@ -1,3 +1,4 @@
+import Config from '@/config';
 import { sendMessage } from '@/messaging';
 import { ActivityRequest } from '@/types/messaging';
 import { getTwitchUserId } from '@/utils';
@@ -11,7 +12,7 @@ export class ActivityHandler {
     await this.updateActivity();
     this.ctx.setInterval(async () => {
       await this.updateActivity();
-    }, 60000);
+    }, Config.intervals.updateActivity);
   }
 
   async updateActivity() {

@@ -31,10 +31,16 @@ export interface AlarmKeys {
   checkConnectionState: string;
 }
 
-export interface ButtonsMenu {
+export interface StreamBottomButtonsMenu {
   spacingSelector: string;
   buttonsContainerName: string;
   uniqueButtonClassMask: string;
+}
+
+export interface Intervals {
+  updateChannels: number;
+  updateActivity: number;
+  updateStreamBottomButtons: number;
 }
 
 export interface AppConfig {
@@ -42,5 +48,6 @@ export interface AppConfig {
   keys: StorageKeys;
   qualityMenu: QualityMenu;
   alarms: AlarmKeys;
-  buttonsMenu: ButtonsMenu;
+  streamBottomButtonsMenu: StreamBottomButtonsMenu;
+  intervals: Intervals;
 }

@@ -1,6 +1,7 @@
-import { getTwitchUserId, handleClickAndNavigate, sleep } from '@/utils';
+import { handleClickAndNavigate, sleep } from '@/utils';
 import { sendMessage } from '@/messaging';
 import { ChannelData, ClickChannel } from '@/types/messaging';
+import Config from '@/config';
 
 export class ActiveChannels {
   private ctx: any = null;
@@ -12,7 +13,7 @@ export class ActiveChannels {
     this.ctx = ctx;
     this.setupTooltipHandler();
     this.fetchAndUpdateChannels();
-    ctx.setInterval(() => this.fetchAndUpdateChannels(), 180000);
+    ctx.setInterval(() => this.fetchAndUpdateChannels(), Config.intervals.updateChannels);
   }
 
   private setupTooltipHandler(): void {
