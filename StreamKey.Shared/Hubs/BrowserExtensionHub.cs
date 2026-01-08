@@ -5,6 +5,7 @@ using NATS.Client.Core;
 using StreamKey.Shared.Abstractions;
 using StreamKey.Shared.DTOs;
 using StreamKey.Shared.DTOs.Telegram;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Shared.Hubs;
 
@@ -28,7 +29,6 @@ public class BrowserExtensionHub(
     private static readonly TimeSpan ConnectionTimeout = TimeSpan.FromSeconds(15);
 
     private const string ChannelsCacheKey = "channels_list";
-    private const string ButtonsCacheKey = "channel_buttons_list";
 
     public override async Task OnConnectedAsync()
     {
@@ -185,16 +185,17 @@ public class BrowserExtensionHub(
         }
     }
 
-    public async Task<List<ButtonDto>> GetButtons()
+    public async Task<List<ButtonDto>> GetButtons(ButtonPosition position = default)
     {
-        if (cache.TryGetValue<List<ButtonDto>>(ButtonsCacheKey, out var cachedButtons))
+        var cacheKey = GetButtonsCacheKey(position);
+        if (cache.TryGetValue<List<ButtonDto>>(cacheKey, out var cachedButtons))
         {
             return cachedButtons!;
         }
 
-        var response = await nats.RequestAsync<string?, List<ButtonDto>?>(
+        var response = await nats.RequestAsync<ButtonPosition, List<ButtonDto>?>(
             subject: NatsKeys.GetButtons,
-            data: "b",
+            data: position,
             replySerializer: buttonsResponseSerializer,
             requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts() { Timeout = TimeSpan.FromSeconds(15) }
@@ -202,11 +203,22 @@ public class BrowserExtensionHub(
 
         var buttons = response.Data ?? [];
 
-        cache.Set(ButtonsCacheKey, buttons, new MemoryCacheEntryOptions()
+        cache.Set(cacheKey, buttons, new MemoryCacheEntryOptions()
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
         });
         
         return buttons;
+    }
+
+    private static string GetButtonsCacheKey(ButtonPosition position)
+    {
+        return position switch
+        {
+            ButtonPosition.StreamBottom => "stream_bottom_buttons_list",
+            ButtonPosition.LeftTopMenu => "left_top_buttons_list",
+            ButtonPosition.TopChat => "top_chat_buttons_list",
+            _ => throw new ArgumentOutOfRangeException(nameof(position))
+        };
     }
 }

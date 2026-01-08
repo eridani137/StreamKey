@@ -3,9 +3,9 @@ using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Mappers;
-using StreamKey.Core.Services;
 using StreamKey.Shared;
 using StreamKey.Shared.DTOs;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Core.NatsListeners;
 
@@ -13,31 +13,31 @@ public class ButtonsListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
     JsonNatsSerializer<List<ButtonDto>?> responseSerializer,
-    INatsRequestReplyProcessor<string?, List<ButtonDto>?> processor
+    INatsRequestReplyProcessor<ButtonPosition, List<ButtonDto>?> processor
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var subscription = nats.SubscribeAsync<string?>(
+        var subscription = nats.SubscribeAsync<ButtonPosition>(
             NatsKeys.GetButtons,
             cancellationToken: stoppingToken);
 
         await processor.ProcessAsync(
             subscription,
-            _ => GetButtonsAsync(stoppingToken),
+            position => GetButtonsAsync(position, stoppingToken),
             nats,
             responseSerializer,
             stoppingToken);
     }
 
-    private async Task<List<ButtonDto>?> GetButtonsAsync(CancellationToken cancellationToken)
+    private async Task<List<ButtonDto>?> GetButtonsAsync(ButtonPosition position, CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var service = scope.ServiceProvider.GetRequiredService<IButtonService>();
 
         var entities = await service.GetButtons(cancellationToken);
         return entities
-            .Where(b => b.IsEnabled)
+            .Where(b => b.IsEnabled && b.Position == position)
             .Select(b => b.Map())
             .ToList();
     }

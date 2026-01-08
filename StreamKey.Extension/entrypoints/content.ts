@@ -1,7 +1,7 @@
 import activeChannels from '@/handlers/ActiveChannels';
 import activityHandler from '@/handlers/ActivityHandler';
 import qualityMenu from '@/handlers/QualityMenu';
-import buttonsMenu from '@/handlers/ButtonsMenu';
+import streamBottomButtons from '@/handlers/StreamBottomButtons';
 import './style.css';
 import { sendMessage } from '@/messaging';
 
@@ -18,5 +18,5 @@ async function runScripts(ctx: any) {
   activeChannels.init(ctx);
   await qualityMenu.init(ctx);
   await activityHandler.init(ctx);
-  await buttonsMenu.init(ctx);
+  await streamBottomButtons.init(ctx);
 }

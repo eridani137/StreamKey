@@ -17,7 +17,8 @@ public static class ButtonMapper
                 HoverStyle = entity.HoverStyle,
                 ActiveStyle = entity.ActiveStyle,
                 Link = entity.Link,
-                IsEnabled = entity.IsEnabled
+                IsEnabled = entity.IsEnabled,
+                Position = entity.Position
             };
         }
     }
@@ -33,7 +34,8 @@ public static class ButtonMapper
                 HoverStyle = dto.HoverStyle,
                 ActiveStyle = dto.ActiveStyle,
                 Link = dto.Link,
-                IsEnabled = dto.IsEnabled
+                IsEnabled = dto.IsEnabled,
+                Position = dto.Position
             };
         }
     }

@@ -1,4 +1,5 @@
 using MessagePack;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Shared.DTOs;
 
@@ -12,4 +13,5 @@ public record ButtonDto
     [Key("activeStyle")] public required string ActiveStyle { get; init; }
     [Key("link")] public required string Link { get; init; }
     [Key("isEnabled")] public required bool IsEnabled { get; init; }
+    [Key("position")] public required ButtonPosition Position { get; init; }
 }

@@ -13,7 +13,8 @@ public static class ClickButtonMapper
             {
                 Link = dto.Link,
                 UserId = dto.UserId,
-                DateTime = DateTime.UtcNow
+                DateTime = DateTime.UtcNow,
+                Position = dto.Position,
             };
         }
     }

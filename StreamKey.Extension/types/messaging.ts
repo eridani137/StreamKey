@@ -47,6 +47,7 @@ export interface ClickChannel extends WithUserId, WithChannelName {}
 
 export interface ClickButton extends WithUserId {
   link: string;
+  position: ButtonPosition;
 }
 
 export interface CheckMemberResponse extends WithNumberUserId {}
@@ -58,4 +59,11 @@ export interface Button {
   hoverStyle?: string;
   activeStyle?: string;
   link: string;
+  position: ButtonPosition;
+}
+
+export enum ButtonPosition {
+  StreamBottom = 0,
+  LeftTopMenu = 1,
+  TopChat = 2
 }

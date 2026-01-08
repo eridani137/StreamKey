@@ -1,4 +1,5 @@
 using MessagePack;
+using StreamKey.Shared.Entities;
 
 namespace StreamKey.Shared.DTOs;
 
@@ -33,4 +34,5 @@ public record ClickButtonRequest
 {
     [Key("link")] public string Link { get; init; } = string.Empty;
     [Key("userId")] public string UserId { get; init; } = string.Empty;
+    [Key("position")] public ButtonPosition Position { get; init; }
 }

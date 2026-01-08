@@ -72,8 +72,8 @@ export function registerMessageHandlers() {
     return await extensionClient.getChannels();
   });
 
-  onMessage('getButtons', async () => {
-    return await extensionClient.getButtons();
+  onMessage('getButtons', async (message) => {
+    return await extensionClient.getButtons(message.data);
   });
 
   onMessage('getConnectionState', async () => {

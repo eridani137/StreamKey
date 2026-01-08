@@ -13,6 +13,7 @@ import { sendMessage } from './messaging';
 import {
   ActivityRequest,
   Button,
+  ButtonPosition,
   ChannelData,
   CheckMemberResponse,
   ClickButton,
@@ -209,8 +210,8 @@ class BrowserExtensionClient {
     return (await this.connection.invoke('GetChannels')) || null;
   }
 
-  async getButtons(): Promise<Button[] | null> {
-    return (await this.connection.invoke('GetButtons')) || null;
+  async getButtons(position: ButtonPosition): Promise<Button[] | null> {
+    return (await this.connection.invoke('GetButtons', position)) || null;
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {
