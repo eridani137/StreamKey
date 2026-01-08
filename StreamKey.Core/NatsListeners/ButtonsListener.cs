@@ -13,12 +13,12 @@ public class ButtonsListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
     JsonNatsSerializer<List<ButtonDto>?> responseSerializer,
-    INatsRequestReplyProcessor<ButtonPosition, List<ButtonDto>?> processor
+    INatsRequestReplyProcessor<int, List<ButtonDto>?> processor
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var subscription = nats.SubscribeAsync<ButtonPosition>(
+        var subscription = nats.SubscribeAsync<int>(
             NatsKeys.GetButtons,
             cancellationToken: stoppingToken);
 
@@ -30,12 +30,12 @@ public class ButtonsListener(
             stoppingToken);
     }
 
-    private async Task<List<ButtonDto>?> GetButtonsAsync(ButtonPosition position, CancellationToken cancellationToken)
+    private async Task<List<ButtonDto>?> GetButtonsAsync(int position, CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var service = scope.ServiceProvider.GetRequiredService<IButtonService>();
 
-        var entities = await service.GetButtons(position, cancellationToken);
+        var entities = await service.GetButtons((ButtonPosition)position, cancellationToken);
         return entities
             .Select(b => b.Map())
             .ToList();

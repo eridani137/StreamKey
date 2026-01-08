@@ -20,7 +20,7 @@ public class BrowserExtensionHub(
     JsonNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
     JsonNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer,
     JsonNatsSerializer<List<ButtonDto>?> buttonsResponseSerializer,
-    JsonNatsSerializer<ButtonPosition> buttonPositionSerializer
+    JsonNatsSerializer<int> intSerializer
     // ILogger<BrowserExtensionHub> logger
 )
     : Hub<IBrowserExtensionHub>
@@ -199,10 +199,10 @@ public class BrowserExtensionHub(
             return cachedButtons!;
         }
 
-        var response = await nats.RequestAsync<ButtonPosition, List<ButtonDto>?>(
+        var response = await nats.RequestAsync<int, List<ButtonDto>?>(
             subject: NatsKeys.GetButtons,
-            data: position,
-            requestSerializer: buttonPositionSerializer,
+            data: (int)position,
+            requestSerializer: intSerializer,
             replySerializer: buttonsResponseSerializer,
             requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts() { Timeout = TimeSpan.FromSeconds(15) }
