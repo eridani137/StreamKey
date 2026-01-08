@@ -6,7 +6,7 @@ services:
       dockerfile: StreamKey.Hub/Dockerfile
     restart: unless-stopped
     environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:${HUB_PORT}
+      - ASPNETCORE_URLS=http://+:${HUB_PORT}
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${MAIN_SERVER_IP}:${SEQ_PORT}
       - OTEL_SERVICE_NAME=StreamKey.Hub
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}

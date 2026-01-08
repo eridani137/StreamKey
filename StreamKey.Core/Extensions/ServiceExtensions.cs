@@ -128,6 +128,11 @@ public static class ServiceExtensions
                 {
                     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
                     options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
+                    
+                    if (builder.Environment.IsDevelopment())
+                    {
+                        options.EnableDetailedErrors = true;
+                    }
                 })
                 .AddMessagePackProtocol()
                 .AddStackExchangeRedis(redisConnectionString,

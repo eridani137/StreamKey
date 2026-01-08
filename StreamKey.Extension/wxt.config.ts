@@ -3,15 +3,15 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
-  vite: () => ({
-    plugins: [],
-    esbuild:
-      process.env.NODE_ENV === 'production'
-        ? {
-            drop: ['console', 'debugger'],
-          }
-        : undefined,
-  }), // TODO
+  // vite: () => ({
+  //   plugins: [],
+  //   esbuild:
+  //     process.env.NODE_ENV === 'production'
+  //       ? {
+  //           drop: ['console', 'debugger'],
+  //         }
+  //       : undefined,
+  // }), // TODO
   manifest: (env) => {
     const manifest = {
       name: 'Твич 1080 и 1440 | Вернуть 1080/1440 на Твич от STREAM KEY (не ВПН)',

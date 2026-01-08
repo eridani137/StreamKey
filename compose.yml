@@ -6,7 +6,7 @@
       dockerfile: StreamKey.Api/Dockerfile
     restart: unless-stopped
     environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:${API_PORT}
+      - ASPNETCORE_URLS=http://+:${API_PORT}
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://seq:${SEQ_PORT}
       - OTEL_SERVICE_NAME=StreamKey.API
       - OTEL_EXPORTER_OTLP_HEADERS=X-Seq-ApiKey=${SEQ_API_KEY}

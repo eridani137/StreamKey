@@ -1,3 +1,5 @@
+using MessagePack;
+
 namespace StreamKey.Shared.Entities;
 
 public class ButtonEntity : BaseGuidEntity

@@ -19,7 +19,8 @@ public class BrowserExtensionHub(
     JsonNatsSerializer<TelegramUserDto?> telegramUserDtoSerializer,
     JsonNatsSerializer<List<ChannelDto>?> channelsResponseSerializer,
     JsonNatsSerializer<CheckMemberRequest> checkMemberRequestSerializer,
-    JsonNatsSerializer<List<ButtonDto>?> buttonsResponseSerializer
+    JsonNatsSerializer<List<ButtonDto>?> buttonsResponseSerializer,
+    JsonNatsSerializer<ButtonPosition> buttonPositionSerializer
     // ILogger<BrowserExtensionHub> logger
 )
     : Hub<IBrowserExtensionHub>
@@ -196,6 +197,7 @@ public class BrowserExtensionHub(
         var response = await nats.RequestAsync<ButtonPosition, List<ButtonDto>?>(
             subject: NatsKeys.GetButtons,
             data: position,
+            requestSerializer: buttonPositionSerializer,
             replySerializer: buttonsResponseSerializer,
             requestOpts: new NatsPubOpts(),
             replyOpts: new NatsSubOpts() { Timeout = TimeSpan.FromSeconds(15) }

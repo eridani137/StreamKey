@@ -63,7 +63,7 @@ export interface Button {
 }
 
 export enum ButtonPosition {
-  StreamBottom = 0,
-  LeftTopMenu = 1,
-  TopChat = 2
+  StreamBottom,
+  LeftTopMenu,
+  TopChat
 }
