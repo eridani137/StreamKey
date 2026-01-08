@@ -168,7 +168,7 @@ public class BrowserExtensionHub(
 
         return channels;
     }
-    
+
     public async Task CheckMember(CheckMemberRequest request)
     {
         var response = await nats.RequestAsync(
@@ -190,7 +190,7 @@ public class BrowserExtensionHub(
     // {
     //     return await GetButtonsByPosition(ButtonPosition.StreamBottom);
     // }
-    
+
     public async Task<List<ButtonDto>> GetButtonsByPosition(ButtonPosition position)
     {
         var cacheKey = GetButtonsCacheKey(position);
@@ -208,13 +208,16 @@ public class BrowserExtensionHub(
             replyOpts: new NatsSubOpts() { Timeout = TimeSpan.FromSeconds(15) }
         );
 
-        var buttons = response.Data ?? [];
+        var buttons = response.Data?
+                          .Where(b => b.IsEnabled && b.Position == position)
+                          .ToList()
+                      ?? [];
 
         cache.Set(cacheKey, buttons, new MemoryCacheEntryOptions()
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
         });
-        
+
         return buttons;
     }
 
