@@ -211,7 +211,7 @@ class BrowserExtensionClient {
   }
 
   async getButtons(position: ButtonPosition): Promise<Button[] | null> {
-    return (await this.connection.invoke('GetButtons', position)) || null;
+    return (await this.connection.invoke('GetButtons', utils.buttonPositionToString(position))) || null;
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {

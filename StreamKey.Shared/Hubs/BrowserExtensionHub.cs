@@ -186,9 +186,10 @@ public class BrowserExtensionHub(
         }
     }
 
-    public async Task<List<ButtonDto>> GetButtons(ButtonPosition position = default)
+    public async Task<List<ButtonDto>> GetButtons(ButtonPosition? position = null)
     {
-        var cacheKey = GetButtonsCacheKey(position);
+        position ??= ButtonPosition.StreamBottom;
+        var cacheKey = GetButtonsCacheKey((ButtonPosition)position);
         if (cache.TryGetValue<List<ButtonDto>>(cacheKey, out var cachedButtons))
         {
             return cachedButtons!;
@@ -196,7 +197,7 @@ public class BrowserExtensionHub(
 
         var response = await nats.RequestAsync<ButtonPosition, List<ButtonDto>?>(
             subject: NatsKeys.GetButtons,
-            data: position,
+            data: (ButtonPosition)position,
             requestSerializer: buttonPositionSerializer,
             replySerializer: buttonsResponseSerializer,
             requestOpts: new NatsPubOpts(),
