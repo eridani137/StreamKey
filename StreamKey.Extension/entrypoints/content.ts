@@ -4,6 +4,7 @@ import qualityMenu from '@/handlers/QualityMenu';
 import streamBottomButtons from '@/handlers/StreamBottomButtons';
 import './style.css';
 import { sendMessage } from '@/messaging';
+import leftTopMenuButtons from '@/handlers/LeftTopMenuButtons';
 
 export default defineContentScript({
   matches: ['https://*.twitch.tv/*'],
@@ -19,4 +20,5 @@ async function runScripts(ctx: any) {
   await qualityMenu.init(ctx);
   await activityHandler.init(ctx);
   await streamBottomButtons.init(ctx);
+  await leftTopMenuButtons.init(ctx);
 }

@@ -7,6 +7,8 @@ namespace StreamKey.Core.Abstractions;
 public interface IButtonService
 {
     Task<List<ButtonEntity>> GetButtons(CancellationToken cancellationToken);
+    
+    Task<List<ButtonEntity>> GetButtons(ButtonPosition position, CancellationToken cancellationToken);
 
     Task<Result<ButtonEntity>> AddButton(ButtonDto dto, CancellationToken cancellationToken);
 

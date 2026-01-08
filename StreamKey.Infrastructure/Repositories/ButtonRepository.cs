@@ -7,9 +7,19 @@ namespace StreamKey.Infrastructure.Repositories;
 public class ButtonRepository(ApplicationDbContext context)
     : BaseRepository<ButtonEntity>(context), IButtonRepository
 {
+    public async Task<List<ButtonEntity>> GetByPosition(ButtonPosition position, CancellationToken cancellationToken)
+    {
+        return await GetSet()
+            .Where(b => b.IsEnabled && b.Position == position)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: cancellationToken);
+    }
+
     public async Task<List<ButtonEntity>> GetAll(CancellationToken cancellationToken)
     {
-        return await GetSet().ToListAsync(cancellationToken: cancellationToken);
+        return await GetSet()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: cancellationToken);
     }
 
     public Task<ButtonEntity?> GetById(Guid id, CancellationToken cancellationToken)

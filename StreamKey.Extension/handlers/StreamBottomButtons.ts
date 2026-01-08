@@ -2,7 +2,7 @@ import Config from '@/config';
 import { sendMessage } from '@/messaging';
 import { Nullable } from '@/types/common';
 import { Button, ButtonPosition, ClickButton } from '@/types/messaging';
-import { handleClickAndNavigate } from '@/utils';
+import { createButtonElement, handleClickAndNavigate } from '@/utils';
 
 export class StreamBottomButtons {
   private ctx: any = null;
@@ -26,62 +26,18 @@ export class StreamBottomButtons {
   addButtons() {
     if (this.buttons.length === 0) return;
 
-    const spacer = document.querySelector<HTMLDivElement>(
+    const node = document.querySelector<HTMLDivElement>(
       Config.streamBottomButtonsMenu.spacingSelector
     );
-    if (!spacer) return;
+    if (!node) return;
 
-    const parent = spacer.parentElement;
+    const parent = node.parentElement;
     if (!parent) return;
 
     this.buttons.forEach((b) => {
-      const button = this.createButtonElement(b);
-      parent.insertBefore(button, spacer);
+      const button = createButtonElement(b);
+      parent.insertBefore(button, node);
     });
-  }
-
-  createButtonElement(data: Button): HTMLButtonElement {
-    const existingButton = document.querySelector(`button[id="${data.id}"]`);
-    if (existingButton) return existingButton as HTMLButtonElement;
-
-    this.buttonCounter++;
-    const uniqueClass = `${Config.streamBottomButtonsMenu.uniqueButtonClassMask}${this.buttonCounter}`;
-
-    const styleEl = document.createElement('style');
-    styleEl.id = `style-${uniqueClass}`;
-    styleEl.textContent = `
-    .${uniqueClass} {
-      ${data.style}
-    }
-    .${uniqueClass}:hover {
-      ${data.hoverStyle || ''}
-    }
-    .${uniqueClass}:active {
-      ${data.activeStyle || ''}
-    }
-  `;
-    document.head.appendChild(styleEl);
-
-    const button = document.createElement('button');
-    button.className = uniqueClass;
-    button.innerHTML = data.html;
-    button.setAttribute('id', data.id);
-
-    button.addEventListener('click', (event: MouseEvent) => {
-      handleClickAndNavigate(
-        event,
-        data.link,
-        (url) => window.open(url, '_blank'),
-        async (userId) => {
-          await sendMessage('clickButton', {
-            link: data.link,
-            userId,
-          } as ClickButton);
-        }
-      );
-    });
-
-    return button;
   }
 
   startObserver(): void {

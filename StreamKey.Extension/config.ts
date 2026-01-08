@@ -39,6 +39,9 @@ const Config: AppConfig = {
     updateChannels: 180000,
     updateActivity: 60000,
     updateStreamBottomButtons: 180000
+  },
+  leftTopMenuButtons: {
+    selector: '[data-a-target="home-link"] + div > div'
   }
 };
 

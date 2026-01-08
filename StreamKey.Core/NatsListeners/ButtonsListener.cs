@@ -35,9 +35,8 @@ public class ButtonsListener(
         await using var scope = scopeFactory.CreateAsyncScope();
         var service = scope.ServiceProvider.GetRequiredService<IButtonService>();
 
-        var entities = await service.GetButtons(cancellationToken);
+        var entities = await service.GetButtons(position, cancellationToken);
         return entities
-            .Where(b => b.IsEnabled && b.Position == position)
             .Select(b => b.Map())
             .ToList();
     }

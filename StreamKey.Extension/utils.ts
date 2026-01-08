@@ -2,8 +2,15 @@ import { HubConnectionState } from '@microsoft/signalr';
 import extensionClient from './BrowserExtensionClient';
 import Config from './config';
 import { DeviceInfo, StatusType } from './types/common';
-import { ButtonPosition, TelegramUser, TelegramUserResponse } from './types/messaging';
+import {
+  Button,
+  ButtonPosition,
+  ClickButton,
+  TelegramUser,
+  TelegramUserResponse,
+} from './types/messaging';
 import { ThrottledFetcher } from './throttler';
+import { sendMessage } from './messaging';
 
 export function getDeviceInfo(): DeviceInfo {
   return {
@@ -238,4 +245,50 @@ export async function handleClickAndNavigate(
 
 export function buttonPositionToString(pos: ButtonPosition): string {
   return ButtonPosition[pos];
+}
+
+let buttonCounter = 0;
+
+export function createButtonElement(data: Button): HTMLButtonElement {
+  const existingButton = document.querySelector(`button[id="${data.id}"]`);
+  if (existingButton) return existingButton as HTMLButtonElement;
+
+  buttonCounter++;
+  const uniqueClass = `${Config.streamBottomButtonsMenu.uniqueButtonClassMask}${buttonCounter}`;
+
+  const styleEl = document.createElement('style');
+  styleEl.id = `style-${uniqueClass}`;
+  styleEl.textContent = `
+    .${uniqueClass} {
+      ${data.style}
+    }
+    .${uniqueClass}:hover {
+      ${data.hoverStyle || ''}
+    }
+    .${uniqueClass}:active {
+      ${data.activeStyle || ''}
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  const button = document.createElement('button');
+  button.className = uniqueClass;
+  button.innerHTML = data.html;
+  button.setAttribute('id', data.id);
+
+  button.addEventListener('click', (event: MouseEvent) => {
+    handleClickAndNavigate(
+      event,
+      data.link,
+      (url) => window.open(url, '_blank'),
+      async (userId) => {
+        await sendMessage('clickButton', {
+          link: data.link,
+          userId,
+        } as ClickButton);
+      }
+    );
+  });
+
+  return button;
 }

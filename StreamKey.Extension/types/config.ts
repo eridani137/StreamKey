@@ -43,6 +43,10 @@ export interface Intervals {
   updateStreamBottomButtons: number;
 }
 
+export interface LeftTopMenuButtons {
+  selector: string;
+}
+
 export interface AppConfig {
   urls: AppUrls;
   keys: StorageKeys;
@@ -50,4 +54,5 @@ export interface AppConfig {
   alarms: AlarmKeys;
   streamBottomButtonsMenu: StreamBottomButtonsMenu;
   intervals: Intervals;
+  leftTopMenuButtons: LeftTopMenuButtons;
 }
