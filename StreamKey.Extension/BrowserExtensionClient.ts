@@ -75,8 +75,7 @@ class BrowserExtensionClient {
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
-      } catch (e) {
-      }
+      } catch (e) {}
     });
 
     connection.onreconnected(async () => {
@@ -84,8 +83,7 @@ class BrowserExtensionClient {
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
-      } catch (e) {
-      }
+      } catch (e) {}
     });
 
     connection.onclose(async (error) => {
@@ -93,8 +91,7 @@ class BrowserExtensionClient {
 
       try {
         await sendMessage('setConnectionState', this.connectionState);
-      } catch (e) {
-      }
+      } catch (e) {}
 
       if (this.shouldReconnect) {
         console.log('Запуск переподключения после закрытия соединения...');
@@ -128,8 +125,7 @@ class BrowserExtensionClient {
 
         try {
           await sendMessage('setConnectionState', this.connectionState);
-        } catch (e) {
-        }
+        } catch (e) {}
 
         console.log('SignalR соединение восстановлено');
 
@@ -160,8 +156,7 @@ class BrowserExtensionClient {
 
         try {
           await sendMessage('setConnectionState', this.connectionState);
-        } catch (e) {
-        }
+        } catch (e) {}
 
         console.log('SignalR соединение установлено');
         break;
@@ -211,7 +206,12 @@ class BrowserExtensionClient {
   }
 
   async getButtons(position: ButtonPosition): Promise<Button[] | null> {
-    return (await this.connection.invoke('GetButtons', utils.buttonPositionToString(position))) || null;
+    return (
+      (await this.connection.invoke(
+        'GetButtonsByPosition',
+        utils.buttonPositionToString(position)
+      )) || null
+    );
   }
 
   async clickChannel(payload: ClickChannel): Promise<void> {

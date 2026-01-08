@@ -1,6 +1,15 @@
 import { defineExtensionMessaging } from '@webext-core/messaging';
 import { HubConnectionState } from '@microsoft/signalr';
-import { ActivityRequest, Button, ButtonPosition, ChannelData, CheckMemberResponse, ClickButton, ClickChannel, TelegramUser } from './types/messaging';
+import {
+  ActivityRequest,
+  Button,
+  ButtonPosition,
+  ChannelData,
+  CheckMemberResponse,
+  ClickButton,
+  ClickChannel,
+  TelegramUser,
+} from './types/messaging';
 
 interface ProtocolMap {
   updateActivity(payload: ActivityRequest): Promise<void>;
@@ -9,10 +18,10 @@ interface ProtocolMap {
   getChannels(): Promise<ChannelData[] | null>;
   checkMember(payload: CheckMemberResponse): Promise<void>;
   getButtons(position: ButtonPosition): Promise<Button[] | null>;
-  
+
   getConnectionState(): Promise<HubConnectionState>;
   setConnectionState(payload: HubConnectionState): Promise<void>;
-  
+
   getProfile(): Promise<TelegramUser | null>;
   initProfile(): Promise<void>;
 
