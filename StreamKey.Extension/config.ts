@@ -41,7 +41,8 @@ const Config: AppConfig = {
     updateStreamBottomButtons: 180000
   },
   leftTopMenuButtons: {
-    selector: '[data-a-target="home-link"] + div > div'
+    selector: '[data-a-target="home-link"] + div > div',
+    uniqueButtonClassMask: 'streamkey-topmenu-button-'
   }
 };
 

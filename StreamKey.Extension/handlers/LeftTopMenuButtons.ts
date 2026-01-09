@@ -4,7 +4,7 @@ import { Nullable } from '@/types/common';
 import { Button, ButtonPosition, ClickButton } from '@/types/messaging';
 import { handleClickAndNavigate } from '@/utils';
 
-export class StreamBottomButtons {
+export class LeftTopMenuButtons {
   private ctx: any = null;
   private observer: Nullable<MutationObserver> = null;
   private isProcessing = false;
@@ -14,64 +14,39 @@ export class StreamBottomButtons {
   async init(ctx: any): Promise<void> {
     this.ctx = ctx;
     await this.fetchButtons();
-    ctx.setInterval(
-      async () => this.fetchButtons(),
-      Config.intervals.updateStreamBottomButtons
-    );
+    ctx.setInterval(async () => this.fetchButtons(), Config.intervals.updateStreamBottomButtons);
     this.startObserver();
   }
 
   private async fetchButtons() {
     this.buttons =
-      (await sendMessage('getButtons', ButtonPosition.StreamBottom)) || [];
-    console.log('[StreamBottom] Fetch', this.buttons.length, 'items');
+      (await sendMessage('getButtons', ButtonPosition.LeftTopMenu)) || [];
+    console.log('[LeftTopMenu] Fetch', this.buttons.length, 'items');
   }
 
   addButtons() {
     if (this.buttons.length === 0) return;
 
     const node = document.querySelector<HTMLDivElement>(
-      Config.streamBottomButtonsMenu.spacingSelector
+      Config.leftTopMenuButtons.selector
     );
     if (!node) return;
 
-    const parent = node.parentElement;
-    if (!parent) return;
-
     this.buttons.forEach((b) => {
-      const button = this.createButtonElement(b);
-      parent.insertBefore(button, node);
+      const button = this.createDivElement(b);
+      node.insertBefore(button, null);
     });
   }
+  
+  createDivElement(data: Button): HTMLDivElement {
+    const existingButton = document.querySelector(`div[id="${data.id}"]`);
+    if (existingButton) return existingButton as HTMLDivElement;
 
-  createButtonElement(data: Button): HTMLButtonElement {
-    const existingButton = document.querySelector(`button[id="${data.id}"]`);
-    if (existingButton) return existingButton as HTMLButtonElement;
+    const div = document.createElement('div');
+    div.innerHTML = data.html;
+    div.setAttribute('id', data.id);
 
-    this.buttonCounter++;
-    const uniqueClass = `${Config.streamBottomButtonsMenu.uniqueButtonClassMask}${this.buttonCounter}`;
-
-    const styleEl = document.createElement('style');
-    styleEl.id = `style-${uniqueClass}`;
-    styleEl.textContent = `
-    .${uniqueClass} {
-      ${data.style}
-    }
-    .${uniqueClass}:hover {
-      ${data.hoverStyle || ''}
-    }
-    .${uniqueClass}:active {
-      ${data.activeStyle || ''}
-    }
-  `;
-    document.head.appendChild(styleEl);
-
-    const button = document.createElement('button');
-    button.className = uniqueClass;
-    button.innerHTML = data.html;
-    button.setAttribute('id', data.id);
-
-    button.addEventListener('click', (event: MouseEvent) => {
+    div.addEventListener('click', (event: MouseEvent) => {
       handleClickAndNavigate(
         event,
         data.link,
@@ -85,7 +60,7 @@ export class StreamBottomButtons {
       );
     });
 
-    return button;
+    return div;
   }
 
   startObserver(): void {
@@ -118,6 +93,6 @@ export class StreamBottomButtons {
   }
 }
 
-const streamBottomButtons = new StreamBottomButtons();
+const leftTopMenuButtons = new LeftTopMenuButtons();
 
-export default streamBottomButtons;
+export default leftTopMenuButtons;

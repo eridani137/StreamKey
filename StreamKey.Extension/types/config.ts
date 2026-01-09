@@ -45,6 +45,7 @@ export interface Intervals {
 
 export interface LeftTopMenuButtons {
   selector: string;
+  uniqueButtonClassMask: string;
 }
 
 export interface AppConfig {
