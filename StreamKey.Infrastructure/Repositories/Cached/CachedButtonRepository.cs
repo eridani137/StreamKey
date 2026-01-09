@@ -16,12 +16,12 @@ public class CachedButtonRepository(
 
     public Task<List<ButtonEntity>> GetByPosition(ButtonPosition position, CancellationToken cancellationToken)
     {
-        return GetCachedData(GetCacheKey(), () => Repository.GetByPosition(position, cancellationToken));
+        return Repository.GetByPosition(position, cancellationToken);
     }
 
     public Task<List<ButtonEntity>> GetAll(CancellationToken cancellationToken)
     {
-        return GetCachedData(GetCacheKey(), () => Repository.GetAll(cancellationToken));
+        return Repository.GetAll(cancellationToken);
     }
 
     public Task<ButtonEntity?> GetById(Guid id, CancellationToken cancellationToken)

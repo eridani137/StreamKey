@@ -193,13 +193,13 @@ public class BrowserExtensionHub(
 
     public async Task<List<ButtonDto>> GetButtonsByPosition(ButtonPosition position)
     {
-        // var cacheKey = GetButtonsCacheKey(position);
+        var cacheKey = GetButtonsCacheKey(position);
         var subject = GetButtonsSubject(position);
 
-        // if (cache.TryGetValue(cacheKey, out List<ButtonDto>? cached))
-        // {
-        //     return cached!;
-        // }
+        if (cache.TryGetValue(cacheKey, out List<ButtonDto>? cached))
+        {
+            return cached!;
+        }
 
         var response = await nats.RequestAsync<int, List<ButtonDto>?>(
             subject,
@@ -211,10 +211,10 @@ public class BrowserExtensionHub(
 
         var buttons = response.Data ?? [];
 
-        // cache.Set(
-        //     cacheKey,
-        //     buttons,
-        //     TimeSpan.FromMinutes(3));
+        cache.Set(
+            cacheKey,
+            buttons,
+            TimeSpan.FromMinutes(3));
 
         return buttons;
     }

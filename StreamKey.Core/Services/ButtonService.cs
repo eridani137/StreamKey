@@ -21,7 +21,7 @@ public class ButtonService(
         return await repository.GetAll(cancellationToken);
     }
 
-    public async Task<List<ButtonEntity>> GetButtons(ButtonPosition position, CancellationToken cancellationToken)
+    public async Task<List<ButtonEntity>> GetButtonsByPosition(ButtonPosition position, CancellationToken cancellationToken)
     {
         return await repository.GetByPosition(position, cancellationToken);
     }
