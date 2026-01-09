@@ -19,21 +19,25 @@ public class ButtonsListener(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var handlers = Enum.GetValues<ButtonPosition>()
-            .ToDictionary(BrowserExtensionHub.GetButtonsSubject, position => position);
+        var positions = Enum.GetValues<ButtonPosition>();
 
-        var tasks = handlers.Select(kvp =>
+        var tasks = positions.Select(position =>
         {
+            var pos = position;
+
+            var subject = BrowserExtensionHub.GetButtonsSubject(pos);
             var subscription = nats.SubscribeAsync<object?>(
-                kvp.Key,
-                cancellationToken: stoppingToken);
+                subject,
+                cancellationToken: stoppingToken
+            );
 
             return processor.ProcessAsync(
                 subscription,
-                _ => GetButtonsAsync(kvp.Value, stoppingToken),
+                _ => GetButtonsAsync(pos, stoppingToken),
                 nats,
                 responseSerializer,
-                stoppingToken);
+                stoppingToken
+            );
         });
 
         await Task.WhenAll(tasks);
