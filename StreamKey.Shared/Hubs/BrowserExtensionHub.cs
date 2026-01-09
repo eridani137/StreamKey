@@ -194,29 +194,26 @@ public class BrowserExtensionHub(
     public async Task<List<ButtonDto>> GetButtonsByPosition(ButtonPosition position)
     {
         var cacheKey = GetButtonsCacheKey(position);
-        if (cache.TryGetValue<List<ButtonDto>>(cacheKey, out var cachedButtons))
+        var subject = GetButtonsSubject(position);
+
+        if (cache.TryGetValue(cacheKey, out List<ButtonDto>? cached))
         {
-            return cachedButtons!;
+            return cached!;
         }
 
-        var response = await nats.RequestAsync<int, List<ButtonDto>?>(
-            subject: NatsKeys.GetButtons,
-            data: (int)position,
-            requestSerializer: intSerializer,
+        var response = await nats.RequestAsync<object?, List<ButtonDto>?>(
+            subject,
+            null,
             replySerializer: buttonsResponseSerializer,
-            requestOpts: new NatsPubOpts(),
-            replyOpts: new NatsSubOpts() { Timeout = TimeSpan.FromSeconds(15) }
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
         );
 
-        var buttons = response.Data?
-                          .Where(b => b.IsEnabled && b.Position == position)
-                          .ToList()
-                      ?? [];
+        var buttons = response.Data ?? [];
 
-        cache.Set(cacheKey, buttons, new MemoryCacheEntryOptions()
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-        });
+        cache.Set(
+            cacheKey,
+            buttons,
+            TimeSpan.FromMinutes(3));
 
         return buttons;
     }
@@ -228,6 +225,17 @@ public class BrowserExtensionHub(
             ButtonPosition.StreamBottom => "stream_bottom_buttons_list",
             ButtonPosition.LeftTopMenu => "left_top_buttons_list",
             ButtonPosition.TopChat => "top_chat_buttons_list",
+            _ => throw new ArgumentOutOfRangeException(nameof(position))
+        };
+    }
+
+    public static string GetButtonsSubject(ButtonPosition position)
+    {
+        return position switch
+        {
+            ButtonPosition.StreamBottom => NatsKeys.GetStreamBottomButtons,
+            ButtonPosition.LeftTopMenu => NatsKeys.GetLeftTopButtons,
+            ButtonPosition.TopChat => NatsKeys.GetTopChatButtons,
             _ => throw new ArgumentOutOfRangeException(nameof(position))
         };
     }

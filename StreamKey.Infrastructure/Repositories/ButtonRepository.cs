@@ -10,7 +10,7 @@ public class ButtonRepository(ApplicationDbContext context)
     public async Task<List<ButtonEntity>> GetByPosition(ButtonPosition position, CancellationToken cancellationToken)
     {
         return await GetSet()
-            .Where(b => b.IsEnabled && b.Position == position)
+            .Where(b => b.Position == position)
             .AsNoTracking()
             .ToListAsync(cancellationToken: cancellationToken);
     }

@@ -9,8 +9,8 @@ public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
     : INatsRequestReplyProcessor<TRequest, TResponse>
 {
     public async Task ProcessAsync(
-        IAsyncEnumerable<NatsMsg<TRequest>> subscription,
-        Func<TRequest, Task<TResponse>> handle,
+        IAsyncEnumerable<NatsMsg<TRequest?>> subscription,
+        Func<TRequest?, Task<TResponse>> handle,
         INatsConnection nats,
         INatsSerialize<TResponse?>? responseSerializer,
         CancellationToken token)
@@ -19,14 +19,7 @@ public sealed class NatsRequestReplyProcessor<TRequest, TResponse>(
         {
             try
             {
-                if (msg.Data is null)
-                {
-                    logger.LogWarning("Получен запрос с null данными: {Subject}", msg.Subject);
-                    await SendResponseAsync(nats, msg.ReplyTo, default, responseSerializer, token);
-                    continue;
-                }
-
-                logger.LogDebug("Обработка запроса: {Subject}", msg.Subject);
+                // logger.LogDebug("Обработка запроса: {Subject}", msg.Subject);
 
                 var response = await handle(msg.Data);
                 await SendResponseAsync(nats, msg.ReplyTo, response, responseSerializer, token);
