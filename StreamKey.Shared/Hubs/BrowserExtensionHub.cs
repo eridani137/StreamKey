@@ -201,9 +201,10 @@ public class BrowserExtensionHub(
             return cached!;
         }
 
-        var response = await nats.RequestAsync<object?, List<ButtonDto>?>(
+        var response = await nats.RequestAsync<int, List<ButtonDto>?>(
             subject,
-            null,
+            (int)position,
+            requestSerializer: intSerializer,
             replySerializer: buttonsResponseSerializer,
             replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(15) }
         );
