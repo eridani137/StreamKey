@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StreamKey.Core.Abstractions;
 using StreamKey.Core.Mappers;
@@ -14,50 +15,71 @@ public class ButtonsListener(
     IServiceScopeFactory scopeFactory,
     INatsConnection nats,
     JsonNatsSerializer<List<ButtonDto>?> responseSerializer,
-    INatsRequestReplyProcessor<object?, List<ButtonDto>?> processor
+    INatsRequestReplyProcessor<object?, List<ButtonDto>?> processor,
+    ILogger<ButtonsListener> logger
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tasks = new List<Task>();
+        var positions = Enum.GetValues<ButtonPosition>();
 
-        foreach (var position in Enum.GetValues<ButtonPosition>())
+        var tasks = positions.Select(position =>
         {
-            tasks.Add(ListenForPosition(position, stoppingToken));
-        }
+            var currentPosition = position;
+            var subject = BrowserExtensionHub.GetButtonsSubject(currentPosition);
+            
+            logger.LogInformation("Starting listener for position {Position} on subject {Subject}", 
+                currentPosition, subject);
+
+            var subscription = nats.SubscribeAsync<object?>(
+                subject,
+                cancellationToken: stoppingToken
+            );
+
+            return processor.ProcessAsync(
+                subscription,
+                _ =>
+                {
+                    logger.LogInformation("Received request for position {Position}", currentPosition);
+                    return GetButtonsAsync(currentPosition, stoppingToken);
+                },
+                nats,
+                responseSerializer,
+                stoppingToken
+            );
+        });
 
         await Task.WhenAll(tasks);
-    }
-    
-    private Task ListenForPosition(ButtonPosition position, CancellationToken stoppingToken)
-    {
-        var subject = BrowserExtensionHub.GetButtonsSubject(position);
-        var subscription = nats.SubscribeAsync<object?>(
-            subject,
-            cancellationToken: stoppingToken
-        );
-
-        return processor.ProcessAsync(
-            subscription,
-            _ => GetButtonsAsync(position, stoppingToken),
-            nats,
-            responseSerializer,
-            stoppingToken
-        );
     }
 
     private async Task<List<ButtonDto>?> GetButtonsAsync(
         ButtonPosition position,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation("GetButtonsAsync called for position: {Position}", position);
+        
         await using var scope = scopeFactory.CreateAsyncScope();
         var service = scope.ServiceProvider.GetRequiredService<IButtonService>();
 
         var entities = await service.GetButtons(position, cancellationToken);
+        
+        logger.LogInformation("Found {Count} buttons for position {Position}", 
+            entities.Count, position);
 
-        return entities
+        var result = entities
             .Where(b => b.IsEnabled)
-            .Select(b => b.Map())
+            .Select(b =>
+            {
+                var dto = b.Map();
+                logger.LogDebug("Mapped button {Id} with position {Position}", 
+                    dto.Id, dto.Position);
+                return dto;
+            })
             .ToList();
+            
+        logger.LogInformation("Returning {Count} enabled buttons for position {Position}", 
+            result.Count, position);
+
+        return result;
     }
 }
